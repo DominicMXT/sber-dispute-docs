@@ -1,0 +1,475 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Finance Assistant на двоих</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ground:#E9ECE8; --paper:#FFFFFF; --ink:#16202A; --ink2:#4A5560; --line:#D5DAD6;
+  --shared:#1D6B57; --shared-soft:#E3F0EB; --private:#5F6670; --hatch:#C9CED3;
+  --warn:#A4461A; --warn-soft:#FBEDE5; --focus:#2463EB;
+  --r-sm:8px; --r-md:14px;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--ground);color:var(--ink)}
+body{margin:0;font:16px/1.45 Onest,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased}
+.num{font-variant-numeric:tabular-nums}
+.phone{max-width:420px;margin:0 auto;min-height:100dvh;background:var(--paper);display:flex;flex-direction:column;position:relative}
+@media (min-width:600px){body{padding:24px 0}.phone{min-height:844px;height:844px;border-radius:28px;overflow:hidden;box-shadow:0 0 0 1px var(--line)}}
+.screen{display:flex;flex-direction:column;flex:1;min-height:0}
+.bar{display:flex;align-items:center;gap:8px;padding:10px 12px;min-height:56px;border-bottom:1px solid var(--line)}
+.bar h2{font-size:17px;font-weight:600;margin:0;flex:1}
+.back{background:none;border:0;color:var(--ink);font:inherit;min-height:44px;min-width:44px;padding:0 8px;border-radius:var(--r-sm);cursor:pointer}
+.demo{font-size:13px;color:var(--private);border:1px solid var(--line);border-radius:999px;padding:2px 10px;white-space:nowrap}
+.body{flex:1;overflow-y:auto;padding:20px 20px 24px}
+.foot{padding:12px 20px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;flex-direction:column;gap:8px;background:var(--paper)}
+.btn{font:inherit;font-weight:600;min-height:52px;border-radius:var(--r-md);border:0;padding:0 18px;cursor:pointer;width:100%}
+.btn-main{background:var(--shared);color:#fff}
+.btn-main[disabled]{background:var(--hatch);color:var(--ink2);cursor:not-allowed}
+.btn-quiet{background:none;color:var(--shared);min-height:44px}
+button:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+h1{font-size:28px;line-height:1.2;font-weight:700;margin:8px 0 12px;letter-spacing:-.01em}
+p{margin:0 0 12px}.muted{color:var(--ink2)}.small{font-size:14px}
+/* start */
+.hero{padding-top:28px}
+.lane{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:24px 0}
+.lane div{border-radius:var(--r-md);padding:14px;min-height:92px;font-size:14px}
+.lane .s{background:var(--shared-soft);color:var(--shared)}
+.lane .p{background:repeating-linear-gradient(135deg,var(--hatch) 0 6px,#EEF0F2 6px 12px);color:var(--ink)}
+.lane b{display:block;font-size:17px;margin-bottom:4px}
+.lane .p span{display:inline-block;background:var(--paper);padding:4px 8px;border-radius:6px}
+.linkish{background:none;border:0;font:inherit;color:var(--ink2);text-decoration:underline;min-height:44px;cursor:pointer;padding:0}
+/* bank */
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 16px}
+.chip{font:inherit;min-height:44px;padding:0 16px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--shared);background:var(--shared-soft);color:var(--shared);font-weight:600}
+.steps{margin:0;padding-left:22px}.steps li{margin-bottom:8px}
+.note{background:#F4F6F4;border-radius:var(--r-sm);padding:10px 12px;font-size:14px;color:var(--ink2)}
+/* ops */
+.total{display:flex;justify-content:space-between;align-items:baseline;padding:12px 14px;border-radius:var(--r-md);background:var(--shared-soft);color:var(--shared);margin-bottom:12px;position:sticky;top:0;z-index:1}
+.total b{font-size:20px}
+.ops{list-style:none;margin:0;padding:0}
+.op{display:grid;grid-template-columns:1fr auto;gap:4px 12px;padding:12px 0;border-bottom:1px solid var(--line);align-items:center}
+.op .m{font-weight:500}.op .d{font-size:13px;color:var(--ink2)}
+.op .a{text-align:right;font-weight:600}
+.lbl{font:inherit;font-size:14px;font-weight:600;min-height:44px;min-width:96px;margin-top:6px;border-radius:999px;cursor:pointer;padding:0 14px}
+.lbl.shared{background:var(--shared);color:#fff;border:1px solid var(--shared)}
+.lbl.private{background:var(--paper);color:var(--private);border:1px solid var(--private)}
+.lbl::before{content:"";display:inline-block;width:22px;height:12px;border-radius:6px;margin-right:8px;vertical-align:-1px;box-shadow:inset 0 0 0 1.5px currentColor;background:radial-gradient(circle at 6px 6px,currentColor 3.5px,transparent 4px)}
+.lbl.shared::before{background:radial-gradient(circle at 16px 6px,currentColor 3.5px,transparent 4px)}
+.tag{grid-column:1 / -1;font-size:13px;color:var(--ink2)}
+.unsure{font-size:13px;color:var(--warn)}
+/* month */
+.big{font-size:44px;line-height:1.05;font-weight:700;letter-spacing:-.02em;margin:6px 0 8px}
+.cats{margin:20px 0 8px;display:flex;flex-direction:column;gap:12px}
+.cat .row{display:flex;justify-content:space-between;font-size:15px;margin-bottom:4px}
+.track{height:10px;border-radius:5px;background:#EEF0F2;overflow:hidden}.fill{height:100%;background:var(--shared);border-radius:5px}
+.fresh{font-size:14px;color:var(--ink2);margin-top:16px}
+.empty{border:1px dashed var(--line);border-radius:var(--r-md);padding:18px;text-align:left}
+/* privacy */
+.choices{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:12px 0 18px}
+.choice{font:inherit;text-align:left;border:2px solid var(--line);background:var(--paper);border-radius:var(--r-md);padding:14px 12px;min-height:112px;cursor:pointer;color:var(--ink)}
+.choice b{display:block;font-size:16px;margin-bottom:6px}
+.choice span{font-size:14px;color:var(--ink2)}
+.choice[aria-checked="true"]{border-color:var(--shared);background:var(--shared-soft)}
+.preview{border:1px solid var(--line);border-radius:var(--r-md);padding:4px 14px 10px}
+.preview h3{font-size:15px;font-weight:600;margin:10px 0 4px}
+.pv{display:flex;justify-content:space-between;gap:12px;padding:9px 0;border-bottom:1px solid var(--line);font-size:15px}
+.pv:last-child{border-bottom:0}
+.redact{display:flex;align-items:center;gap:10px;padding:12px 0;font-size:15px;color:var(--ink)}
+.redact i{flex:none;width:72px;height:18px;border-radius:4px;background:repeating-linear-gradient(135deg,var(--hatch) 0 6px,#EEF0F2 6px 12px)}
+.ptag{font-size:12px;color:var(--private);border:1px solid var(--line);border-radius:999px;padding:0 6px;margin-left:6px}
+.placeholder{color:var(--ink2);font-size:15px;padding:14px 0}
+.status{border-radius:var(--r-md);background:var(--shared-soft);color:var(--shared);padding:14px;margin-top:14px}
+.status b{display:block;margin-bottom:4px}
+.role{background:#F4F6F4;border-radius:var(--r-sm);padding:8px 12px;font-size:14px;color:var(--ink2);margin-bottom:14px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:14px 0}
+.cols div{border:1px solid var(--line);border-radius:var(--r-md);padding:12px;font-size:14px}
+.cols b{display:block;font-size:15px;margin-bottom:6px}
+/* together */
+.switch{display:grid;grid-template-columns:1fr 1fr;background:#EEF0F2;border-radius:var(--r-md);padding:4px;margin-bottom:16px}
+.switch button{font:inherit;min-height:44px;border:0;border-radius:10px;background:none;color:var(--ink2);cursor:pointer}
+.switch button[aria-checked="true"]{background:var(--paper);color:var(--ink);font-weight:600;box-shadow:0 0 0 1px var(--line)}
+.plan{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0 4px;font-size:15px;color:var(--ink2)}
+.plan input{width:120px}
+.fit{border:1px solid var(--line);border-radius:var(--r-md);padding:14px;margin:18px 0}
+.fit label{display:block;font-weight:600;margin-bottom:8px}
+.fitrow{display:flex;gap:8px}
+input.txt{font:inherit;min-height:48px;border:1px solid var(--line);border-radius:var(--r-sm);padding:0 12px;flex:1;min-width:0;color:var(--ink);background:var(--paper)}
+.fitrow .btn{width:auto;min-height:48px}
+.answer{margin-top:10px;font-weight:600}
+.answer.ok{color:var(--shared)}.answer.no{color:var(--warn)}
+details.list{border-top:1px solid var(--line);margin-top:8px}
+details.list summary{min-height:48px;display:flex;align-items:center;cursor:pointer;font-weight:500}
+.toast{position:absolute;left:16px;right:16px;bottom:96px;background:var(--ink);color:#fff;padding:12px 14px;border-radius:var(--r-sm);font-size:15px}
+dialog{border:0;border-radius:var(--r-md);padding:20px;max-width:380px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(22,32,42,.45)}
+dialog textarea{width:100%;height:220px;font:13px/1.4 ui-monospace,Consolas,monospace;border:1px solid var(--line);border-radius:var(--r-sm);padding:8px}
+@media (prefers-reduced-motion:no-preference){.fill{transition:width .35s ease}}
+</style>
+
+<div data-superseded style="background:#FBE4E4;color:#5A1A15;border:1px solid #C0392B;border-radius:8px;padding:10px 14px;margin:12px auto;max-width:880px;font:15px/1.5 system-ui,sans-serif"><b>Устарело 21.09 — заменено файлом prototype/2026-09-22_purchase-prototype.html. Документ оставлен как история решений.</b></div>
+<div class="phone" id="app">
+
+<!-- 1 Старт · Т1 -->
+<section class="screen" data-screen="1" data-req="Т1">
+  <div class="body hero">
+    <p class="muted small">Finance Assistant</p>
+    <h1>Сколько общих денег у вас осталось — даже если карты в разных банках</h1>
+    <p class="muted">Каждый сам отмечает, какие его траты общие. Остальное партнёр увидит, только если вы сами откроете.</p>
+    <div class="lane" aria-hidden="true">
+      <div class="s"><b>Общее</b>видно вам обоим</div>
+      <div class="p"><span><b>Личное</b>не видно партнёру</span></div>
+    </div>
+    <p class="small muted">Цифры здесь из примера — пары Ани и Миши.</p>
+  </div>
+  <div class="foot">
+    <button class="btn btn-main" data-act="start">Посмотреть, сколько уходит на общее</button>
+    <button class="linkish small" data-act="interviewer">Для интервьюера</button>
+  </div>
+</section>
+
+<!-- 2 Выписка · Т2 Т3 -->
+<section class="screen" data-screen="2" data-req="Т2 Т3" hidden>
+  <div class="bar"><button class="back" data-act="back" aria-label="Назад">Назад</button><h2>Выписка</h2></div>
+  <div class="body">
+    <h1>Выписка за этот месяц покажет, сколько ушло на общее</h1>
+    <p class="muted">Нужен PDF из приложения банка — с 1-го числа по сегодня. Выберите банк, и подскажем, где его взять.</p>
+    <div class="chips" role="group" aria-label="Банк">
+      <button class="chip" data-bank="Сбер" aria-pressed="false">Сбер</button>
+      <button class="chip" data-bank="Т-Банк" aria-pressed="false">Т-Банк</button>
+      <button class="chip" data-bank="Альфа" aria-pressed="false">Альфа</button>
+      <button class="chip" data-bank="Другой" aria-pressed="false">Другой банк</button>
+    </div>
+    <div id="bankHelp" hidden>
+      <ol class="steps">
+        <li>Откройте карту, с которой платите за общее, в приложении <span id="bankName">банка</span>.</li>
+        <li>Найдите раздел с выписками — проще всего набрать «выписка» в поиске приложения.</li>
+        <li>Выберите период с 1-го числа по сегодня и формат PDF, сохраните файл на телефон.</li>
+      </ol>
+      <p class="small muted" id="otherBank" hidden>Для других банков попробуйте PDF или CSV — проверим, прочитается ли.</p>
+    </div>
+    <p class="note">Выписку разбирает сервис Finance Assistant. Партнёр увидит только то, что вы сами ему откроете. В этом прототипе настоящие файлы не загружаются.</p>
+  </div>
+  <div class="foot"><button class="btn btn-main" data-act="upload">Взять выписку Ани из примера</button></div>
+</section>
+
+<!-- 3 Разметка · Т4 Т5 -->
+<section class="screen" data-screen="3" data-req="Т4 Т5" hidden>
+  <div class="bar"><button class="back" data-act="back" aria-label="Назад">Назад</button><h2>Что здесь общее</h2><span class="demo">Демо-данные</span></div>
+  <div class="body">
+    <p class="muted">Разметили за вас. Всё сомнительное оставили личным. Ошиблись — нажмите на метку, она переключится.</p>
+    <div class="total"><span>Общее</span><b class="num" id="sumShared3"></b></div>
+    <ul class="ops" id="opsList"></ul>
+  </div>
+  <div class="foot"><button class="btn btn-main" data-act="labelsDone">Показать итог месяца</button></div>
+</section>
+
+<!-- 4 Мой месяц · Т6 Т7 -->
+<section class="screen" data-screen="4" data-req="Т6 Т7" hidden>
+  <div class="bar"><button class="back" data-act="back" aria-label="Назад">Назад</button><h2>Мой месяц</h2><span class="demo">Демо-данные</span></div>
+  <div class="body" id="monthBody"></div>
+  <div class="foot" id="monthFoot">
+    <button class="btn btn-main" data-act="invite">Позвать Мишу</button>
+    <button class="btn btn-quiet" data-act="solo">Пока без партнёра</button>
+  </div>
+</section>
+
+<!-- 5 Приглашение · Т8 Т9 Т10 -->
+<section class="screen" data-screen="5" data-req="Т8 Т9 Т10" hidden>
+  <div class="bar"><button class="back" data-act="back" aria-label="Назад">Назад</button><h2>Позвать Мишу</h2><span class="demo">Демо-данные</span></div>
+  <div class="body">
+    <h1>Что увидит Миша</h1>
+    <p class="muted">Выберите сами. Поменять можно в любой момент.</p>
+    <div class="choices" role="radiogroup" aria-label="Что увидит партнёр" id="choicesA"></div>
+    <div class="preview" aria-live="polite" id="previewA"></div>
+    <div id="inviteStatus" hidden class="status">
+      <b>Ссылка скопирована. Миша ещё не открыл её</b>
+      <span class="small">Отправьте её Мише в любой мессенджер. Ваш месяц уже считается, ждать его не нужно.</span>
+    </div>
+    <p><button class="linkish small" data-act="interviewer">Для интервьюера</button></p>
+  </div>
+  <div class="foot">
+    <button class="btn btn-main" data-act="copyLink" id="copyBtn" disabled>Скопировать ссылку</button>
+    <button class="btn btn-quiet" data-act="asPartner" id="asPartnerBtn" hidden>Посмотреть глазами Миши</button>
+  </div>
+</section>
+
+<!-- 6 Вход партнёра · Т11 -->
+<section class="screen" data-screen="6" data-req="Т11" hidden>
+  <div class="bar"><button class="back" data-act="back" aria-label="Назад">Назад</button><h2>Приглашение</h2><span class="demo">Демо-данные</span></div>
+  <div class="body">
+    <p class="role">Сейчас вы — Миша. Так приглашение выглядит у партнёра.</p>
+    <h1>Аня зовёт смотреть общие деньги вместе</h1>
+    <p class="muted">До того как кто-то что-то увидит, выберите, что показывать Ане.</p>
+    <div class="choices" role="radiogroup" aria-label="Что увидит Аня" id="choicesM"></div>
+    <div class="cols">
+      <div><b>Увидите вы</b><span id="youSee"></span></div>
+      <div><b>Увидит Аня</b><span id="sheSees">Выберите выше</span></div>
+    </div>
+    <p class="small muted">Выписку Миши возьмём из примера.</p>
+    <p><button class="linkish small" data-act="interviewer">Для интервьюера</button></p>
+  </div>
+  <div class="foot"><button class="btn btn-main" data-act="partnerUpload" id="partnerUploadBtn" disabled>Увидеть общий остаток</button></div>
+</section>
+
+<!-- 7 Общий бюджет · Т12 Т13 Т14 -->
+<section class="screen" data-screen="7" data-req="Т12 Т13 Т14" hidden>
+  <div class="bar"><button class="back" data-act="back" aria-label="Назад">Назад</button><h2>Общий бюджет</h2><span class="demo">Демо-данные</span></div>
+  <div class="body">
+    <p class="muted">Осталось на общее до 30 сентября</p>
+    <div class="big num" id="remaining"></div>
+    <div class="track" aria-hidden="true"><div class="fill" id="planFill"></div></div>
+    <div class="plan"><span id="planText"></span><button class="linkish" data-act="editPlan">изменить план</button></div>
+    <div class="plan" id="planEdit" hidden><input class="txt num" id="planInput" inputmode="decimal" aria-label="План на общее, рублей"><button class="btn btn-main" style="width:auto;min-height:48px" data-act="savePlan">Сохранить</button></div>
+    <div class="answer no" id="planError" aria-live="polite"></div>
+    <p class="fresh" id="fresh7"></p>
+    <p class="small muted" style="margin:14px 0 6px">Остаток одинаковый у обоих — проверьте:</p>
+    <div class="switch" role="radiogroup" aria-label="Смотреть глазами">
+      <button role="radio" data-viewer="A" aria-checked="true">Как Аня</button>
+      <button role="radio" data-viewer="M" aria-checked="false">Как Миша</button>
+    </div>
+    <div class="fit">
+      <label for="fitInput">Влезает ли трата?</label>
+      <div class="fitrow"><input class="txt num" id="fitInput" inputmode="decimal" placeholder="Сумма, ₽"><button class="btn btn-main" data-act="fit">Проверить</button></div>
+      <div class="answer" id="fitAnswer" aria-live="polite"></div>
+    </div>
+    <details class="list"><summary id="sharedSummary"></summary><ul class="ops" id="sharedList"></ul></details>
+    <details class="list" id="partnerAllWrap" hidden><summary id="partnerAllSummary"></summary><ul class="ops" id="partnerAllList"></ul></details>
+    <p><button class="linkish" data-act="whoSees">Кто что видит</button></p>
+    <p><button class="linkish small" data-act="interviewer">Для интервьюера</button></p>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<dialog id="interviewer">
+  <h2 style="margin:0 0 8px;font-size:18px">Для интервьюера</h2>
+  <p class="small muted">Результаты этого участника. Скопируйте в журнал интервью и начните заново для следующего.</p>
+  <textarea id="logText" readonly></textarea>
+  <div style="display:flex;gap:8px;margin-top:12px">
+    <button class="btn btn-main" data-act="copyLog">Скопировать</button>
+    <button class="btn btn-quiet" data-act="reset" style="border:1px solid var(--line)">Новый участник</button>
+  </div>
+  <button class="linkish" data-act="closeDialog">Закрыть</button>
+</dialog>
+</div>
+
+<script>
+const OPS_A = [
+  {id:'a1', d:'1 сент', m:'Пятёрочка', c:'Продукты', a:2340, k:'shared'},
+  {id:'a2', d:'2 сент', m:'Самокат', c:'Продукты', a:1890, k:'shared'},
+  {id:'a3', d:'3 сент', m:'Wildberries', c:'Одежда', a:3990, k:'private'},
+  {id:'a4', d:'3 сент', m:'Кофейня «Зёрна»', c:'Кафе', a:390, k:'private'},
+  {id:'a5', d:'4 сент', m:'ЖКУ', c:'Дом', a:6450, k:'shared'},
+  {id:'a6', d:'5 сент', m:'Яндекс Такси', c:'Транспорт', a:640, k:'private'},
+  {id:'a7', d:'6 сент', m:'ВкусВилл', c:'Продукты', a:3120, k:'shared'},
+  {id:'a8', d:'7 сент', m:'Леруа Мерлен', c:'Дом', a:4780, k:'shared'},
+  {id:'a9', d:'8 сент', m:'Аптека', c:'Здоровье', a:1260, k:'private'},
+  {id:'a10', d:'9 сент', m:'Кинотеатр', c:'Отдых', a:1400, k:'private', unsure:true},
+  {id:'a11', d:'10 сент', m:'Яндекс Плюс', c:'Подписки', a:399, k:'shared'},
+  {id:'a12', d:'11 сент', m:'Фитнес-клуб', c:'Спорт', a:3500, k:'private'},
+  {id:'a13', d:'11 сент', m:'Перевод Михаилу', c:'Перевод', a:10000, k:'transfer'},
+  {id:'a14', d:'12 сент', m:'Возврат: Леруа Мерлен', c:'Дом', a:-780, k:'shared', parent:'a8'}
+];
+const OPS_M = [
+  {id:'m1', d:'1 сент', m:'Аренда квартиры', c:'Дом', a:42000, k:'shared'},
+  {id:'m2', d:'3 сент', m:'Перекрёсток', c:'Продукты', a:2760, k:'shared'},
+  {id:'m3', d:'4 сент', m:'Steam', c:'Игры', a:1499, k:'private'},
+  {id:'m4', d:'5 сент', m:'Ростелеком', c:'Дом', a:750, k:'shared'},
+  {id:'m5', d:'7 сент', m:'Барбершоп', c:'Уход', a:1800, k:'private'},
+  {id:'m6', d:'8 сент', m:'Магнит', c:'Продукты', a:1150, k:'shared'},
+  {id:'m7', d:'10 сент', m:'Шиномонтаж', c:'Авто', a:3200, k:'private'},
+  {id:'m8', d:'11 сент', m:'Яндекс Лавка', c:'Продукты', a:1340, k:'shared'},
+  {id:'m9', d:'11 сент', m:'Перевод от Анны', c:'Перевод', a:10000, k:'transfer'}
+];
+const FRESH = {A:'12 сентября', M:'11 сентября'};
+const parseSum = s => { const v = Math.round(parseFloat(String(s||'').replace(/\s/g,'').replace(',','.'))); return v>0 ? v : null; };
+const plural = n => { const t=n%10, h=n%100; return (t===1&&h!==11) ? `${n} личная операция скрыта` : (t>=2&&t<=4&&(h<12||h>14)) ? `${n} личные операции скрыты` : `${n} личных операций скрыты`; };
+const fmt = n => (n<0?'−':'') + new Intl.NumberFormat('ru-RU').format(Math.abs(n)) + ' ₽';
+const $ = id => document.getElementById(id);
+
+function freshState(){
+  const order = Math.random() < 0.5 ? ['shared','all'] : ['all','shared'];
+  return {screen:1, hist:[], labels:Object.fromEntries(OPS_A.map(o=>[o.id,o.k])), bank:null,
+    modeA:null, modeM:null, order, plan:90000, viewer:'A', taps:0, tapsToAha:null, counting:false,
+    log:[], started:new Date().toLocaleString('ru-RU'), firstA:null, firstM:null, linkCopied:false};
+}
+let S;
+try { const p = JSON.parse(localStorage.getItem('fa-proto')); S = Object.assign(freshState(), p && typeof p==='object' ? p : {}); if(!(S.screen>=1 && S.screen<=7)) S.screen = 1; } catch(e){ S = freshState(); }
+function save(){ try{ localStorage.setItem('fa-proto', JSON.stringify(S)); }catch(e){} }
+function log(ev, data){ S.log.push({t:new Date().toLocaleTimeString('ru-RU'), ev, ...data}); save(); }
+
+const labelOf = o => o.k==='transfer' ? 'transfer' : (o.id.startsWith('a') ? S.labels[o.parent || o.id] : o.k);
+const sharedA = () => OPS_A.filter(o=>labelOf(o)==='shared').reduce((s,o)=>s+o.a,0);
+const privateA = () => OPS_A.filter(o=>labelOf(o)==='private');
+const sharedM = () => OPS_M.filter(o=>o.k==='shared').reduce((s,o)=>s+o.a,0);
+const spendA = () => OPS_A.filter(o=>labelOf(o)!=='transfer').reduce((s,o)=>s+o.a,0);
+
+function go(n, push=true){
+  if(push && S.screen!==n) S.hist.push(S.screen);
+  S.screen = n; save();
+  document.querySelectorAll('.screen').forEach(s=>s.hidden = +s.dataset.screen!==n);
+  ({3:renderOps,4:renderMonth,5:renderInvite,6:renderPartner,7:renderTogether})[n]?.();
+  if(n===4 && S.counting && S.tapsToAha===null && sharedA()>0){ S.tapsToAha=S.taps; S.counting=false; log('aha1_screen4',{taps:S.taps}); }
+  const b = document.querySelector(`.screen[data-screen="${n}"] .body`); if(b) b.scrollTop=0;
+}
+
+function toast(msg){ const t=$('toast'); t.textContent=msg; t.hidden=false; clearTimeout(toast.h); toast.h=setTimeout(()=>t.hidden=true,2600); }
+
+function renderOps(){
+  $('sumShared3').textContent = fmt(sharedA());
+  $('opsList').innerHTML = OPS_A.map(o=>{
+    const l = labelOf(o);
+    if(o.k==='transfer') return `<li class="op"><div><div class="m">${o.m}</div><div class="d">${o.d}</div></div><div class="a num">${fmt(o.a)}</div><div class="tag">Перевод Мише — не трата, не считаем</div></li>`;
+    if(o.parent) return `<li class="op"><div><div class="m">${o.m}</div><div class="d">${o.d}, ${o.c}</div></div><div class="a num">${fmt(o.a)}</div><div class="tag">Возврат — метка как у покупки: ${l==='shared'?'общее':'личное'}</div></li>`;
+    const word = l==='shared' ? 'Общее' : 'Личное';
+    return `<li class="op"><div><div class="m">${o.m}</div><div class="d">${o.d}, ${o.c}${o.unsure?' <span class="unsure">не уверены</span>':''}</div></div><div class="a"><div class="num">${fmt(o.a)}</div><button class="lbl ${l}" data-toggle="${o.id}" aria-pressed="${l==='shared'}" aria-label="${o.m}: ${word.toLowerCase()}. Нажмите, чтобы поменять">${word}</button></div></li>`;
+  }).join('');
+}
+
+function renderMonth(){
+  const sh = sharedA(), total = spendA();
+  const foot = $('monthFoot');
+  if(sh<=0){
+    foot.innerHTML = `<button class="btn btn-main" data-act="back">Вернуться к разметке</button>`;
+    $('monthBody').innerHTML = `<div class="empty"><h1 style="font-size:22px">Пока ничего не отмечено общим</h1><p class="muted">Отметьте хотя бы одну трату общей — и здесь появится, сколько уходит на общее.</p></div>`;
+    return;
+  }
+  foot.innerHTML = `<button class="btn btn-main" data-act="invite">Позвать Мишу</button><button class="btn btn-quiet" data-act="solo">Пока без партнёра</button>`;
+  const cats = {};
+  OPS_A.filter(o=>labelOf(o)==='shared').forEach(o=>cats[o.c]=(cats[o.c]||0)+o.a);
+  const top = Object.entries(cats).sort((a,b)=>b[1]-a[1]).slice(0,3);
+  const max = top[0][1];
+  $('monthBody').innerHTML = `
+    <p class="muted">С 1 по 12 сентября на общее ушло</p>
+    <div class="big num" id="sharedBig">${fmt(sh)}</div>
+    <p>Это <b class="num">${Math.round(sh/total*100)}%</b> из <span class="num">${fmt(total)}</span>, которые вы потратили за это время.</p>
+    <div class="cats">${top.map(([c,v])=>`<div class="cat"><div class="row"><span>${c}</span><span class="num">${fmt(v)}</span></div><div class="track"><div class="fill" style="width:${Math.max(4,Math.round(v/max*100))}%"></div></div></div>`).join('')}</div>
+    <p class="fresh">Данные на ${FRESH.A} — по вашей выписке.</p>
+    <p class="small muted">Позовите Мишу — и увидите, сколько общих денег осталось на двоих до конца месяца.</p>`;
+}
+
+function choiceHtml(who, mode){
+  const cur = who==='A' ? S.modeA : S.modeM;
+  const other = who==='A' ? 'Миша' : 'Аня';
+  const text = mode==='shared'
+    ? {b:'Только общее', s:`${other} видит только ваши общие траты.`}
+    : {b:'Всё', s:`${other} видит все ваши траты, и личные.`};
+  return `<button class="choice" role="radio" aria-checked="${cur===mode}" data-mode="${who}:${mode}"><b>${text.b}</b><span>${text.s}</span></button>`;
+}
+
+function renderInvite(){
+  $('choicesA').innerHTML = S.order.map(m=>choiceHtml('A',m)).join('');
+  $('copyBtn').disabled = !S.modeA;
+  $('inviteStatus').hidden = !S.linkCopied; $('asPartnerBtn').hidden = !S.linkCopied;
+  $('copyBtn').textContent = S.linkCopied ? 'Отправить ещё раз' : 'Скопировать ссылку';
+  const pv = $('previewA');
+  if(!S.modeA){ pv.innerHTML = `<p class="placeholder">Выберите вариант — здесь появится ровно то, что увидит Миша.</p>`; return; }
+  const sharedOps = OPS_A.filter(o=>labelOf(o)==='shared');
+  const priv = privateA();
+  let html = `<h3>Так увидит Миша</h3>` + sharedOps.map(o=>`<div class="pv"><span>${o.m}</span><span class="num">${fmt(o.a)}</span></div>`).join('');
+  if(S.modeA==='shared'){
+    html += `<div class="redact"><i aria-hidden="true"></i><span>${plural(priv.length)}</span></div>`;
+  } else {
+    html += priv.map(o=>`<div class="pv"><span>${o.m}<span class="ptag">личное</span></span><span class="num">${fmt(o.a)}</span></div>`).join('');
+  }
+  pv.innerHTML = html;
+}
+
+function renderPartner(){
+  $('choicesM').innerHTML = S.order.map(m=>choiceHtml('M',m)).join('');
+  $('youSee').textContent = S.modeA==='all' ? 'Все траты Ани, включая личные' : 'Траты, которые Аня отметила общими. Её личные — нет';
+  $('sheSees').textContent = !S.modeM ? 'Выберите выше' : (S.modeM==='all' ? 'Все ваши траты, включая личные' : 'Только ваши общие траты');
+  $('partnerUploadBtn').disabled = !S.modeM;
+}
+
+function renderTogether(){
+  $('fitAnswer').textContent = ''; $('fitAnswer').className = 'answer';
+  const spent = sharedA() + sharedM();
+  const rem = S.plan - spent;
+  $('remaining').textContent = fmt(rem);
+  $('planFill').style.width = Math.min(100, Math.round(spent/S.plan*100)) + '%';
+  $('planText').textContent = `Потрачено ${fmt(spent)} из плана ${fmt(S.plan)}`;
+  $('fresh7').textContent = `Данные: Аня — на ${FRESH.A}, Миша — на ${FRESH.M}.`;
+  document.querySelectorAll('[data-viewer]').forEach(b=>b.setAttribute('aria-checked', b.dataset.viewer===S.viewer));
+  const all = [...OPS_A.filter(o=>labelOf(o)==='shared'), ...OPS_M.filter(o=>o.k==='shared')];
+  $('sharedSummary').textContent = `Общие траты — ${all.length}`;
+  $('sharedList').innerHTML = all.map(o=>`<li class="op"><div><div class="m">${o.m}</div><div class="d">${o.d}, ${o.c}</div></div><div class="a num">${fmt(o.a)}</div></li>`).join('');
+  const partnerMode = S.viewer==='A' ? S.modeM : S.modeA;
+  const partnerPriv = S.viewer==='A' ? OPS_M.filter(o=>o.k==='private') : privateA();
+  const pname = S.viewer==='A' ? 'Миши' : 'Ани';
+  $('partnerAllWrap').hidden = partnerMode!=='all';
+  if(partnerMode!=='all') $('partnerAllList').innerHTML = '';
+  if(partnerMode==='all'){
+    $('partnerAllSummary').textContent = `Личные траты ${pname} — открыты для вас (${partnerPriv.length})`;
+    $('partnerAllList').innerHTML = partnerPriv.map(o=>`<li class="op"><div><div class="m">${o.m}</div><div class="d">${o.d}, ${o.c}</div></div><div class="a num">${fmt(o.a)}</div></li>`).join('');
+  }
+}
+
+function logText(){
+  const lines = [
+    `Начало: ${S.started}`,
+    `Касаний до экрана «Мой месяц»: ${S.tapsToAha ?? 'не дошёл'}`,
+    `Порядок вариантов приватности: ${S.order.map(m=>m==='shared'?'только общее':'всё').join(', затем ')}`,
+    `Первый выбор на экране 5 (идёт в замер): ${S.firstA ? (S.firstA==='shared'?'только общее':'всё') : 'нет'}`,
+    `Итоговый выбор на экране 5: ${S.modeA ? (S.modeA==='shared'?'только общее':'всё') : 'нет'}`,
+    `Выбор за Мишу на экране 6 (в замер не идёт): ${S.firstM ? (S.firstM==='shared'?'только общее':'всё') : 'нет'}`,
+    `Правок разметки: ${OPS_A.filter(o=>o.k!=='transfer' && S.labels[o.id]!==o.k).length}`,
+    `Банк для подсказки: ${S.bank || 'не выбирал'}`,
+    '', 'События:', ...S.log.map(e=>`${e.t} ${e.ev} ${Object.entries(e).filter(([k])=>!['t','ev'].includes(k)).map(([k,v])=>k+'='+v).join(' ')}`)
+  ];
+  return lines.join('\n');
+}
+
+document.addEventListener('click', e=>{
+  const el = e.target.closest('button');
+  if(!el) return;
+  if(S.counting) { S.taps++; save(); }
+  const act = el.dataset.act;
+  if(el.dataset.bank){
+    S.bank = el.dataset.bank;
+    document.querySelectorAll('[data-bank]').forEach(b=>b.setAttribute('aria-pressed', b===el));
+    $('bankName').textContent = S.bank==='Другой' ? 'банка' : S.bank;
+    $('bankHelp').hidden = false; $('otherBank').hidden = S.bank!=='Другой'; log('bank',{bank:S.bank}); return;
+  }
+  if(el.dataset.toggle){ const id=el.dataset.toggle; S.labels[id] = S.labels[id]==='shared' ? 'private' : 'shared'; log('relabel',{id,l:S.labels[id]}); renderOps(); document.querySelector('[data-toggle="'+id+'"]')?.focus(); return; }
+  if(el.dataset.mode){
+    const [who,m]=el.dataset.mode.split(':');
+    if(who==='A'){ const changed = S.modeA && S.modeA!==m; if(S.firstA===null) S.firstA=m; S.modeA=m; log(changed?'privacyA_change':'privacyA',{mode:m}); renderInvite(); }
+    else { const changed = S.modeM && S.modeM!==m; if(S.firstM===null) S.firstM=m; S.modeM=m; log(changed?'privacyM_change':'privacyM',{mode:m}); renderPartner(); }
+    return;
+  }
+  if(el.dataset.viewer){ S.viewer=el.dataset.viewer; save(); renderTogether(); return; }
+  switch(act){
+    case 'start': if(S.tapsToAha===null && !S.counting){ S.taps=1; S.counting=true; } log('start',{}); go(2); break;
+    case 'upload': log('upload_demo',{}); go(3); break;
+    case 'labelsDone': go(4); break;
+    case 'back': if(S.hist.length) go(S.hist.pop(), false); break;
+    case 'invite': log('invite_open',{}); go(5); break;
+    case 'solo': log('solo',{}); toast('Хорошо. Позвать Мишу можно позже — кнопка останется здесь.'); break;
+    case 'copyLink': S.linkCopied=true; log('link_copied',{mode:S.modeA}); renderInvite(); toast('Ссылка скопирована. В прототипе она ненастоящая.'); break;
+    case 'asPartner': go(6); break;
+    case 'partnerUpload': log('partner_upload',{}); go(7); break;
+    case 'fit': {
+      const v = parseSum($('fitInput').value);
+      const out = $('fitAnswer');
+      if(!v){ out.className='answer no'; out.textContent='Введите сумму больше нуля, например 3500.'; return; }
+      const rem = S.plan - sharedA() - sharedM();
+      if(v<=rem){ out.className='answer ok'; out.textContent=`Влезает. Останется ${fmt(rem-v)}.`; }
+      else { out.className='answer no'; out.textContent=`Не влезает на ${fmt(v-rem)}.`; }
+      log('fit_check',{sum:v, fits:v<=rem}); break;
+    }
+    case 'editPlan': $('planEdit').hidden=false; $('planInput').value=S.plan; $('planInput').focus(); break;
+    case 'savePlan': { const v=parseSum($('planInput').value); if(!v){ $('planError').textContent='План не сохранён: введите сумму больше нуля, например 90000.'; return; } $('planError').textContent=''; S.plan=v; log('plan',{plan:v}); $('planEdit').hidden=true; renderTogether(); break; }
+    case 'whoSees': { const t = S.viewer==='A' ? 5 : 6; S.hist.push(7); S.screen=t; save(); document.querySelectorAll('.screen').forEach(s=>s.hidden=+s.dataset.screen!==t); (t===5 ? renderInvite : renderPartner)(); break; }
+    case 'interviewer': $('logText').value=logText(); $('interviewer').showModal(); break;
+    case 'copyLog': { const t=$('logText'); t.select(); try{ navigator.clipboard.writeText(t.value).then(()=>toast('Скопировано'),()=>toast('Выделено — скопируйте вручную')); }catch(err){ toast('Выделено — скопируйте вручную'); } break; }
+    case 'reset': S=freshState(); save(); location.reload(); break;
+    case 'closeDialog': $('interviewer').close(); break;
+  }
+});
+
+go(S.screen, false);
+</script>

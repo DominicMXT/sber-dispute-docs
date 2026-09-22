@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Граф работ пары по трём интервью</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#F0F2F5; --card-bg:#FFFFFF; --text-main:#111827; --text-muted:#6B7280;
+      --border:#E5E7EB; --accent:#1E88E5; --shadow:0 4px 20px rgba(0,0,0,0.08); --node-stroke:#1A1A1A;
+    }
+    [data-theme="dark"] {
+      --bg:#0F1117; --card-bg:#1A1D27; --text-main:#F9FAFB; --text-muted:#9CA3AF;
+      --border:#2A2D3A; --accent:#3B82F6; --shadow:0 4px 24px rgba(0,0,0,0.4); --node-stroke:#3A3D50;
+    }
+    body { background:var(--bg); color:var(--text-main); display:flex; justify-content:center; padding:40px; font-family:'Inter',sans-serif; margin:0; transition:background 0.3s ease; }
+    .page { background:var(--card-bg); border-radius:24px; padding:48px; box-shadow:var(--shadow); width:100%; max-width:1200px; border:1px solid var(--border); transition:background 0.3s ease,border 0.3s ease; }
+    header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:40px; gap:24px; flex-wrap:wrap; }
+    .title-group h1 { margin:0; font-size:36px; font-weight:900; letter-spacing:-0.02em; display:flex; align-items:center; gap:16px; }
+    .title-group h1::before { content:''; display:block; width:8px; height:40px; background:var(--accent); border-radius:4px; flex:none; }
+    .title-group p { margin:8px 0 0 24px; color:var(--text-muted); font-size:16px; font-weight:500; max-width:70ch; }
+    .controls { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    button { font:600 13px 'Inter',sans-serif; padding:10px 20px; border-radius:12px; cursor:pointer; transition:all 0.2s ease; display:flex; align-items:center; gap:8px; }
+    .btn-secondary { background:var(--card-bg); border:1px solid var(--border); color:var(--text-main); }
+    .btn-secondary:hover { background:var(--bg); border-color:var(--accent); }
+    select.style-select { font:600 13px 'Inter',sans-serif; padding:9px 12px; border-radius:12px; cursor:pointer; border:1px solid var(--border); background:var(--card-bg); color:var(--text-main); outline:none; transition:border-color 0.2s ease; }
+    select.style-select:hover { border-color:var(--accent); }
+    .mermaid svg { max-width:100%; height:auto; overflow:visible; }
+    .node rect,.node circle,.node polygon,.node path { stroke-width:2.5px !important; stroke:var(--node-stroke) !important; filter:drop-shadow(4px 4px 0px rgba(0,0,0,0.1)); }
+    .node text { font-weight:500 !important; font-size:14px !important; fill:var(--text-main) !important; }
+    .edgePath .path { stroke-width:2.5px !important; stroke:var(--text-muted) !important; }
+    .cluster rect { stroke-width:2.5px !important; stroke:var(--node-stroke) !important; fill:var(--bg) !important; }
+    .cluster text { font-weight:600 !important; fill:var(--text-main) !important; }
+    h2 { font-size:22px; font-weight:800; letter-spacing:-0.01em; margin:48px 0 6px; }
+    h2:first-of-type { margin-top:16px; }
+    .lead { color:var(--text-muted); margin:0 0 18px; max-width:78ch; }
+    table { border-collapse:collapse; width:100%; font-size:14px; margin:14px 0 8px; }
+    th,td { text-align:left; vertical-align:top; padding:8px 10px; border-bottom:1px solid var(--border); }
+    th { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700; }
+    .tw { overflow-x:auto; }
+    code { font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--bg); padding:1px 5px; border-radius:4px; }
+    .tag { display:inline-block; font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:6px; white-space:nowrap; }
+    .t-ok { background:#E8F5E9; color:#1B5E20; }
+    .t-warn { background:#FFF3E0; color:#7A3E00; }
+    .t-bad { background:#FBE4E4; color:#8E1B1B; }
+    [data-theme="dark"] .t-ok { background:#15321F; color:#7FD39B; }
+    [data-theme="dark"] .t-warn { background:#33240F; color:#F0C060; }
+    [data-theme="dark"] .t-bad { background:#331A1A; color:#F08A8A; }
+    blockquote { margin:10px 0; padding:8px 14px; border-left:3px solid var(--accent); color:var(--text-muted); font-style:italic; }
+    .note-box { background:#FFF9C4; border:2px dashed #FBC02D; color:#5A4500; border-radius:12px; padding:14px 18px; margin:16px 0; }
+    [data-theme="dark"] .note-box { background:#2E2716; border-color:#F0C060; color:#F0DFA8; }
+    footer { margin-top:48px; padding-top:20px; border-top:1px solid var(--border); color:var(--text-muted); font-size:13.5px; }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
+    @media print { .controls,header select { display:none !important; } body { padding:0; background:#fff !important; } .page { box-shadow:none !important; border:none !important; max-width:100% !important; border-radius:0 !important; } }
+    @media (max-width:640px) { body { padding:16px; } .page { padding:24px 18px; } .title-group h1 { font-size:26px; } }
+  </style>
+</head>
+<body>
+<div data-superseded style="background:#FBE4E4;color:#5A1A15;border:1px solid #C0392B;border-radius:8px;padding:10px 14px;margin:12px auto;max-width:880px;font:15px/1.5 system-ui,sans-serif"><b>Устарело 21.09 — заменено файлом value/2026-09-21_segment-a-value-proposition.html, раздел 3а. Документ оставлен как история решений.</b></div>
+  <div class="page">
+    <header>
+      <div class="title-group">
+        <h1>Граф работ пары</h1>
+        <p>Собран из трёх проведённых пар (P01, P02, P03 — шесть интервью, 20 сентября 2026). Уровни — по канону Next Move Theory, относительно нашего продукта. У каждого узла указано, сколькими парами из трёх он подтверждён.</p>
+      </div>
+      <div class="controls">
+        <select class="style-select" id="style-select" onchange="setDiagramStyle(this.value)">
+          <option value="default">Default</option>
+          <option value="minimal">Minimal</option>
+          <option value="pastel">Pastel</option>
+          <option value="print">Print</option>
+        </select>
+        <button class="btn-secondary" onclick="toggleTheme()" id="theme-toggle">🌙 Тёмная тема</button>
+        <button class="btn-secondary" onclick="exportPDF()">⬇ PDF</button>
+      </div>
+    </header>
+
+    <div class="note-box"><b>Чем это отличается от графа от 14 сентября.</b> Тот собран на 26 публичных отзывах и умозрении, до единого интервью. Этот — только на том, что люди рассказали о своём прошлом. Совпадающих узлов меньше половины.</div>
+
+    <h2>1. Уровни работ</h2>
+    <p class="lead">Вверху — то, ради чего люди всё это делают. В середине — уровень, на который метит продукт. Оранжевым — соседние работы того же уровня, которые продукт <b>не</b> делает: они видны в интервью, но их выполняет кто-то другой. Внизу — чем это закрывают сегодня.</p>
+
+    <div class="mermaid">
+      graph TD
+        classDef yellow fill:#FFFDE7,stroke:#1A1A1A,stroke-width:2px;
+        classDef blue   fill:#E3F2FD,stroke:#1A1A1A,stroke-width:2px;
+        classDef green  fill:#E8F5E9,stroke:#1A1A1A,stroke-width:2px;
+        classDef purple fill:#F3E5F5,stroke:#1A1A1A,stroke-width:2px;
+        classDef teal   fill:#E0F7FA,stroke:#1A1A1A,stroke-width:2px;
+        classDef orange fill:#FFF3E0,stroke:#1A1A1A,stroke-width:2px;
+        classDef note   fill:#FFF9C4,stroke:#FBC02D,stroke-dasharray:4;
+
+        subgraph BIG["Ради чего — задачи уровнем выше"]
+          direction LR
+          BJ1["Дойти до общей цели<br/>в срок · 2 из 3"]:::purple
+          BJ2["Договориться и<br/>сохранить доверие · 3 из 3"]:::purple
+          BJ3["Выбрать вещь и<br/>не переплатить · 2 из 3"]:::note
+        end
+
+        subgraph CORE["Уровень продукта"]
+          direction LR
+          CJ1["Узнать, сколько<br/>можно потратить · 3 из 3"]:::blue
+          CJ2["Свести траты обоих<br/>за период · 3 из 3"]:::blue
+          CJ3["Согласовать<br/>крупную трату · 3 из 3"]:::blue
+        end
+
+        subgraph SMALL["Соседние работы — продукт их не делает"]
+          direction LR
+          SJ1["Взять деньги<br/>у партнёра · 2 из 3"]:::orange
+          SJ2["Найти, откуда взять<br/>на крупное · 1 из 3"]:::orange
+          SJ3["Сравнить варианты<br/>покупки · 2 из 3"]:::orange
+          SJ4["Снять неденежный<br/>барьер · 1 из 3"]:::orange
+        end
+
+        subgraph NOW["Чем закрывают сегодня"]
+          direction LR
+          MJ1["Спросить партнёра<br/>голосом · 3 из 3"]:::green
+          MJ2["Свести вечером<br/>по памяти · 1 из 3"]:::green
+          MJ3["Таблица под<br/>одну цель · 2 из 3"]:::green
+          MJ4["Разложить закупку<br/>на статьи · 1 из 3"]:::green
+        end
+
+        MJ1 --> CJ1
+        MJ2 --> CJ2
+        MJ3 --> CJ2
+        MJ4 --> CJ2
+        CJ1 --> BJ2
+        CJ2 --> BJ1
+        CJ3 --> BJ1
+        CJ3 --> BJ2
+        SJ1 --> BJ2
+        SJ2 --> BJ1
+        SJ3 --> BJ3
+        SJ4 --> BJ1
+    </div>
+
+    <h2>2. Чем подтверждён каждый узел</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Узел</th><th>Пар</th><th>Чем подтверждён</th></tr></thead>
+      <tbody>
+        <tr><td><b>Узнать, сколько можно потратить</b></td><td><span class="tag t-ok">3 из 3</span></td><td>P02: «я ему звоню: ты сколько потратил, я сколько сегодня могу тратить». P03: «могла спросить у [мужа], попросить скинуть мне на карту». P01: жена спрашивает, сколько на накопительном</td></tr>
+        <tr><td><b>Свести траты обоих за период</b></td><td><span class="tag t-ok">3 из 3</span></td><td>P02 сводят вечером со всех карт; P03 ведёт таблицу свадьбы в Excel; P01 пробовали таблицу и приложение и бросили</td></tr>
+        <tr><td><b>Согласовать крупную трату</b></td><td><span class="tag t-ok">3 из 3</span></td><td>P01 — диван и квартира, до полутора недель; P02 — гарнитур 15 тыс. ₽, билеты 75 тыс. ₽; P03 — путёвка 190 тыс. ₽, три месяца</td></tr>
+        <tr><td>Договориться и сохранить доверие</td><td><span class="tag t-ok">3 из 3</span></td><td>P03-A: без договорённости «ведёт к отсутствию доверия»; P02-B: «будут испорчены отношения»; P03-B: «всегда важно обсудить, свести все за и против»</td></tr>
+        <tr><td>Дойти до общей цели в срок</td><td><span class="tag t-warn">2 из 3</span></td><td>P02 — квартира и планирование периода; P03 — свадьба с датой. В P01 цели с датой нет</td></tr>
+        <tr><td>Выбрать вещь и не переплатить</td><td><span class="tag t-warn">2 из 3</span></td><td>P01 — сравнение на Авито, качество, «выматывает»; P02 — месяц выбирали гарнитур. <b>Это не наша территория:</b> соседний верхний узел</td></tr>
+        <tr><td>Взять деньги у партнёра</td><td><span class="tag t-warn">2 из 3</span></td><td>P01 — переводы по запросу; P03 — «исключительно устно». Продукт этого не делает</td></tr>
+        <tr><td>Разложить закупку на статьи</td><td><span class="tag t-bad">1 из 3</span></td><td>P03-A: «алкоголь я так не могу прозрачно посчитать» — пять магазинов за день. Единственный случай, когда человек сам описал работу продукта</td></tr>
+        <tr><td>Снять неденежный барьер</td><td><span class="tag t-bad">1 из 3</span></td><td>P03 — покупку путёвки три месяца держал загранпаспорт, а не расчёт</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>3. Критическая цепь продукта и где она рвётся</h2>
+    <p class="lead">Та же карта, развёрнутая по времени на нашем решении — шаги, которые человек должен пройти, чтобы получить результат. Оранжевые узлы — места, где по трём парам цепь рвётся или где мы ни разу не мерили.</p>
+
+    <div class="mermaid">
+      graph LR
+        classDef yellow fill:#FFFDE7,stroke:#1A1A1A,stroke-width:2px;
+        classDef blue   fill:#E3F2FD,stroke:#1A1A1A,stroke-width:2px;
+        classDef green  fill:#E8F5E9,stroke:#1A1A1A,stroke-width:2px;
+        classDef purple fill:#F3E5F5,stroke:#1A1A1A,stroke-width:2px;
+        classDef teal   fill:#E0F7FA,stroke:#1A1A1A,stroke-width:2px;
+        classDef orange fill:#FFF3E0,stroke:#1A1A1A,stroke-width:2px;
+        classDef note   fill:#FFF9C4,stroke:#FBC02D,stroke-dasharray:4;
+
+        A["Повод:<br/>нужен ответ сейчас"]:::yellow --> B["Скачать выписку<br/>0 замеров из 6"]:::orange
+        B --> C["Загрузить файл"]:::blue
+        C --> D["Отметить<br/>общее и личное"]:::blue
+        D --> E["Первая польза:<br/>сколько ушло на общее"]:::green
+        E --> F["Позвать партнёра"]:::blue
+        F --> G["Выбрать, что<br/>увидит партнёр<br/>спроса 0 из 3"]:::orange
+        G --> H["Партнёр загружает<br/>свою выписку<br/>своей пользы не видит"]:::orange
+        H --> I["Один остаток<br/>на двоих"]:::green
+        I --> J["Влезает ли трата"]:::green
+        J --> K["Обновить данные<br/>не проверено"]:::orange
+        K -.повтор.-> A
+    </div>
+
+    <div class="tw"><table>
+      <thead><tr><th>Разрыв</th><th>Что показали интервью</th><th>Что это значит</th></tr></thead>
+      <tbody>
+        <tr><td><b>Скачать выписку</b></td><td>Ни один из шести участников выписку не скачивал; в журнале 0 замеров секунд из 4 строк</td><td>Первый шаг цепи ни разу не пройден живым человеком. Всё, что дальше, — предположение</td></tr>
+        <tr><td><b>Выбрать, что увидит партнёр</b></td><td>Желание скрыть траты — 0 из 3 пар. Единственная, кто прошла экран руками, оставила общим почти всё: «у меня вообще нечего скрывать»</td><td>Узел в цепи есть, спроса на него нет. Он же несёт основное ценностное предложение</td></tr>
+        <tr><td><b>Партнёр загружает выписку</b></td><td>P03-B о пользе: «не знаю, мы и так ведём учёт в Excel». P02-B: картину и так держит он сам</td><td>Второй партнёр — тот, у кого уже есть картина. Ему продукт не добавляет ничего, а работу добавляет</td></tr>
+        <tr><td><b>Обновить данные</b></td><td>Ни разу не доходили. Регулярность выписки никто не проверял</td><td>Без этого узла нет повторного использования, а значит и частоты</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>4. Чего в графе прототипа нет, а в интервью есть</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Что</th><th>Пар</th><th>Откуда</th><th>Куда это в графе</th></tr></thead>
+      <tbody>
+        <tr><td><b>Спросить партнёра голосом</b></td><td><span class="tag t-ok">3 из 3</span></td><td>Все три пары договариваются голосом; письменных денежных дней 0–1 из 7</td><td>Настоящее решение-конкурент под «узнать, сколько можно потратить». Продукт конкурирует с разговором, а не с перепиской</td></tr>
+        <tr><td><b>Асимметрия ролей</b></td><td><span class="tag t-ok">3 из 3</span></td><td>Один держит картину, второй спрашивает. В P03 роли расщеплены: таблицу ведёт жена, деньги переводит муж</td><td>Цепь у партнёров разная. В прототипе оба проходят одинаковый путь</td></tr>
+        <tr><td><b>Общая цель с датой</b></td><td><span class="tag t-warn">2 из 3</span></td><td>Свадьба (P03), квартира и период (P02)</td><td>Единственный найденный повод возвращаться. Из прототипа цели вырезаны 14 сентября</td></tr>
+        <tr><td><b>Разложить закупку на статьи</b></td><td><span class="tag t-bad">1 из 3</span></td><td>Пять магазинов за день, алкоголь и продукты в разных чеках</td><td>Узла нет вовсе. Единственная работа, которую человек описал сам</td></tr>
+        <tr><td><b>Неденежный барьер</b></td><td><span class="tag t-bad">1 из 3</span></td><td>Загранпаспорт держал покупку три месяца</td><td>Продукт снимает денежную неопределённость, а держит иногда не она</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>5. Что в графе прототипа оказалось лишним</h2>
+    <ul>
+      <li><b>Приватность как основное предложение.</b> 0 из 3 пар. Узел остаётся в цепи как настройка, но нести на нём отличие продукта больше нечем.</li>
+      <li><b>Симметричный путь обоих партнёров.</b> Предполагалось, что оба грузят выписки и оба получают пользу. По интервью второй партнёр — часто тот, у кого картина уже есть.</li>
+      <li><b>Ежедневная переписка как опора частоты.</b> 0 ежедневных пар из 3; вердикт скрипта — ещё две не ежедневные пары, и допущение опровергнуто досрочно.</li>
+    </ul>
+
+    <footer>
+      Источники узлов — <code>interviews/transcripts/</code> (6 расшифровок), разбор <code>interviews/2026-09-20_P01-P03_analyze-interviews.html</code>, журнал <code>interviews/money-days-log.csv</code>.
+      Уровни и критическая цепь — по канону <a href="https://nextmovetheory.com/?utm_source=visualcave&utm_medium=skill-artifact" target="_blank" rel="noopener">Next Move Theory</a> (Иван Замесин, CC BY-NC-SA 4.0), файлы <code>job-graph.md</code> и <code>critical-chain.md</code>.
+      Три пары — мало: каждый узел здесь гипотеза с числом подтверждений, а не факт.
+    </footer>
+  </div>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    const blocks = Array.from(document.querySelectorAll('.mermaid'));
+    blocks.forEach(el => { el.dataset.source = el.textContent.trim(); });
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
+    const THEMES = {
+      default: { theme:'base',    vars:{ primaryColor:'#FFFDE7', primaryBorderColor:'#1A1A1A', primaryTextColor:'#1A1A1A', lineColor:'#424242', clusterBkg:'#F8F9FA', clusterBorder:'#1A1A1A' }, classDefs:{ yellow:'fill:#FFFDE7,stroke:#1A1A1A,stroke-width:2px', blue:'fill:#E3F2FD,stroke:#1A1A1A,stroke-width:2px', green:'fill:#E8F5E9,stroke:#1A1A1A,stroke-width:2px', purple:'fill:#F3E5F5,stroke:#1A1A1A,stroke-width:2px', teal:'fill:#E0F7FA,stroke:#1A1A1A,stroke-width:2px', orange:'fill:#FFF3E0,stroke:#1A1A1A,stroke-width:2px', note:'fill:#FFF9C4,stroke:#FBC02D,stroke-dasharray:4' } },
+      minimal:  { theme:'neutral', vars:{ primaryColor:'#F8FAFC', primaryBorderColor:'#CBD5E1', primaryTextColor:'#111827', lineColor:'#94A3B8', clusterBkg:'#F8FAFC', clusterBorder:'#E2E8F0' }, classDefs:{ yellow:'fill:#FFFFFF,stroke:#D1D5DB,stroke-width:1.5px', blue:'fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1.5px', green:'fill:#F0FDF4,stroke:#86EFAC,stroke-width:1.5px', purple:'fill:#FAF5FF,stroke:#D8B4FE,stroke-width:1.5px', teal:'fill:#F0FDFA,stroke:#99F6E4,stroke-width:1.5px', orange:'fill:#FFF7ED,stroke:#FED7AA,stroke-width:1.5px', note:'fill:#FEFCE8,stroke:#FDE047,stroke-dasharray:4' } },
+      pastel:   { theme:'base',    vars:{ primaryColor:'#FEF3C7', primaryBorderColor:'#F59E0B', primaryTextColor:'#1A1A1A', lineColor:'#6B7280', clusterBkg:'#FFF7ED', clusterBorder:'#FED7AA' }, classDefs:{ yellow:'fill:#FEF3C7,stroke:#F59E0B,stroke-width:2px', blue:'fill:#DBEAFE,stroke:#60A5FA,stroke-width:2px', green:'fill:#D1FAE5,stroke:#34D399,stroke-width:2px', purple:'fill:#EDE9FE,stroke:#A78BFA,stroke-width:2px', teal:'fill:#CFFAFE,stroke:#22D3EE,stroke-width:2px', orange:'fill:#FFE4E6,stroke:#FB7185,stroke-width:2px', note:'fill:#FEF9C3,stroke:#FBBF24,stroke-dasharray:4' } },
+      print:    { theme:'base',    vars:{ primaryColor:'#FFFFFF', primaryBorderColor:'#000000', primaryTextColor:'#000000', lineColor:'#333333', clusterBkg:'#F5F5F5', clusterBorder:'#000000' }, classDefs:{ yellow:'fill:#FFFFFF,stroke:#000000,stroke-width:2px', blue:'fill:#F5F5F5,stroke:#000000,stroke-width:2px', green:'fill:#EBEBEB,stroke:#000000,stroke-width:2px', purple:'fill:#E0E0E0,stroke:#000000,stroke-width:2px', teal:'fill:#D6D6D6,stroke:#000000,stroke-width:2px', orange:'fill:#CCCCCC,stroke:#000000,stroke-width:2px', note:'fill:#FFFFE0,stroke:#888,stroke-dasharray:4' } },
+    };
+    async function applyStyle(name) {
+      const t = THEMES[name] || THEMES.default;
+      for (const el of blocks) {
+        let src = el.dataset.source;
+        for (const [cn, def] of Object.entries(t.classDefs)) {
+          src = src.replace(new RegExp(`(classDef\\s+${cn}\\s+)[^;\\n]+`, 'g'), `$1${def}`);
+        }
+        el.textContent = src;
+        el.removeAttribute('data-processed');
+      }
+      mermaid.initialize({ startOnLoad:false, theme:t.theme, flowchart:{ htmlLabels:true, useMaxWidth:true, padding:40 }, themeVariables:{ fontFamily:'Inter, sans-serif', ...t.vars } });
+      try {
+        await mermaid.run({ nodes: blocks });
+      } catch (err) {
+        console.error('Mermaid render error:', err);
+      }
+      try { localStorage.setItem('vc-style', name); } catch(e) {}
+    }
+    const _saved = (() => { try { return localStorage.getItem('vc-style') || 'default'; } catch(e) { return 'default'; } })();
+    const _sel = document.getElementById('style-select');
+    if (_sel && _saved !== 'default') _sel.value = _saved;
+    document.fonts.ready.then(() => applyStyle(_saved));
+    window.setDiagramStyle = applyStyle;
+    window.toggleTheme = () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      document.getElementById('theme-toggle').textContent = next === 'dark' ? '☀️ Светлая тема' : '🌙 Тёмная тема';
+    };
+    window.exportPDF = function() { window.print(); };
+  </script>
+</body>
+</html>

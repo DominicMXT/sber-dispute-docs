@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>План этапа 1</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#F0F2F5; --card-bg:#FFFFFF; --text-main:#111827; --text-muted:#6B7280;
+      --border:#E5E7EB; --accent:#1E88E5; --shadow:0 4px 20px rgba(0,0,0,0.08); --node-stroke:#1A1A1A;
+    }
+    [data-theme="dark"] {
+      --bg:#0F1117; --card-bg:#1A1D27; --text-main:#F9FAFB; --text-muted:#9CA3AF;
+      --border:#2A2D3A; --accent:#3B82F6; --shadow:0 4px 24px rgba(0,0,0,0.4); --node-stroke:#3A3D50;
+    }
+    body { background:var(--bg); color:var(--text-main); display:flex; justify-content:center; padding:40px; font-family:'Inter',sans-serif; margin:0; transition:background 0.3s ease; }
+    .page { background:var(--card-bg); border-radius:24px; padding:48px; box-shadow:var(--shadow); width:100%; max-width:1200px; border:1px solid var(--border); transition:background 0.3s ease,border 0.3s ease; }
+    header { display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:40px; gap:24px; flex-wrap:wrap; }
+    .title-group h1 { margin:0; font-size:36px; font-weight:900; letter-spacing:-0.02em; display:flex; align-items:center; gap:16px; }
+    .title-group h1::before { content:''; display:block; width:8px; height:40px; background:var(--accent); border-radius:4px; flex:none; }
+    .title-group p { margin:8px 0 0 24px; color:var(--text-muted); font-size:16px; font-weight:500; max-width:70ch; }
+    .controls { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    button { font:600 13px 'Inter',sans-serif; padding:10px 20px; border-radius:12px; cursor:pointer; transition:all 0.2s ease; display:flex; align-items:center; gap:8px; }
+    .btn-secondary { background:var(--card-bg); border:1px solid var(--border); color:var(--text-main); }
+    .btn-secondary:hover { background:var(--bg); border-color:var(--accent); }
+    select.style-select { font:600 13px 'Inter',sans-serif; padding:9px 12px; border-radius:12px; cursor:pointer; border:1px solid var(--border); background:var(--card-bg); color:var(--text-main); outline:none; transition:border-color 0.2s ease; }
+    select.style-select:hover { border-color:var(--accent); }
+    .mermaid svg { max-width:100%; height:auto; overflow:visible; }
+    .node rect,.node circle,.node polygon,.node path { stroke-width:2.5px !important; stroke:var(--node-stroke) !important; filter:drop-shadow(4px 4px 0px rgba(0,0,0,0.1)); }
+    .node text { font-weight:500 !important; font-size:14px !important; fill:var(--text-main) !important; }
+    .edgePath .path { stroke-width:2.5px !important; stroke:var(--text-muted) !important; }
+    .cluster rect { stroke-width:2.5px !important; stroke:var(--node-stroke) !important; fill:var(--bg) !important; }
+    .cluster text { font-weight:600 !important; fill:var(--text-main) !important; }
+    h2 { font-size:22px; font-weight:800; letter-spacing:-0.01em; margin:48px 0 6px; }
+    h2:first-of-type { margin-top:16px; }
+    .lead { color:var(--text-muted); margin:0 0 18px; max-width:78ch; }
+    table { border-collapse:collapse; width:100%; font-size:14px; margin:14px 0 8px; }
+    th,td { text-align:left; vertical-align:top; padding:8px 10px; border-bottom:1px solid var(--border); }
+    th { font-size:12px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-muted); font-weight:700; }
+    .tw { overflow-x:auto; }
+    .gantt-box { min-width:960px; }
+    code { font-family:'JetBrains Mono',monospace; font-size:12.5px; background:var(--bg); padding:1px 5px; border-radius:4px; }
+    .tag { display:inline-block; font-size:11.5px; font-weight:700; padding:2px 8px; border-radius:6px; white-space:nowrap; }
+    .t-ok { background:#E8F5E9; color:#1B5E20; }
+    .t-warn { background:#FFF3E0; color:#7A3E00; }
+    .t-bad { background:#FBE4E4; color:#8E1B1B; }
+    [data-theme="dark"] .t-ok { background:#15321F; color:#7FD39B; }
+    [data-theme="dark"] .t-warn { background:#33240F; color:#F0C060; }
+    [data-theme="dark"] .t-bad { background:#331A1A; color:#F08A8A; }
+    blockquote { margin:10px 0; padding:8px 14px; border-left:3px solid var(--accent); color:var(--text-muted); font-style:italic; }
+    .note-box { background:#FFF9C4; border:2px dashed #FBC02D; color:#5A4500; border-radius:12px; padding:14px 18px; margin:16px 0; }
+    [data-theme="dark"] .note-box { background:#2E2716; border-color:#F0C060; color:#F0DFA8; }
+    footer { margin-top:48px; padding-top:20px; border-top:1px solid var(--border); color:var(--text-muted); font-size:13.5px; }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
+    @media print { .controls,header select { display:none !important; } body { padding:0; background:#fff !important; } .page { box-shadow:none !important; border:none !important; max-width:100% !important; border-radius:0 !important; } }
+    @media (max-width:640px) { body { padding:16px; } .page { padding:24px 18px; } .title-group h1 { font-size:26px; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="title-group">
+        <h1>План этапа 1</h1>
+        <p>Finance Assistant · Sber500 × Disrupt · с 21 сентября по 14 октября 2026. Интервью закончены, дальше — MVP, 50 реальных пользователей и концепция вывода на рынок. У каждой задачи — чем проверить и когда считать её проваленной.</p>
+      </div>
+      <div class="controls">
+        <select class="style-select" id="style-select" onchange="setDiagramStyle(this.value)">
+          <option value="default">Default</option>
+          <option value="minimal">Minimal</option>
+          <option value="pastel">Pastel</option>
+          <option value="print">Print</option>
+        </select>
+        <button class="btn-secondary" onclick="toggleTheme()" id="theme-toggle">🌙 Тёмная тема</button>
+        <button class="btn-secondary" onclick="exportPDF()">⬇ PDF</button>
+      </div>
+    </header>
+
+    <div class="note-box"><b>Исходная точка, 21 сентября.</b> До сдачи 23 дня. Кода нет: всю неделю разработки команда проводила интервью, в репозитории один начальный коммит от 14.09. Интервью — 16 из 20 обязательных, реальных пользователей — 0 из 50, открытого доступа и аналитики нет. Поэтому узкое место — разработка. Всё остальное в плане выстроено так, чтобы не держать её и не ждать её.</div>
+
+    <h2>1. Где мы по алгоритму канона</h2>
+    <p class="lead">В каноне Next Move Theory десять шагов: сначала гипотезы в голове, потом поле, потом снятие рисков и запуск. Три нижних шага в плане ниже — это и есть оставшаяся работа.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Шаг</th><th>Статус</th><th>Что есть</th><th>Чего не хватает</th></tr></thead>
+      <tbody>
+        <tr><td>1. Проверить саму цель</td><td><span class="tag t-warn">задана конкурсом</span></td><td>Цель — номинация по метрикам: 1 000 DAU и 10+ обращений на DAU в ноябре</td><td>Формально «пять почему» не проходили. Сознательно пропускаем: цель задана правилами конкурса</td></tr>
+        <tr><td>2. Разобрать текущее состояние</td><td><span class="tag t-ok">пройден</span></td><td>Исследование рынка от 01.09, три группы решений</td><td>—</td></tr>
+        <tr><td>3. Сегменты, граф работ, с чем сравнивают</td><td><span class="tag t-ok">пройден</span></td><td>Граф на 26 отзывах (14.09) и на трёх парах (20.09); список альтернатив — от банковских приложений до таблицы</td><td>Граф на трёх парах устарел: пар уже девять</td></tr>
+        <tr><td>4. Отобрать способы создать ценность</td><td><span class="tag t-ok">пройден</span></td><td>Ценностное предложение от 14.09</td><td>Собрано на отзывах, до единого интервью</td></tr>
+        <tr><td>5. Поле</td><td><span class="tag t-ok">закрыто 21.09</span></td><td>9 пар, 16 человек; три сегмента, один складывается: раздельные деньги, общие траты с карт разных банков</td><td>Сегмент A — это 3 пары. Размер сегмента не измерен. Счёт сообщений по дням есть только у четырёх пар</td></tr>
+        <tr><td>6. Приложить способы к реальному графу</td><td><span class="tag t-bad">не сделан</span></td><td>—</td><td>Ценность под сегмент A на данных интервью — задача 2 плана</td></tr>
+        <tr><td>7. Отранжировать, проверить экономикой</td><td><span class="tag t-bad">не сделан</span></td><td>Ранжирование от 14.09, на отзывах</td><td>Экономику на пару не считали ни разу</td></tr>
+        <tr><td>8. Снять главные риски</td><td><span class="tag t-warn">частично</span></td><td>Проверялось одно допущение — ежедневная переписка о деньгах: ежедневных 0 пар из 4</td><td>Вердикт по заранее записанному правилу не вынесен: пар меньше десяти. Остальные риски не проверяли — раздел 3</td></tr>
+        <tr><td>9. Подтвердить ценность</td><td><span class="tag t-bad">не сделан</span></td><td>—</td><td>Проверка удобства по правилу «4 из 4» и реальное использование — задачи 12 и 14</td></tr>
+        <tr><td>10. Запустить и вернуться к шагу 1</td><td><span class="tag t-bad">не сделан</span></td><td>—</td><td>Открытый доступ к 03.10</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>2. Что мы не изучали — и где это закрывается в плане</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Не изучено</th><th>Почему важно именно сейчас</th><th>Где в плане</th></tr></thead>
+      <tbody>
+        <tr><td><b>Откуда возьмётся частота</b></td><td>Для номинации нужно 10+ обращений к решению на активного пользователя в день. Ежедневная переписка о деньгах — единственная опора частоты, которую мы проверяли, — не подтвердилась: 0 пар из 4. Другой опоры пока нет</td><td>Задача 2 — назвать повод возвращаться каждый день; задача 6 — журнал вызовов, который его измерит</td></tr>
+        <tr><td><b>Подключается ли второй партнёр</b></td><td>В 5 парах из 9 учёт ведёт один партнёр. Если в сценарий входит «пригласить партнёра», порог в 50 пользователей зависит от того, согласится ли второй</td><td>Задача 3: сценарий, который человек проходит один; приглашение — следующий шаг, а не условие</td></tr>
+        <tr><td><b>Каналы привлечения</b></td><td>50 человек за неделю — это нужно найти до запуска, а не после. Ни одного канала не проверяли</td><td>Задачи 10 и 11: тексты и лист ожидания до открытия</td></tr>
+        <tr><td><b>Экономика на пару</b></td><td>Нужна в концепции вывода на рынок: сколько стоит привести пару и окупается ли это</td><td>Задача 16, на фактах этапа 1</td></tr>
+        <tr><td><b>Готовы ли загружать выписку</b> <span class="tag t-ok">снято 21.09</span></td><td>Загрузка выписки — лишнее действие, которое делается только ради продукта. На деле её никто не делал: продукта не было</td><td>Задача 12: проверка удобства на стенде</td></tr>
+        <tr><td><b>Размер сегмента A</b></td><td>Три пары из девяти — это доля в нашей выборке, а не на рынке</td><td>Не закрываем на этапе 1: воронка открытого доступа покажет, кто приходит и остаётся</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>3. Что MVP должен проверить</h2>
+    <p class="lead">По канону MVP — зонд, а не маленький продукт: заранее записываем, какие допущения он проверяет. Ниже они в утвердительной форме, как требует канон. Допущений пять, а выживаемость перемножается: при 50 % на каждое все пять выживают в 3 % случаев. Поэтому первое действие — убрать одно из них.</p>
+    <div class="tw"><table>
+      <thead><tr><th>#</th><th>Допущение</th><th>Чем проверяется</th><th>Опровергнуто, если</th></tr></thead>
+      <tbody>
+        <tr><td>Д1</td><td>Пары с раздельными деньгами и общими тратами с карт разных банков находятся в тематических сообществах и приходят по посеву</td><td>Лист ожидания, источник трафика в журнале</td><td>К 02.10 в листе меньше 150 контактов (цель — 350)</td></tr>
+        <tr><td>Д2</td><td>Человек сам, без подсказки, заводит покупку фразой и доходит до ответа «сходится / не хватает»</td><td>Проверка удобства «4 из 4», затем журнал событий</td><td>После трёх кругов правок меньше 4 из 4 доходят до ответа</td></tr>
+        <tr><td>Д3</td><td>Человек возвращается на следующий день без напоминания от команды</td><td>Журнал: возврат на второй день</td><td>Меньше 30% активных заходят 4+ дня из 7 — та же метрика, что в требованиях <span class="tag t-warn">порог — моя гипотеза</span></td></tr>
+        <tr><td>Д4</td><td>Второй партнёр принимает приглашение</td><td>Журнал: принятые приглашения</td><td>Меньше трети приглашений приняты за 48 часов <span class="tag t-warn">порог — моя гипотеза</span></td></tr>
+        <tr><td>Д5</td><td>Повод вернуться даёт больше одного обращения к решению в день на человека</td><td>Журнал вызовов: обращений на DAU</td><td>В среднем меньше 3 за 5 дней после запуска <span class="tag t-warn">порог — моя гипотеза</span></td></tr>
+      </tbody>
+    </table></div>
+    <div class="note-box"><b>Что предлагаю убрать.</b> Д4 — из условия «реальный пользователь». По Положению реальный пользователь — тот, кто выполнил хотя бы один целевой сценарий. Если сценарий требует второго партнёра, порог в 50 человек зависит от согласия ещё 50 человек. Если сценарий проходится одному, Д4 остаётся измерением, а не условием сдачи. Это моя рекомендация, решение — в задаче 3.</div>
+
+    <h2>4. План-график</h2>
+    <p class="lead">Красным — критический путь: любая задержка на нём сдвигает сдачу. Запаса нет: 13 октября занято пакетом сдачи. Самая опасная точка — открытый доступ к 3 октября: без него не набрать 50 пользователей за оставшуюся неделю.</p>
+    <div class="tw">
+    <div class="mermaid gantt-box">
+gantt
+    dateFormat YYYY-MM-DD
+    axisFormat %d.%m
+    todayMarker off
+    section Решение
+    Анкеты закрыты, данные обезличены :done, t1, 2026-09-21, 1d
+    Ценность и требования :done, t2, 2026-09-21, 1d
+    Ключ GigaChat API :crit, t1a, 2026-09-22, 2d
+    Оценка объёма разработчиком :crit, t3, 2026-09-22, 2d
+    Объём зафиксирован :milestone, crit, m1, 2026-09-24, 0d
+    section Разработчик
+    Каркас, стенд, журнал :crit, t4, 2026-09-22, 3d
+    Фраза, расчёт, ответ, согласие :crit, t5, 2026-09-25, 3d
+    Партнёр и отложенное :crit, t5b, 2026-09-28, 2d
+    На себя сегодня, удаление :crit, t5c, 2026-09-30, 2d
+    Правки и компоненты :crit, t13, 2026-10-02, 1d
+    Открытый доступ :milestone, crit, m2, 2026-10-03, 0d
+    section Продакт до открытия
+    ПДн, политика, согласие :t7, 2026-09-22, 5d
+    Прототип и набор людей :t12a, 2026-09-22, 3d
+    Проверка на прототипе :t12, 2026-09-25, 3d
+    Каналы и тексты :t10, 2026-09-25, 4d
+    Лист ожидания :t11, 2026-09-29, 5d
+    Проверка на стенде :t12b, 2026-10-01, 2d
+    section Пользователи
+    50 реальных пользователей :crit, t14, 2026-10-03, 10d
+    Контрольная точка 25 человек :milestone, m3, 2026-10-08, 0d
+    Метрики каждый день :t15, 2026-10-03, 11d
+    section Сдача
+    Концепция вывода на рынок :crit, t16, 2026-10-08, 5d
+    Пакет и письмо :crit, t17, 2026-10-13, 1d
+    Сдача этапа 1 :milestone, crit, m4, 2026-10-14, 0d
+    </div>
+    </div>
+
+    <h2>5. Задачи, результаты и критерии</h2>
+    <p class="lead">«Принять» — что должно быть видно, чтобы задачу закрыть. «Отклонить» — при каком наблюдении она провалена. Задача без строки «отклонить» — пожелание, поэтому такая строка есть у всех.</p>
+    <div class="tw"><table>
+      <thead><tr><th>#</th><th>Задача · кто · срок</th><th>Результат</th><th>Принять, если</th><th>Отклонить, если</th><th>Чем делать</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td><b>Закрыть анкеты, обезличить данные</b><br>продакт · 21.09 <span class="tag t-ok">сделано</span></td><td>16 интервью в обезличенных расшифровках, исходники с именами вне проекта</td><td>Скрипт поиска имён по проекту — 0 совпадений</td><td>Хоть одно имя участника в папке проекта</td><td>скрипт проверки</td></tr>
+        <tr><td>2</td><td><b>Ценность для сегмента A</b><br>продакт · 23.09 <span class="tag t-ok">сделано 21.09</span></td><td>Таблица «ожидали → увидели» и одностраничное предложение: кому, почему перейдут, повод возвращаться каждый день, момент «ага»</td><td>Каждое утверждение опирается на пары с номерами. Назван повод возвращаться, который можно измерить журналом</td><td>Повод возвращаться — ежедневная переписка (не подтвердилась) или не назван вовсе</td><td><code>phs-falsify</code> → <code>nmt-craft-value-proposition</code></td></tr>
+        <tr><td>3</td><td><b>Целевой сценарий и объём MVP</b><br>продакт и разработчик · 24.09 <span class="tag t-warn">требования готовы 21.09, ждут оценки разработчика</span></td><td>Требования <code>prd/2026-09-21_mvp-prd.html</code>: 14 обязательных, сценарий «завёл покупку фразой и увидел, сойдётся ли к дате»</td><td>Разработчик оценил обязательные требования 1–13 и 18 по дням и подтвердил, что они влезают до 02.10</td><td>Оценка больше доступных дней — тогда режем по порядку из требований, а не молча</td><td><code>nmt-product-requirements</code> — готово</td></tr>
+        <tr><td>1а</td><td><b>Ключ GigaChat API</b><br>продакт · 22–23.09</td><td>Ключ и лимиты GigaChat API на программу или свой ключ</td><td>Разработчик делает тестовый вызов со стенда</td><td>К 23.09 ключа нет — ядро (требования 3–5) начать нельзя; вопрос организатору висит с онбординга</td><td>письмо организатору — <code>letter-write</code></td></tr>
+        <tr><td>4</td><td><b>Каркас, стенд, журнал</b><br>разработчик · 22–24.09</td><td>Приложение по адресу, аккаунт устройства, журнал событий и вызовов с полями для антифрода, репозиторий с первыми коммитами</td><td>Продакт открывает стенд с телефона; в журнале есть события с хэшем IP и устройства</td><td>В истории репозитория секрет или код, написанный до периода конкурса</td><td><code>secret-guard</code> — перед каждым пушем</td></tr>
+        <tr><td>5</td><td><b>Ядро сценария</b><br>разработчик · 25.09–01.10</td><td>Требования 2–13 из PRD: фраза → GigaChat → расчёт → ответ и совет; партнёр; «на себя сегодня»</td><td>Продакт проходит сценарий на своей фразе; числа в ответе совпадают с расчётом</td><td>Хоть одно число в ответе модели не совпадает с расчётом кода</td><td>готовые компоненты — не писать своё</td></tr>
+        <tr><td>6</td><td><b>Журнал событий и вызовов</b><br>разработчик · 24–29.09</td><td>Каждое действие человека и каждый вызов модели, инструмента или фоновой задачи: обезличенный идентификатор, время, тип, результат, код ошибки, источник трафика</td><td>Скрипт по выгрузке за день считает DAU, обращений на DAU и прошедших сценарий</td><td>Тестовые вызовы нельзя отличить от пользовательских</td><td>инструмент выбрать с поиском готового</td></tr>
+        <tr><td>7</td><td><b>Персональные данные</b><br>продакт · 22–26.09</td><td>Политика обработки, согласие до первого ввода, согласие на связь для листа ожидания, состав данных (включая доходы), срок хранения, удаление, что уходит в GigaChat, хостинг в РФ</td><td>Тексты готовы к 26.09 — до сборки экрана согласия и до листа ожидания</td><td>Данные хранятся без срока или без согласия; уведомление Роскомнадзора не проверено</td><td><code>legal-risk-assessment</code> — оценка рисков, не юридическая консультация</td></tr>
+        <tr><td>8</td><td><b>Список сторонних компонентов</b><br>разработчик · 02.10</td><td>Файл в репозитории: библиотеки, модели, API с лицензиями</td><td>Каждая зависимость из манифеста есть в списке</td><td>Хоть одна зависимость без лицензии</td><td>список из манифеста</td></tr>
+        <tr><td>9</td><td><b>Открытый доступ</b><br>разработчик · 03.10</td><td>Решение по публичному адресу, у организатора доступ к репозиторию на чтение</td><td>Незнакомый человек проходит сценарий с телефона без инструкций</td><td>Открыто позже 05.10 — тогда на 50 пользователей остаётся меньше недели</td><td><code>secret-guard</code> по всей истории</td></tr>
+        <tr><td>10</td><td><b>Каналы и тексты</b><br>продакт · 25–30.09</td><td>3–5 каналов с ожидаемым числом людей и текст посева под сегмент A</td><td>У каждого канала — ожидаемое число и способ проверить его по журналу</td><td>Каналы — только свой круг и знакомые: такие пользователи не засчитываются</td><td><code>nmt-craft-go-to-market</code> → <code>pw-landing-text</code>; площадки — <code>ru-signals</code></td></tr>
+        <tr><td>11</td><td><b>Лист ожидания</b><br>продакт · 29.09–03.10</td><td>Контакты людей из сегмента, которые попробуют в день открытия; стартует, когда стенд уже есть</td><td>350+ контактов к 02.10 с источником и согласием на связь. Расчёт: 30% дойдут до «ага», откроют 30–50% — для 50 пользователей нужно 167 первых визитов</td><td>К 02.10 меньше 150 — меняем канал и текст до открытия</td><td>текст из задачи 10; форма — страница на стенде</td></tr>
+        <tr><td>12а</td><td><b>Кликабельный прототип нового сценария и набор людей</b><br>продакт · 22–24.09 <span class="tag t-ok">прототип и гид готовы 21.09; набор людей — за продактом</span></td><td>Прототип «фраза → ответ → отправить партнёру → на себя сегодня» и 4 человека из сегмента A на 25–27.09 — не из круга интервьюированных</td><td>Прототип открывается на телефоне; 4 встречи назначены</td><td>Меньше 4 человек из сегмента к 24.09</td><td>прототип — моя задача</td></tr>
+        <tr><td>12</td><td><b>Проверка на прототипе = интервью 17–20</b><br>продакт · 25–27.09</td><td>4 человека проходят сценарий вслух; перед этим — короткое интервью по опроснику; записи с согласием</td><td>4 из 4 доходят до ответа без подсказки. Записано как 4 интервью по опроснику, а не только проверка удобства</td><td>Меньше 4 из 4 — правим сценарий в требованиях до 28.09, а не после сборки</td><td>вопросы на каждом шаге: что видите, что думаете, что чувствуете, что хотите сделать</td></tr>
+        <tr><td>12б</td><td><b>Проверка на стенде с живым GigaChat</b><br>продакт · 01–02.10</td><td>2–4 человека пишут свои фразы на стенде: понимает ли модель живую речь</td><td>9 из 10 фраз разобраны без правки</td><td>Меньше 7 из 10 — до открытия упростить ввод (подсказки-примеры)</td><td>журнал разбора фраз</td></tr>
+        <tr><td>13</td><td><b>Правки после проверок и список компонентов</b><br>разработчик · 02.10</td><td>Исправлены места, где люди застряли; файл компонентов с лицензиями без GPL и AGPL</td><td>Незнакомый человек проходит сценарий с телефона без инструкций</td><td>Правка не закрывает место, на котором застрял человек</td><td>—</td></tr>
+        <tr><td>14</td><td><b>50 реальных пользователей</b><br>продакт — посев; разработчик — антифрод и правки · 03–12.10</td><td>50 физических лиц вне команды, круга интервьюированных и знакомых прошли целевой сценарий</td><td>В журнале 50+ человек после склейки дублей по устройству и IP, с <code>is_test</code> и <code>is_related</code> = нет; к 08.10 — 25+</td><td>К 08.10 меньше 25 — меняем канал в тот же день. Никаких вознаграждений за действия в продукте</td><td>каналы из задачи 10</td></tr>
+        <tr><td>15</td><td><b>Метрики каждый день</b><br>продакт · 05–13.10</td><td>Каждое утро скрипт считает DAU, обращений на DAU, прошедших сценарий, возврат на второй день и принятые приглашения</td><td>Цифры считает скрипт по журналу, а не рука</td><td>Пропущен день или цифры нельзя повторить по выгрузке</td><td>скрипт из задачи 6</td></tr>
+        <tr><td>16</td><td><b>Концепция вывода на рынок</b><br>продакт · 08–12.10</td><td>Как выйти на 1 000 DAU устойчиво и 10+ обращений на DAU: каналы со стоимостью, экономика на пару, динамика этапа 1, где держит рост</td><td>У каждого канала — гипотеза, число и проверка на фактах этапа 1</td><td>План без фактических данных этапа 1</td><td><code>nmt-craft-go-to-market</code>, <code>unit-economics</code>, <code>find-constraint</code></td></tr>
+        <tr><td>17</td><td><b>Сдать этап 1</b><br>продакт · 13–14.10</td><td>Письмо организатору: ссылка на решение, доступы, итоги 20 интервью, 50 пользователей, концепция</td><td>У каждого требования п. 4.2 Положения — доказательство</td><td>Хоть одно требование без доказательства</td><td><code>letter-write</code></td></tr>
+        <tr><td>18</td><td><b>Отвечать организатору</b><br>оба · постоянно</td><td>Почту из заявки проверяем каждый день</td><td>Ответ за 2 рабочих дня или быстрее</td><td>Запрос без ответа дольше 2 рабочих дней</td><td><code>letter-write</code></td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>6. Развилки — где решаем, а не ждём</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Дата</th><th>Вопрос</th><th>Если нет</th></tr></thead>
+      <tbody>
+        <tr><td>23.09</td><td>Ключ GigaChat API есть?</td><td>Разработчик начинает с каркаса и заглушки модели; продакт в тот же день пишет организатору</td></tr>
+        <tr><td>24.09</td><td>Разработчик подтвердил, что обязательные требования 1–13 и 18 влезают до 02.10?</td><td>Режем по порядку из требований: необязательные 14–17, затем «отметить отложенное» (9). Фраза, ответ, партнёр и «на себя» не режутся</td></tr>
+        <tr><td>27.09</td><td>На прототипе 4 из 4 дошли до ответа?</td><td>Правим сценарий в требованиях до 28.09 — разработчик ещё не собрал экраны партнёра и «на себя»</td></tr>
+        <tr><td>01.10</td><td>Сценарий работает на стенде?</td><td>Проверку на стенде проводим на том, что есть; открытие всё равно 03.10, в худшем случае 05.10</td></tr>
+        <tr><td>02.10</td><td>В листе ожидания 150+ контактов?</td><td>До открытия меняем канал и текст посева</td></tr>
+        <tr><td>08.10</td><td>25+ реальных пользователей?</td><td>Меняем канал в тот же день; разработчик берёт на себя правки по журналу, продакт — только привлечение</td></tr>
+      </tbody>
+    </table></div>
+
+    <h2>7. Что я додумал — проверьте и поправьте</h2>
+    <ul>
+      <li>Ценность и сценарий решаются к 23–24.09, а не к 28.09, как стояло в досье: разработчик не может ждать неделю.</li>
+      <li>Четыре недостающих интервью — это проверка удобства на стенде с людьми из сегмента. По Положению нужны «клиентские интервью с представителями целевой аудитории». Если организатор считает только интервью до продукта, придётся добирать отдельно.</li>
+      <li>Разработчик один и работает полный день все дни, включая выходные. Если нет — открытый доступ сдвигается, и первой режется задача 13.</li>
+      <li>Доступ по ссылке к опроснику больше не нужен: анкеты закрыты. Прототип остаётся ориентиром для разработчика.</li>
+      <li><b>После перепроверки 21.09:</b> расхождение требований с концепцией в онбординге (выписки, категории, общий остаток месяца, уведомления) владелец принял как риск и организатора не уведомляет. Технический аудит сверяет «соответствие заявленной концепции» — если спросят, объяснение: концепция уточнена по итогам 16 интервью, гипотеза и сегмент-пара те же.</li>
+      <li><b>20 интервью:</b> 16 по людям, но 14 записей, одна непригодна. 4 интервью на прототипе ведём по опроснику и записываем как интервью — тогда 20 по людям и 18 по записям. Если организатор считает по записям, нужно ещё 2.</li>
+      <li>Пороги в Д3–Д5 и в листе ожидания — мои оценки, а не данные. Их стоит утвердить до открытия, чтобы потом не подгонять под факт.</li>
+      <li>Вердикт по ежедневной переписке остаётся невынесенным: ежедневных 0 пар из 4, до десяти пар не добрали. Частоту теперь проверяет журнал вызовов на живых пользователях.</li>
+    </ul>
+
+    <footer>
+      Требования этапа — п. 4.2 и Приложение 2 Положения конкурса (<code>polozhenie-konkursa.txt</code>). Шаги и проверка допущений — по канону <a href="https://nextmovetheory.com/?utm_source=visualcave&utm_medium=skill-artifact" target="_blank" rel="noopener">Next Move Theory</a> (Иван Замесин, CC BY-NC-SA 4.0), файлы <code>the-algorithm.md</code> и <code>rat-key-theses.md</code>. Данные интервью — <code>interviews/2026-09-21_P01-P09_analyze-interviews.html</code>.
+    </footer>
+  </div>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    const blocks = Array.from(document.querySelectorAll('.mermaid'));
+    blocks.forEach(el => { el.dataset.source = el.textContent.trim(); });
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (isDark) document.documentElement.setAttribute('data-theme', 'dark');
+    const THEMES = {
+      default: { theme:'base',    vars:{ primaryColor:'#FFFDE7', primaryBorderColor:'#1A1A1A', primaryTextColor:'#1A1A1A', lineColor:'#424242', clusterBkg:'#F8F9FA', clusterBorder:'#1A1A1A' }, classDefs:{ yellow:'fill:#FFFDE7,stroke:#1A1A1A,stroke-width:2px', blue:'fill:#E3F2FD,stroke:#1A1A1A,stroke-width:2px', green:'fill:#E8F5E9,stroke:#1A1A1A,stroke-width:2px', purple:'fill:#F3E5F5,stroke:#1A1A1A,stroke-width:2px', teal:'fill:#E0F7FA,stroke:#1A1A1A,stroke-width:2px', orange:'fill:#FFF3E0,stroke:#1A1A1A,stroke-width:2px', note:'fill:#FFF9C4,stroke:#FBC02D,stroke-dasharray:4' } },
+      minimal:  { theme:'neutral', vars:{ primaryColor:'#F8FAFC', primaryBorderColor:'#CBD5E1', primaryTextColor:'#111827', lineColor:'#94A3B8', clusterBkg:'#F8FAFC', clusterBorder:'#E2E8F0' }, classDefs:{ yellow:'fill:#FFFFFF,stroke:#D1D5DB,stroke-width:1.5px', blue:'fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1.5px', green:'fill:#F0FDF4,stroke:#86EFAC,stroke-width:1.5px', purple:'fill:#FAF5FF,stroke:#D8B4FE,stroke-width:1.5px', teal:'fill:#F0FDFA,stroke:#99F6E4,stroke-width:1.5px', orange:'fill:#FFF7ED,stroke:#FED7AA,stroke-width:1.5px', note:'fill:#FEFCE8,stroke:#FDE047,stroke-dasharray:4' } },
+      pastel:   { theme:'base',    vars:{ primaryColor:'#FEF3C7', primaryBorderColor:'#F59E0B', primaryTextColor:'#1A1A1A', lineColor:'#6B7280', clusterBkg:'#FFF7ED', clusterBorder:'#FED7AA' }, classDefs:{ yellow:'fill:#FEF3C7,stroke:#F59E0B,stroke-width:2px', blue:'fill:#DBEAFE,stroke:#60A5FA,stroke-width:2px', green:'fill:#D1FAE5,stroke:#34D399,stroke-width:2px', purple:'fill:#EDE9FE,stroke:#A78BFA,stroke-width:2px', teal:'fill:#CFFAFE,stroke:#22D3EE,stroke-width:2px', orange:'fill:#FFE4E6,stroke:#FB7185,stroke-width:2px', note:'fill:#FEF9C3,stroke:#FBBF24,stroke-dasharray:4' } },
+      print:    { theme:'base',    vars:{ primaryColor:'#FFFFFF', primaryBorderColor:'#000000', primaryTextColor:'#000000', lineColor:'#333333', clusterBkg:'#F5F5F5', clusterBorder:'#000000' }, classDefs:{ yellow:'fill:#FFFFFF,stroke:#000000,stroke-width:2px', blue:'fill:#F5F5F5,stroke:#000000,stroke-width:2px', green:'fill:#EBEBEB,stroke:#000000,stroke-width:2px', purple:'fill:#E0E0E0,stroke:#000000,stroke-width:2px', teal:'fill:#D6D6D6,stroke:#000000,stroke-width:2px', orange:'fill:#CCCCCC,stroke:#000000,stroke-width:2px', note:'fill:#FFFFE0,stroke:#888,stroke-dasharray:4' } },
+    };
+    async function applyStyle(name) {
+      const t = THEMES[name] || THEMES.default;
+      for (const el of blocks) {
+        let src = el.dataset.source;
+        for (const [cn, def] of Object.entries(t.classDefs)) {
+          src = src.replace(new RegExp(`(classDef\\s+${cn}\\s+)[^;\\n]+`, 'g'), `$1${def}`);
+        }
+        el.textContent = src;
+        el.removeAttribute('data-processed');
+      }
+      mermaid.initialize({ startOnLoad:false, theme:t.theme, flowchart:{ htmlLabels:true, useMaxWidth:true, padding:40 }, gantt:{ leftPadding:125, barHeight:24, barGap:6, fontSize:12, sectionFontSize:13, topPadding:40 }, themeVariables:{ fontFamily:'Inter, sans-serif', ...t.vars } });
+      try {
+        await mermaid.run({ nodes: blocks });
+      } catch (err) {
+        console.error('Mermaid render error:', err);
+      }
+      try { localStorage.setItem('vc-style', name); } catch(e) {}
+    }
+    const _saved = (() => { try { return localStorage.getItem('vc-style') || 'default'; } catch(e) { return 'default'; } })();
+    const _sel = document.getElementById('style-select');
+    if (_sel && _saved !== 'default') _sel.value = _saved;
+    document.fonts.ready.then(() => applyStyle(_saved));
+    window.setDiagramStyle = applyStyle;
+    window.toggleTheme = () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      document.getElementById('theme-toggle').textContent = next === 'dark' ? '☀️ Светлая тема' : '🌙 Тёмная тема';
+    };
+    window.exportPDF = function() { window.print(); };
+  </script>
+</body>
+</html>
