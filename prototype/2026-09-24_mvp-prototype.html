@@ -1,0 +1,1034 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Крупная покупка к дате</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ===== Токены. Разработчик переносит этот блок в код как есть. =====
+   shared  — то, что видят оба (общая покупка, собранное, статусы);
+   private — то, что видит только владелец (его доля, отложенное, приходы, траты);
+   hatch   — штриховка «закрыто от партнёра»;  calm — нейтральный тон вместо красного. */
+:root{
+  --ground:#E9ECE8; --paper:#FFFFFF; --soft:#F4F6F4; --line:#D5DAD6;
+  --ink:#16202A; --ink2:#4A5560; --ink3:#5F6670;
+  --shared:#1D6B57; --shared-soft:#E3F0EB; --private:#5F6670; --hatch:#C9CED3;
+  --warn:#A4461A; --warn-soft:#FBEDE5; --calm:#3F4A55; --calm-soft:#EEF0F2; --focus:#2463EB;
+  --t-cap:13px; --t-body:16px; --t-h3:18px; --t-h2:20px; --t-h1:26px; --t-hero:40px;
+  --s1:4px; --s2:8px; --s3:12px; --s4:16px; --s5:20px; --s6:24px; --s8:32px;
+  --r-sm:8px; --r-md:14px; --r-lg:20px; --hit:44px;
+  --lift:0 0 0 1px rgba(22,32,42,.06),0 1px 2px -1px rgba(22,32,42,.08),0 4px 12px rgba(22,32,42,.06);
+  --ease:cubic-bezier(.23,1,.32,1);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --ground:#101412; --paper:#181D1B; --soft:#1F2522; --line:#2C3431;
+  --ink:#E8ECEA; --ink2:#A9B3AE; --ink3:#9AA3AB;
+  --shared:#4FB394; --shared-soft:#16302A; --private:#9AA3AB; --hatch:#3A423F;
+  --warn:#E89A6E; --warn-soft:#3A2519; --calm:#C5CDD4; --calm-soft:#232A2E; --focus:#7AA7FF;
+  --lift:0 0 0 1px rgba(255,255,255,.08)}}
+:root[data-theme="dark"]{
+  --ground:#101412; --paper:#181D1B; --soft:#1F2522; --line:#2C3431;
+  --ink:#E8ECEA; --ink2:#A9B3AE; --ink3:#9AA3AB;
+  --shared:#4FB394; --shared-soft:#16302A; --private:#9AA3AB; --hatch:#3A423F;
+  --warn:#E89A6E; --warn-soft:#3A2519; --calm:#C5CDD4; --calm-soft:#232A2E; --focus:#7AA7FF;
+  --lift:0 0 0 1px rgba(255,255,255,.08)}
+
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--ground);color:var(--ink)}
+body{margin:0;font:var(--t-body)/1.45 Onest,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+.num{font-variant-numeric:tabular-nums}
+.phone{max-width:420px;margin:0 auto;height:100vh;height:100dvh;background:var(--paper);display:flex;flex-direction:column;position:relative;overflow:hidden}
+@media (min-width:600px){body{padding:24px 0}.phone{min-height:844px;height:844px;border-radius:28px;box-shadow:0 0 0 1px var(--line)}}
+.screen{display:flex;flex-direction:column;flex:1;min-height:0}
+
+/* шапка */
+.bar{display:flex;align-items:center;gap:var(--s1);padding:6px 8px 6px 12px;min-height:56px;border-bottom:1px solid var(--line)}
+.bar h2{font-size:17px;font-weight:600;margin:0;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.back,.fbk{background:none;border:0;color:var(--ink);font:inherit;min-height:var(--hit);min-width:var(--hit);padding:0 8px;border-radius:var(--r-sm);cursor:pointer}
+.fbk{font-size:14px;color:var(--ink2);white-space:nowrap}
+.demo{font-size:12px;color:var(--ink3);border:1px solid var(--line);border-radius:999px;padding:2px 10px;white-space:nowrap}
+
+.body{flex:1;overflow-y:auto;padding:var(--s5) var(--s5) var(--s6)}
+.foot{padding:var(--s3) var(--s5) calc(var(--s4) + env(safe-area-inset-bottom));border-top:1px solid var(--line);display:flex;flex-direction:column;gap:var(--s2);background:var(--paper)}
+.tabs + .foot, .has-tabs .foot{padding-bottom:var(--s3)}
+
+/* типографика */
+h1{font-size:var(--t-h1);line-height:1.2;font-weight:700;margin:var(--s2) 0 var(--s3);letter-spacing:-.015em;text-wrap:balance}
+h3{font-size:var(--t-h3);font-weight:600;margin:0 0 var(--s2);letter-spacing:-.005em}
+p{margin:0 0 var(--s3);text-wrap:pretty}
+.muted{color:var(--ink2)} .small{font-size:14px} .cap{font-size:var(--t-cap);color:var(--ink2)}
+.hero{font-size:var(--t-hero);line-height:1.05;font-weight:700;letter-spacing:-.025em;margin:2px 0 var(--s1)}
+
+/* кнопки */
+.btn{font:inherit;font-weight:600;min-height:52px;border-radius:var(--r-md);border:0;padding:0 18px;cursor:pointer;width:100%;transition:transform .12s var(--ease),background-color .15s}
+.btn:active{transform:scale(.97)}
+.btn-main{background:var(--shared);color:#fff}
+.btn-main[disabled]{background:var(--hatch);color:var(--ink);cursor:not-allowed}
+.btn-line{background:var(--paper);color:var(--shared);box-shadow:inset 0 0 0 1.5px var(--shared)}
+.btn-quiet{background:none;color:var(--shared);min-height:var(--hit)}
+.btn-calm{background:var(--paper);color:var(--calm);box-shadow:inset 0 0 0 1.5px var(--line)}
+.row-btns{display:flex;gap:var(--s2)} .row-btns .btn{flex:1}
+button:focus-visible,input:focus-visible,textarea:focus-visible,a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+a{color:var(--shared)}
+.link{font:inherit;background:none;border:0;color:var(--shared);text-decoration:underline;text-underline-offset:3px;cursor:pointer;min-height:var(--hit);padding:0;display:inline-flex;align-items:center;text-align:left}
+
+/* поля */
+textarea,input[type=text],input[type=number],input[type=date],input[type=email]{font:inherit;width:100%;border:1.5px solid var(--line);border-radius:var(--r-md);padding:12px 14px;background:var(--soft);color:var(--ink);min-height:52px}
+textarea{min-height:104px;resize:vertical}
+.field{margin:0 0 var(--s4)}
+.field label{display:block;font-size:14px;color:var(--ink2);margin-bottom:6px}
+.field.miss input{border-color:var(--warn);background:var(--warn-soft)}
+.hint{font-size:13px;color:var(--warn);margin-top:var(--s1)}
+.chips{display:flex;flex-wrap:wrap;gap:var(--s2);margin:var(--s3) 0 var(--s1)}
+.chips.col{flex-direction:column}
+.chip{font:inherit;font-size:14px;min-height:var(--hit);padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:var(--paper);color:var(--ink);cursor:pointer;text-align:left}
+.chip[aria-pressed="true"]{border-color:var(--shared);background:var(--shared-soft);color:var(--shared);font-weight:600}
+
+/* метка видимости — фирменный элемент */
+.vis{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:500;color:var(--ink2);white-space:nowrap}
+.vis::before{content:"";width:10px;height:10px;border-radius:3px;flex:none}
+.vis.sh::before{background:var(--shared)}
+.vis.pr::before{background:repeating-linear-gradient(135deg,var(--private) 0 1.5px,transparent 1.5px 3.5px);box-shadow:inset 0 0 0 1px var(--private)}
+.blk-h{display:flex;justify-content:space-between;align-items:center;gap:var(--s2);margin-bottom:var(--s2)}
+
+/* блоки */
+.card{border-radius:var(--r-md);padding:var(--s4);margin:0 0 var(--s4);background:var(--paper);box-shadow:var(--lift)}
+.card.priv{background:linear-gradient(var(--paper),var(--paper)) padding-box;box-shadow:inset 0 0 0 1px var(--line)}
+.status{border-radius:var(--r-md);padding:var(--s4);margin:var(--s1) 0 var(--s4)}
+.status.ok{background:var(--shared-soft);color:var(--shared)}
+.status.gap{background:var(--warn-soft);color:var(--warn)}
+.status.calm{background:var(--calm-soft);color:var(--calm)}
+.status .k{font-size:15px;font-weight:600}
+.status .sub{font-size:14px}
+.note{background:var(--soft);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;color:var(--ink2);margin:0 0 var(--s3)}
+.note.warn{background:var(--warn-soft);color:var(--warn)}
+.banner{display:flex;gap:var(--s2);align-items:flex-start;background:var(--calm-soft);color:var(--calm);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;margin:0 0 var(--s3)}
+.parsed{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--soft);border-radius:var(--r-sm);padding:4px 4px 4px 12px;font-size:14px;margin-bottom:var(--s3)}
+.parsed button{font:inherit;font-size:14px;color:var(--shared);background:none;border:0;min-height:var(--hit);cursor:pointer;padding:0 10px;white-space:nowrap;font-weight:600}
+.busy{display:flex;align-items:center;gap:10px;color:var(--ink2);margin-top:var(--s3)}
+.busy i{width:18px;height:18px;border:2px solid var(--line);border-top-color:var(--shared);border-radius:50%;animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.rows{border-radius:var(--r-md);padding:2px var(--s4);margin-bottom:var(--s4);box-shadow:inset 0 0 0 1px var(--line)}
+.row{display:flex;justify-content:space-between;gap:var(--s3);padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.row:last-child{border-bottom:0}
+.row>span:last-child{font-weight:600;text-align:right}
+.coach{border-left:3px solid var(--shared);padding:2px 0 2px var(--s3);margin:0 0 var(--s4)}
+.coach ul{margin:0;padding-left:18px}.coach li{margin-bottom:6px}
+.msg{background:var(--soft);border-radius:14px 14px 14px 4px;padding:12px 14px;margin:var(--s2) 0 var(--s4);white-space:pre-wrap}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:var(--s3) 0 var(--s4)}
+.cols>div{border-radius:var(--r-md);padding:var(--s3);font-size:14px}
+.cols .y{background:var(--shared-soft);color:var(--shared)}
+.cols .n{background:repeating-linear-gradient(135deg,var(--hatch) 0 6px,var(--soft) 6px 12px);color:var(--ink)}
+.cols .n b,.cols .n li{background:var(--soft);box-decoration-break:clone;-webkit-box-decoration-break:clone;padding:0 2px}
+.cols b{display:block;margin-bottom:6px;font-size:15px}
+.cols ul{margin:0;padding-left:16px}
+.prog{height:10px;border-radius:999px;background:var(--soft);overflow:hidden;box-shadow:inset 0 0 0 1px var(--line);margin:var(--s2) 0 var(--s1)}
+.prog i{display:block;height:100%;background:var(--shared);border-radius:999px;transition:width .4s var(--ease)}
+.who{display:flex;justify-content:space-between;gap:var(--s3);padding:var(--s3) 0;border-top:1px solid var(--line)}
+.who:first-of-type{border-top:0}
+.who b{display:block;font-size:15px}
+.who .r{text-align:right;font-size:14px}
+.pill{display:inline-block;font-size:12px;font-weight:600;border-radius:999px;padding:2px 8px}
+.pill.on{background:var(--shared-soft);color:var(--shared)}
+.pill.off{background:var(--calm-soft);color:var(--calm)}
+.later{display:inline-block;font-size:12px;color:var(--ink2);border:1px dashed var(--ink3);border-radius:999px;padding:1px 8px;margin-left:6px;vertical-align:2px;white-space:nowrap}
+.list{list-style:none;margin:0 0 var(--s3);padding:0}
+.list li{display:flex;justify-content:space-between;gap:var(--s3);padding:10px 0;border-bottom:1px solid var(--line);font-size:15px}
+.pcard{display:block;width:100%;text-align:left;font:inherit;color:inherit;border:0;cursor:pointer;border-radius:var(--r-md);padding:var(--s4);margin:0 0 var(--s3);background:var(--paper);box-shadow:var(--lift);transition:transform .12s var(--ease)}
+.pcard:active{transform:scale(.98)}
+.pcard .t{display:flex;justify-content:space-between;gap:var(--s2);font-weight:600}
+.menu{display:flex;flex-direction:column}
+.menu button{font:inherit;text-align:left;background:none;border:0;border-bottom:1px solid var(--line);min-height:52px;padding:0 2px;color:var(--ink);cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+.menu button.dang{color:var(--warn)}
+
+/* вкладки */
+.tabs{display:flex;border-top:1px solid var(--line);background:var(--paper);padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{flex:1;font:inherit;font-size:14px;font-weight:500;min-height:52px;background:none;border:0;color:var(--ink2);cursor:pointer;position:relative}
+.tabs button[aria-current="page"]{color:var(--shared);font-weight:600}
+.tabs button[aria-current="page"]::after{content:"";position:absolute;left:28%;right:28%;top:0;height:3px;border-radius:0 0 3px 3px;background:var(--shared)}
+
+/* листы */
+.sheet{position:absolute;inset:0;background:rgba(10,16,20,.38);display:flex;align-items:flex-end;z-index:5}
+.sheet>.card{width:100%;border-radius:var(--r-lg) var(--r-lg) 0 0;margin:0;padding:var(--s5) var(--s5) calc(var(--s5) + env(safe-area-inset-bottom));max-height:88%;overflow-y:auto;animation:up .24s var(--ease)}
+@keyframes up{from{transform:translateY(24px);opacity:0}to{transform:none;opacity:1}}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+.obs{font-size:13px}
+.obs pre{white-space:pre-wrap;background:var(--soft);padding:10px;border-radius:8px;max-height:180px;overflow:auto;font-size:12px}
+.obs .kv{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin:8px 0}
+.obs .map{display:grid;grid-template-columns:1fr;gap:2px;margin:8px 0}
+.obs .map button{font:inherit;font-size:13px;text-align:left;background:var(--soft);border:0;border-radius:6px;min-height:36px;padding:4px 10px;cursor:pointer;color:var(--ink)}
+.obs .map small{color:var(--ink2)}
+.obs .flags label{display:flex;align-items:center;gap:8px;min-height:36px}
+</style>
+</head>
+<body>
+<div class="phone" id="app">
+
+<!-- ==================== ВЛАДЕЛЕЦ ==================== -->
+
+<!-- Требования 1, 2 -->
+<section class="screen" data-s="consent">
+  <div class="bar"><h2 id="brand">Крупная покупка к дате</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <h1>Посчитаем, сойдётся ли покупка к сроку</h1>
+    <p class="muted">Напишите одной фразой, что покупаете, сколько стоит, к какому сроку и сколько можете внести сами. Регистрация не нужна.</p>
+    <div class="card priv" style="margin-top:var(--s4)">
+      <p style="margin:0 0 var(--s3)"><b>Партнёр не видит ваши деньги.</b> Только общую покупку и её прогресс — никаких ваших остатков, трат и доходов.</p>
+      <p style="margin:0 0 var(--s3)"><b>Фраза уходит в GigaChat без номеров карт и телефонов.</b> Суммы считает программа, а не нейросеть.</p>
+      <p style="margin:0"><b>Всё удаляется одной кнопкой.</b> Данные хранятся в России 12 месяцев с последнего входа.</p>
+    </div>
+    <button class="link" data-act="policy">Как мы обращаемся с данными</button>
+  </div>
+  <div class="foot"><button class="btn btn-main" data-act="consent">Согласен, начать</button></div>
+</section>
+
+<!-- Требование 3; случаи 7, 16, 20 -->
+<section class="screen" data-s="phrase" hidden>
+  <div class="bar"><button class="back" data-act="backFromPhrase" aria-label="Назад">←</button><h2>Что покупаем?</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <div class="banner" id="ph-offline" hidden>Нет сети. Фраза сохранена на телефоне — посчитаю, когда появится связь.</div>
+    <div class="banner" id="ph-limit" hidden>Слишком много запросов подряд. Фраза сохранена — попробуйте через минуту.</div>
+    <label for="phrase" class="small muted">Обычными словами, как написали бы партнёру</label>
+    <textarea id="phrase" placeholder="Например: котёл 40 тысяч к 15 ноября, я могу 25"></textarea>
+    <div class="chips" aria-label="Примеры">
+      <button class="chip" data-ex="котёл 40 тысяч к 15 ноября, я могу 25">котёл 40 тысяч к 15 ноября, я могу 25</button>
+      <button class="chip" data-ex="кровать 60к до нового года, плачу сам">кровать 60к до нового года, плачу сам</button>
+      <button class="chip" data-ex="отпуск 150 000 через 3 месяца, с меня 70">отпуск 150 000 через 3 месяца, с меня 70</button>
+    </div>
+    <div class="busy" id="busy" hidden><i></i>Разбираю фразу…</div>
+    <p class="cap" style="margin-top:var(--s3)">Не пишите номера карт, телефоны и имена — они не нужны для расчёта.</p>
+  </div>
+  <div class="foot"><button class="btn btn-main" data-act="parse">Посчитать</button></div>
+</section>
+
+<!-- Случаи 4, 5, 22: один уточняющий вопрос вместо формы -->
+<section class="screen" data-s="clarify" hidden>
+  <div class="bar"><button class="back" data-go="phrase" aria-label="Назад">←</button><h2>Уточню одно</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <div class="parsed"><span id="c-got"></span></div>
+    <div class="note" id="c-pii" hidden>Номер карты или телефона я скрыл — в расчёт он не нужен.</div>
+    <h1 id="c-q">К какой дате нужно?</h1>
+    <div id="c-input"></div>
+    <div class="chips" id="c-chips"></div>
+    <div class="hint" id="c-hint" hidden></div>
+  </div>
+  <div class="foot"><button class="btn btn-main" data-act="clarifyOk">Посчитать</button></div>
+</section>
+
+<!-- Требование 3 (поправить), случаи 1, 2, 6 -->
+<section class="screen" data-s="fields" hidden>
+  <div class="bar"><button class="back" data-act="fieldsBack" aria-label="Назад">←</button><h2 id="f-h">Правильно понял?</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <div class="banner" id="f-fail" hidden>Не получилось разобрать фразу. Заполните три поля — посчитаю сразу.</div>
+    <p class="muted small" id="f-lead">Проверьте, что я разобрал из фразы. Поправьте, если нужно.</p>
+    <div class="field" id="f-title"><label for="i-title">Что покупаем</label><input type="text" id="i-title" autocomplete="off"></div>
+    <div class="field" id="f-sum"><label for="i-sum">Сколько стоит, ₽</label><input type="number" inputmode="numeric" id="i-sum"><div class="hint" hidden>Сколько примерно стоит?</div></div>
+    <div class="field" id="f-date"><label for="i-date">К какому сроку</label><input type="date" id="i-date"><div class="hint" hidden>К какой дате нужно?</div></div>
+    <div class="field" id="f-share"><label for="i-share">Сколько вносите вы, ₽</label><input type="number" inputmode="numeric" id="i-share"><div class="hint" hidden>Сколько можете внести сами? Если платите всё — впишите всю сумму</div></div>
+    <button class="chip" data-act="alone">Плачу всё сам(а)</button>
+  </div>
+  <div class="foot"><button class="btn btn-main" data-act="calc">Всё верно — посчитать</button></div>
+</section>
+
+<!-- Требования 4, 5, 13, 14 -->
+<section class="screen" data-s="answer" hidden>
+  <div class="bar"><button class="back" data-act="answerBack" aria-label="Назад">←</button><h2 id="a-title">Покупка</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <div class="parsed"><span id="a-parsed"></span><button data-act="edit">Поправить</button></div>
+    <div class="status" id="a-status"><div class="k" id="a-k"></div><div class="hero num" id="a-big"></div><div class="sub" id="a-sub"></div></div>
+    <div class="blk-h"><span class="cap">Расчёт</span><span class="vis pr">видно только вам</span></div>
+    <div class="rows num" id="a-rows"></div>
+    <div class="coach" id="a-coach" hidden><h3>Что можно сделать</h3><ul id="a-tips"></ul></div>
+    <div id="a-bank"></div>
+    <div class="card priv" id="a-seg" hidden>
+      <p style="font-weight:600;margin-bottom:var(--s2)">Один вопрос: как вы решали последнюю крупную покупку?</p>
+      <div class="chips" style="margin:0">
+        <button class="chip" data-seg="скинулись долями">Скинулись, каждый своей частью</button>
+        <button class="chip" data-seg="обсудили, заплатил один">Обсудили, заплатил один</button>
+        <button class="chip" data-seg="с общего счёта">С общего счёта</button>
+        <button class="chip" data-seg="не обсуждали">Не обсуждали</button>
+        <button class="chip" data-seg="не было">Не было крупных</button>
+        <button class="chip" data-seg="пропустил">Пропустить</button>
+      </div>
+    </div>
+    <p class="small muted" id="a-partner"></p>
+  </div>
+  <div class="foot">
+    <button class="btn btn-main" data-act="toShare" id="b-share">Отправить партнёру</button>
+    <button class="btn btn-line" data-act="toPurchase">Готово — к покупке</button>
+  </div>
+</section>
+
+<!-- Требование 6, случаи 8, 17 -->
+<section class="screen" data-s="share" hidden>
+  <div class="bar"><button class="back" data-act="shareBack" aria-label="Назад">←</button><h2 id="sh-h">Отправить партнёру</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <p class="muted small">Так будет выглядеть сообщение в мессенджере:</p>
+    <div class="msg" id="m-text"></div>
+    <div class="blk-h"><span class="small muted">По ссылке партнёр увидит только эту покупку</span><span class="vis sh">видит партнёр</span></div>
+    <p class="cap" id="sh-copied" hidden>Текст скопирован — вставьте его в чат с партнёром.</p>
+  </div>
+  <div class="foot">
+    <button class="btn btn-main" data-act="shareNow">Отправить</button>
+    <button class="btn btn-line" data-act="copy">Скопировать текст</button>
+    <button class="btn-quiet btn" data-act="asPartner">Посмотреть глазами партнёра</button>
+  </div>
+</section>
+
+<!-- Случай 13: несколько покупок -->
+<section class="screen has-tabs" data-s="purchases" hidden>
+  <div class="bar"><h2>Покупки</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <div id="pl-list"></div>
+    <p class="cap" id="pl-sum"></p>
+  </div>
+  <div class="foot"><button class="btn btn-line" data-act="newPurchase">Добавить покупку</button></div>
+</section>
+
+<!-- Требования 9, 14, 16 (П2); случаи 6, 8, 9, 10, 14, 15, 21 -->
+<section class="screen has-tabs" data-s="purchase" hidden>
+  <div class="bar"><button class="back" data-go="purchases" aria-label="К покупкам">←</button><h2 id="pu-h">Покупка</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <div class="banner" id="pu-cancel" hidden></div>
+    <div class="card">
+      <div class="blk-h"><span class="cap" id="pu-when"></span><span class="vis sh">видит партнёр</span></div>
+      <div class="hero num" id="pu-hero" style="font-size:32px"></div>
+      <div class="cap" id="pu-of"></div>
+      <div class="prog" role="progressbar" aria-label="Собрано" id="pu-bar"><i></i></div>
+      <div id="pu-who"></div>
+    </div>
+    <div id="pu-over"></div>
+    <div id="pu-bank"></div>
+    <div class="card priv">
+      <div class="blk-h"><span class="cap">Ваша часть</span><span class="vis pr">видно только вам</span></div>
+      <div class="rows num" id="pu-mine" style="margin:0"></div>
+    </div>
+    <div class="banner" id="pu-device" hidden><span>Данные живут только на этом телефоне. Сменить телефон или очистить браузер — всё пропадёт.<br><button class="link" data-act="email">Сохранить по почте</button><span class="later">после открытия</span></span></div>
+  </div>
+  <div class="foot">
+    <button class="btn btn-main" data-act="saveOpen">Я отложил(а)</button>
+    <button class="btn btn-calm" data-act="changeOpen">Изменить покупку</button>
+  </div>
+</section>
+
+<!-- Требование 10 -->
+<section class="screen has-tabs" data-s="income" hidden>
+  <div class="bar"><h2>Сегодня на себя</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <div class="blk-h"><span class="small muted">Напишите про деньги в месяц</span><span class="vis pr">видно только вам</span></div>
+    <p class="muted small">Посчитаю, сколько можно тратить на себя каждый день и не сорвать свою часть покупки.</p>
+    <textarea id="income" placeholder="Например: зарплата 80 тысяч 10-го и 25-го, обязательные 30 тысяч"></textarea>
+    <div class="chips"><button class="chip" data-inc="зарплата 80 тысяч в месяц, обязательные траты 30 тысяч">зарплата 80 тысяч, обязательные 30 тысяч</button></div>
+    <div class="field" id="f-inc" style="margin-top:var(--s3)"><label for="i-inc">Приходит в месяц, ₽</label><input type="number" inputmode="numeric" id="i-inc"><div class="hint" hidden>Сколько приходит в месяц?</div></div>
+    <div class="field" id="f-must"><label for="i-must">Обязательные траты в месяц, ₽</label><input type="number" inputmode="numeric" id="i-must"></div>
+  </div>
+  <div class="foot"><button class="btn btn-main" data-act="incomeSet">Посчитать</button></div>
+</section>
+
+<!-- Требования 11, 15 (П2); случаи 11, 12, 13, 18 -->
+<section class="screen has-tabs" data-s="today" hidden>
+  <div class="bar"><h2>Сегодня на себя</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <div class="blk-h"><span class="cap" id="t-date"></span><span class="vis pr">видно только вам</span></div>
+    <div class="status ok" id="t-status"><div class="k" id="t-k"></div><div class="hero num" id="t-left"></div><div class="sub" id="t-sub"></div></div>
+    <label for="spend" class="small muted">Потратили? Напишите, например «кофе 300»</label>
+    <div style="display:flex;gap:var(--s2);margin:6px 0 var(--s2)"><input type="text" id="spend" placeholder="кофе 300" autocomplete="off"><button class="btn btn-main" style="width:auto;flex:none" data-act="spend">Записать</button></div>
+    <button class="chip" data-act="shotOpen">Записать скриншотом уведомления банка<span class="later">после открытия</span></button>
+    <ul class="list num" id="t-list" style="margin-top:var(--s3)"></ul>
+    <p class="cap" id="t-unl" hidden></p>
+    <p class="cap" id="t-plan"></p>
+    <button class="link" data-act="incomeEdit">Изменить приходы и обязательные траты</button>
+  </div>
+</section>
+
+<!-- Требования 12, 16, 17 (П2) -->
+<section class="screen has-tabs" data-s="data" hidden>
+  <div class="bar"><h2>Мои данные</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <div class="blk-h"><span class="cap">Что хранится</span><span class="vis pr">видно только вам</span></div>
+    <ul class="list" id="d-what"></ul>
+    <div class="menu">
+      <button data-act="email">Сохранить на другом устройстве<span class="later">после открытия</span></button>
+      <button data-act="install">Поставить на главный экран<span class="later">после открытия</span></button>
+      <button data-act="policy">Как мы обращаемся с данными<span aria-hidden="true">›</span></button>
+      <button class="dang" data-act="delAsk">Удалить все мои данные<span aria-hidden="true">›</span></button>
+    </div>
+  </div>
+</section>
+
+<!-- Требование 12, после удаления -->
+<section class="screen" data-s="deleted" hidden>
+  <div class="bar"><h2>Данные удалены</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <h1>Мы удалили ваши данные</h1>
+    <p class="muted">Покупки, суммы, приходы и траты стёрты с сервера. Остались только обезличенные записи о действиях — без сумм и текста.</p>
+    <p class="muted" id="del-partner">У партнёра покупка осталась с пометкой «участник вышел» — ваша часть обнулена.</p>
+  </div>
+  <div class="foot"><button class="btn btn-line" data-act="restart">Начать заново</button></div>
+</section>
+
+<!-- ==================== ПАРТНЁР ==================== -->
+
+<!-- Требования 7, 8 -->
+<section class="screen" data-s="pInvite" hidden>
+  <div class="bar"><button class="back" data-act="backToOwner" aria-label="Назад">←</button><h2>Вас позвали в покупку</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <h1 id="pi-title">Покупка</h1>
+    <div class="cols">
+      <div class="y"><b>Вы увидите</b><ul><li>что покупаем и к какому сроку</li><li>общую сумму и сколько собрано</li><li>свою часть</li></ul></div>
+      <div class="n"><b>Никто не увидит</b><ul><li>остатков на картах</li><li>трат</li><li>доходов</li></ul></div>
+    </div>
+    <label for="p-phrase" class="small muted">Сколько можете внести? Напишите как удобно</label>
+    <input type="text" id="p-phrase" placeholder="я могу 15" autocomplete="off">
+    <div class="hint" id="pi-hint" hidden>Напишите сумму, например «я могу 15»</div>
+  </div>
+  <div class="foot"><button class="btn btn-main" data-act="partnerAccept">Внести свою часть</button></div>
+</section>
+
+<!-- Случай 9: ссылку открыл второй человек -->
+<section class="screen" data-s="pUsed" hidden>
+  <div class="bar"><button class="back" data-act="backToOwner" aria-label="Назад">←</button><h2>Приглашение</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <h1>Это приглашение уже принято</h1>
+    <p class="muted">Одну ссылку может принять только один человек. Если приглашение для вас — попросите прислать новое.</p>
+  </div>
+  <div class="foot"><button class="btn btn-line" data-act="consentFromPartner">Посчитать свою покупку</button></div>
+</section>
+
+<!-- Требования 8, 9; случаи 6, 10, 21 -->
+<section class="screen" data-s="pHome" hidden>
+  <div class="bar"><h2 id="ph-h">Покупка</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="body">
+    <div class="banner" id="ph-left" hidden>Второй участник удалил свои данные — его часть обнулена. Покупка осталась у вас.</div>
+    <div class="banner" id="ph-changed" hidden></div>
+    <div class="card">
+      <div class="blk-h"><span class="cap" id="ph-when"></span><span class="vis sh">видят оба</span></div>
+      <div class="hero num" id="ph-hero" style="font-size:32px"></div>
+      <div class="cap" id="ph-of"></div>
+      <div class="prog" role="progressbar" aria-label="Собрано" id="ph-bar"><i></i></div>
+      <div id="ph-who"></div>
+    </div>
+    <div id="ph-over"></div>
+    <div class="card priv">
+      <div class="blk-h"><span class="cap">Ваша часть</span><span class="vis pr">видно только вам</span></div>
+      <div class="rows num" id="ph-mine" style="margin:0"></div>
+    </div>
+  </div>
+  <div class="foot">
+    <button class="btn btn-main" data-act="pSave">Я отложил(а)</button>
+    <button class="btn-quiet btn" data-act="backToOwner">Вернуться к себе (прототип)</button>
+  </div>
+</section>
+
+<nav class="tabs" id="tabs" hidden aria-label="Разделы">
+  <button data-tab="purchases">Покупки</button>
+  <button data-tab="today">Сегодня</button>
+  <button data-tab="data">Мои данные</button>
+</nav>
+
+<!-- ==================== ЛИСТЫ ==================== -->
+
+<div class="sheet" id="sh-fb" hidden><div class="card">
+  <h3>Что не так?</h3>
+  <p class="cap">Напишите, что непонятно или мешает. Мы читаем каждое сообщение.</p>
+  <textarea id="fb-text" placeholder="Например: не понял, что увидит партнёр"></textarea>
+  <div class="row-btns" style="margin-top:var(--s3)"><button class="btn btn-calm" data-act="close">Отмена</button><button class="btn btn-main" data-act="fbSend">Отправить</button></div>
+</div></div>
+
+<div class="sheet" id="sh-fbok" hidden><div class="card">
+  <h3>Спасибо, получили</h3><p class="muted">Посмотрим и поправим. Ответа ждать не нужно.</p>
+  <button class="btn btn-line" data-act="close">Хорошо</button>
+</div></div>
+
+<div class="sheet" id="sh-policy" hidden><div class="card">
+  <h3>Как мы обращаемся с данными</h3>
+  <ul class="small" style="padding-left:18px;margin:0 0 var(--s3)">
+    <li><b>Что храним:</b> покупки, суммы, сроки, доли, отложенное, приходы и обязательные траты, записанные траты, ответы на вопросы.</li>
+    <li><b>Что уходит в GigaChat:</b> только текст фразы, номера карт и телефонов заменяются до отправки. Суммы считает программа.</li>
+    <li><b>Что видит партнёр:</b> покупку, общую сумму, сколько собрано вместе, свою часть и «по плану / отстаёт» у второго — без сумм.</li>
+    <li><b>Где и сколько:</b> серверы в России, 12 месяцев с последнего входа.</li>
+    <li><b>Удаление:</b> «Мои данные» → «Удалить все мои данные». Остаются только обезличенные записи о действиях.</li>
+  </ul>
+  <button class="btn btn-line" data-act="close">Понятно</button>
+</div></div>
+
+<div class="sheet" id="sh-save" hidden><div class="card">
+  <div class="blk-h"><h3 style="margin:0">Сколько отложили?</h3><span class="vis pr">видно только вам</span></div>
+  <p class="cap">Партнёр увидит только, сколько собрано вместе, и что вы идёте по плану.</p>
+  <input type="text" id="save-text" placeholder="отложил 5000" autocomplete="off">
+  <div class="chips"><button class="chip" data-save="отложил 5000">отложил 5000</button><button class="chip" data-save="отложила 3 тысячи">отложила 3 тысячи</button></div>
+  <div class="hint" id="save-hint" hidden>Напишите сумму, например «отложил 5000»</div>
+  <div class="row-btns" style="margin-top:var(--s3)"><button class="btn btn-calm" data-act="close">Отмена</button><button class="btn btn-main" data-act="saveOk">Записать</button></div>
+</div></div>
+
+<div class="sheet" id="sh-change" hidden><div class="card">
+  <h3>Изменить покупку</h3>
+  <div class="menu">
+    <button data-act="chShare">Поменять мою часть<span aria-hidden="true">›</span></button>
+    <button data-act="chDate">Перенести срок<span aria-hidden="true">›</span></button>
+    <button data-act="chRevoke" id="ch-revoke">Отозвать приглашение партнёра<span aria-hidden="true">›</span></button>
+    <button class="dang" data-act="chCancel">Отменить покупку<span aria-hidden="true">›</span></button>
+  </div>
+  <button class="btn btn-calm" data-act="close" style="margin-top:var(--s3)">Закрыть</button>
+</div></div>
+
+<div class="sheet" id="sh-ask" hidden><div class="card">
+  <h3 id="ask-h"></h3><p class="cap" id="ask-p"></p>
+  <input type="text" id="ask-text" autocomplete="off"><input type="date" id="ask-date" hidden>
+  <div class="hint" id="ask-hint" hidden></div>
+  <div class="row-btns" style="margin-top:var(--s3)"><button class="btn btn-calm" data-act="close">Отмена</button><button class="btn btn-main" data-act="askOk">Сохранить</button></div>
+</div></div>
+
+<div class="sheet" id="sh-confirm" hidden><div class="card">
+  <h3 id="cf-h"></h3><p class="muted" id="cf-p"></p>
+  <div class="row-btns"><button class="btn btn-calm" data-act="close">Не надо</button><button class="btn btn-main" data-act="cfOk" id="cf-ok">Да</button></div>
+</div></div>
+
+<div class="sheet" id="sh-shot" hidden><div class="card">
+  <h3>Трата со скриншота <span class="later">после открытия</span></h3>
+  <p class="cap">Выберите скриншот уведомления банка — GigaChat найдёт сумму и место. Пример распознавания:</p>
+  <div class="msg" style="font-size:14px">Т-Банк · Покупка 450 ₽ · ЯНДЕКС ТАКСИ · Доступно …</div>
+  <div class="rows num"><div class="row"><span>Сумма</span><span>450 ₽</span></div><div class="row"><span>На что</span><span>такси</span></div></div>
+  <div class="row-btns"><button class="btn btn-calm" data-act="close">Отмена</button><button class="btn btn-main" data-act="shotOk">Записать 450 ₽</button></div>
+</div></div>
+
+<div class="sheet" id="sh-email" hidden><div class="card">
+  <h3>Сохранить на другом устройстве <span class="later">после открытия</span></h3>
+  <div id="em-1"><p class="cap">Пришлём код на почту. Почта нужна только чтобы открыть ваши покупки на другом телефоне.</p>
+    <input type="email" id="em-addr" placeholder="почта" autocomplete="email">
+    <div class="row-btns" style="margin-top:var(--s3)"><button class="btn btn-calm" data-act="close">Не сейчас</button><button class="btn btn-main" data-act="emSend">Прислать код</button></div></div>
+  <div id="em-2" hidden><p class="cap">Код отправлен. Введите его здесь.</p>
+    <input type="text" inputmode="numeric" id="em-code" placeholder="код из письма" autocomplete="one-time-code">
+    <div class="row-btns" style="margin-top:var(--s3)"><button class="btn btn-calm" data-act="close">Отмена</button><button class="btn btn-main" data-act="emOk">Подтвердить</button></div></div>
+  <div id="em-3" hidden><p class="muted">Готово. Откройте ссылку на другом телефоне и введите ту же почту.</p><button class="btn btn-line" data-act="close">Хорошо</button></div>
+</div></div>
+
+<div class="sheet" id="sh-install" hidden><div class="card">
+  <h3>На главный экран <span class="later">после открытия</span></h3>
+  <p class="cap">Чтобы открывать одним касанием, как приложение.</p>
+  <p class="small"><b>iPhone, Safari:</b> кнопка «Поделиться» внизу → «На экран „Домой“» → «Добавить».</p>
+  <p class="small"><b>Android, Chrome:</b> меню ⋮ справа сверху → «Добавить на главный экран».</p>
+  <button class="btn btn-line" data-act="close">Понятно</button>
+</div></div>
+
+<!-- Панель интервьюера: 5 касаний по заголовку первого экрана или ?obs=1 -->
+<div class="sheet" id="obs" hidden><div class="card obs">
+  <h3 style="margin:0 0 6px">Для интервьюера</h3>
+  <div class="kv num" id="o-kv"></div>
+  <div style="display:flex;gap:8px;flex-wrap:wrap;margin:8px 0">
+    <button class="chip" data-act="hint">Дал подсказку</button>
+    <button class="chip" data-act="copyLog">Скопировать результаты</button>
+    <button class="chip" data-act="reset">Новый участник</button>
+    <button class="chip" data-act="obsClose">Закрыть</button>
+  </div>
+  <details><summary style="min-height:36px;cursor:pointer">Сбои для проверки</summary>
+    <div class="flags">
+      <label><input type="checkbox" data-flag="gigaFail"> GigaChat не ответил (случай 1)</label>
+      <label><input type="checkbox" data-flag="offline"> Нет сети (случай 16)</label>
+      <label><input type="checkbox" data-flag="rateLimit"> Лимит запросов (случай 20)</label>
+    </div></details>
+  <details><summary style="min-height:36px;cursor:pointer">Карта экранов</summary><div class="map" id="o-map"></div></details>
+  <pre id="o-log"></pre>
+</div></div>
+
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEY='fa-proto-2409';
+const DAY=864e5;
+const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};
+const addDays=(d,n)=>{const x=new Date(d);x.setDate(x.getDate()+n);return x};
+const iso=d=>{const z=new Date(d.getTime()-d.getTimezoneOffset()*6e4);return z.toISOString().slice(0,10)};
+const fromIso=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const rub=n=>Math.round(n).toLocaleString('ru-RU')+' ₽';
+const fmtDate=d=>d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
+const plural=(n,a,b,c)=>{n=Math.abs(n)%100;const m=n%10;return n>10&&n<20?c:m===1?a:m>=2&&m<=4?b:c};
+
+const fresh=()=>({screen:'consent',role:'owner',t0:Date.now(),tPhrase:null,tAnswer:null,hints:0,edits:0,
+  purchases:[],cur:null,draft:null,parsed:null,phrase:'',seg:null,inc:null,must:null,spends:[],fb:[],log:[],
+  flags:{gigaFail:false,offline:false,rateLimit:false},deviceWarned:false,fieldsMode:'edit',clarify:null,ask:null,confirm:null});
+let S; try{S=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY))||{})}catch(e){S=fresh()}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+function log(ev,d){S.log.push({t:Math.round((Date.now()-S.t0)/1000),ev,...(d||{})});if(S.log.length>400)S.log.shift();save();renderObs()}
+const P=()=>S.purchases.find(p=>p.id===S.cur)||null;
+
+/* ---------- маскирование до отправки в модель (случай 7) ---------- */
+function maskPII(t){let hit=false;
+  t=t.replace(/(?:\d[ -]?){15,18}\d/g,()=>{hit=true;return '[карта]'});
+  t=t.replace(/(?:\+7|(?<!\d)8)[\s(-]*\d{3}[\s)-]*\d{3}[\s-]*\d{2}[\s-]*\d{2}/g,()=>{hit=true;return '[телефон]'});
+  return {t,hit};}
+
+/* ---------- разбор фразы: имитация GigaChat правилами (перенесено из версии 22.09 без изменений) ---------- */
+const WORDS={'десять':10,'двадцать':20,'тридцать':30,'сорок':40,'пятьдесят':50,'шестьдесят':60,'семьдесят':70,'восемьдесят':80,'девяносто':90,'сто':100,'двести':200,'триста':300,'пятьсот':500};
+const MONTHS=['январ','феврал','март','апрел','ма','июн','июл','август','сентябр','октябр','ноябр','декабр'];
+function numsIn(t){
+  t=t.toLowerCase().replace(/ё/g,'е');
+  for(const [w,v] of Object.entries(WORDS)) t=t.replace(new RegExp('(^|[^а-я])'+w+'(?=[^а-я]|$)','g'),'$1'+v);
+  const out=[]; const re=/(\d(?:\d|\s(?=\d{3}(?!\d)))*(?:[.,]\d+)?)(?:\s*(тысяч[а-я]*|тыс\.?|млн|миллион[а-я]*|₽|р\.?(?![а-я])|руб[а-я]*)|(к|k)(?![а-яa-z]))?/g; let m;
+  while((m=re.exec(t))){
+    const raw=m[1].replace(/\s+(?=\d{3}(\D|$))/g,'').replace(/\s/g,' ').trim().split(' ')[0].replace(',','.');
+    let v=parseFloat(raw); if(isNaN(v)) continue; const u=m[2]||m[3]||'';
+    if(/^(тыс|т\.|к|k)/.test(u)) v*=1000; else if(/^(млн|миллион)/.test(u)) v*=1e6;
+    out.push({v,idx:m.index,u,end:re.lastIndex});
+  }
+  return {t,out};
+}
+function parseDate(t){
+  const now=today(); t=t.toLowerCase().replace(/ё/g,'е'); let m;
+  if(/нов(ого|ому|ый) год|конц[ау] года/.test(t)) return new Date(now.getFullYear(),11,31);
+  if(/к лету|до лета|летом/.test(t)){let d=new Date(now.getFullYear(),5,1); if(d<now) d.setFullYear(d.getFullYear()+1); return d;}
+  if(/к весне|до весны/.test(t)){let d=new Date(now.getFullYear(),2,1); if(d<now) d.setFullYear(d.getFullYear()+1); return d;}
+  if((m=t.match(/через\s+(\d+|пару|неделю|месяц|полгода)\s*(дн[а-я]*|недел[а-я]*|месяц[а-я]*)?/))){
+    const n=m[1]==='пару'?2:m[1]==='неделю'?1:m[1]==='месяц'?1:m[1]==='полгода'?6:parseInt(m[1]);
+    const u=m[1]==='неделю'?'нед':m[1]==='месяц'||m[1]==='полгода'?'мес':(m[2]||'мес');
+    const d=new Date(now); if(/^дн/.test(u)) d.setDate(d.getDate()+n); else if(/^нед/.test(u)) d.setDate(d.getDate()+7*n); else d.setMonth(d.getMonth()+n); return d;
+  }
+  if((m=t.match(/(\d{1,2})[.\/](\d{1,2})(?:[.\/](\d{2,4}))?/))){
+    let y=m[3]?(+m[3]<100?2000+ +m[3]:+m[3]):now.getFullYear(); let d=new Date(y,+m[2]-1,+m[1]); if(!m[3]&&d<now) d.setFullYear(y+1); return d;
+  }
+  if((m=t.match(/(\d{1,2})\s+([а-я]+)/g))){
+    for(const s of m){ const [dd,mm]=s.split(/\s+/); const mi=MONTHS.findIndex(p=>mm.startsWith(p)&&(p!=='ма'||/^ма[яй]/.test(mm)));
+      if(mi>=0){ let d=new Date(now.getFullYear(),mi,+dd); if(d<now) d.setFullYear(d.getFullYear()+1); return d; } }
+  }
+  for(let mi=0;mi<12;mi++){ const p=MONTHS[mi]; const re=new RegExp('(^|[^а-я])(в|к|до)\\s+'+(p==='ма'?'ма[ею]':p)+'[а-я]*'); if(re.test(t)){ let d=new Date(now.getFullYear(),mi,1); if(/(^|[^а-я])в\s/.test(t.match(re)[0])) d=new Date(now.getFullYear(),mi,15); if(d<now) d.setFullYear(d.getFullYear()+1); return d; } }
+  return null;
+}
+function parsePhrase(text){
+  const {t,out}=numsIn(text);
+  const dateNums=new Set(); (t.match(/(\d{1,2})\s+(январ|феврал|март|апрел|ма[яй]|июн|июл|август|сентябр|октябр|ноябр|декабр)|(\d{1,2})[.\/]\d{1,2}|через\s+\d+/g)||[]).forEach(s=>{const i=t.indexOf(s);dateNums.add(i);});
+  const money=out.filter(n=>{ for(const i of dateNums){ if(n.idx>=i&&n.idx<=i+6) return false; } return true; });
+  const alone=/(плачу|заплачу|оплачу|покупаю|беру)\s*(сам|сама|один|одна|все|целиком)|сам(а)? плачу|все сам/.test(t);
+  let sum=null,share=null;
+  const shareRe=/(я могу|могу|я внесу|внесу|с меня|моя (доля|часть)|от меня|я дам|дам)\s*/;
+  if(money.length){
+    sum=money[0].v;
+    const sm=t.match(shareRe);
+    if(sm){ const after=money.find(n=>n.idx>=t.indexOf(sm[0])); if(after&&after!==money[0]){ share=after.v; if(!after.u&&share<1000&&sum>=1000) share*=1000; } }
+    else if(money.length>1){ share=money[1].v; if(!money[1].u&&share<1000&&sum>=1000) share*=1000; }
+  }
+  if(alone&&sum) share=sum;
+  let title=text.split(/\d|(?:^|\s)(?:десять|двадцать|тридцать|сорок|пятьдесят|шестьдесят|семьдесят|восемьдесят|девяносто|сто)(?:\s|$)/i)[0].trim().replace(/^(купить|покупаем|хотим|надо|нужно|на)\s+/i,'').replace(/[,.\s]+$/,'').replace(/\s+(за|на|в|к|до)$/i,'').trim();
+  if(!title) title='Покупка';
+  return {title:title.charAt(0).toUpperCase()+title.slice(1),sum,date:parseDate(t),share,alone};
+}
+window.__parsePhrase=parsePhrase;
+
+/* ---------- расчёт: код, не модель (требования 4, 9, 10, 11) ---------- */
+function calc(p){
+  const sum=+p.sum, mine=+p.share, partner=p.partnerShare?+p.partnerShare:0, date=fromIso(p.date);
+  const days=Math.max(1,Math.round((date-today())/DAY));
+  const gap=Math.max(0,sum-mine-partner), over=Math.max(0,mine+partner-sum);
+  const perDay=Math.ceil(Math.max(0,mine-(p.saved||0))/days);
+  const collected=(p.saved||0)+(p.partnerSaved||0);
+  const total=Math.max(1,Math.round((date-fromIso(p.created))/DAY)), passed=Math.max(0,Math.round((today()-fromIso(p.created))/DAY));
+  const onPlan=(p.saved||0)>=Math.floor(mine*passed/total)-1;
+  return {sum,mine,partner,days,gap,over,perDay,collected,onPlan,date};
+}
+function active(){return S.purchases.filter(p=>p.status!=='cancelled')}
+function daily(){
+  const reserve=active().reduce((a,p)=>a+calc(p).perDay,0);
+  const month=(+S.inc||0)-(+S.must||0)-reserve*30, per=Math.floor(month/30);
+  const td=iso(today()); const todays=S.spends.filter(s=>s.day===td); const spent=todays.reduce((a,b)=>a+b.v,0);
+  return {per,left:per-spent,spent,reserve,todays};
+}
+
+/* ---------- навигация ---------- */
+const TABBED=['purchases','purchase','income','today','data'];
+function go(s){
+  document.querySelectorAll('.screen').forEach(e=>e.hidden=e.dataset.s!==s);
+  S.screen=s; save();
+  const tabs=$('tabs'); tabs.hidden=!TABBED.includes(s);
+  const tab=s==='purchase'?'purchases':s==='income'?'today':s;
+  tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===tab?'page':'false'));
+  const r=RENDER[s]; if(r) r();
+  log('screen',{s});
+}
+function sheet(id){document.querySelectorAll('.sheet').forEach(e=>{if(e.id!=='obs')e.hidden=e.id!==id});}
+function closeSheets(){document.querySelectorAll('.sheet').forEach(e=>{if(e.id!=='obs')e.hidden=true});}
+
+const RENDER={
+  phrase(){ S.tPhrase=S.tPhrase||Date.now(); $('ph-offline').hidden=!(S.flags.offline&&S.phrase); $('ph-limit').hidden=!(S.flags.rateLimit&&S.phrase); $('busy').hidden=true; },
+  clarify: renderClarify,
+  fields: renderFields,
+  answer: renderAnswer,
+  share: renderShare,
+  purchases: renderList,
+  purchase: renderPurchase,
+  income(){ $('f-inc').classList.remove('miss'); $('f-inc').querySelector('.hint').hidden=true; if(S.inc!=null){$('i-inc').value=S.inc;$('i-must').value=S.must;} },
+  today: renderToday,
+  data: renderData,
+  pInvite(){ const p=P(); $('pi-title').textContent=p.title+' — '+rub(p.sum)+' к '+fmtDate(fromIso(p.date)); $('pi-hint').hidden=true; },
+  pHome: renderPartner,
+};
+
+/* ---------- уточнение одним вопросом ---------- */
+function startClarify(kind){
+  S.clarify=kind; go('clarify');
+}
+function renderClarify(){
+  const d=S.draft||{}, k=S.clarify;
+  const got=[]; if(d.title&&d.title!=='Покупка')got.push(d.title); if(d.sum&&k!=='currency')got.push(rub(d.sum)); if(d.date&&k!=='datePast')got.push('к '+fmtDate(d.date)); if(d.share&&k!=='share')got.push('вы — '+rub(d.share));
+  $('c-got').textContent='Понял: '+(got.join(', ')||'пока немного');
+  $('c-pii').hidden=!S.piiMasked; $('c-hint').hidden=true;
+  const Q={
+    date:['К какой дате нужно?','<input type="date" id="c-val">',[['через месяц',30],['через 3 месяца',91],['к новому году','ny']]],
+    datePast:['Эта дата уже прошла. На какую переносим?','<input type="date" id="c-val">',[['через месяц',30],['через 3 месяца',91]]],
+    sum:['Сколько примерно стоит?','<input type="number" inputmode="numeric" id="c-val" placeholder="например, 40000">',[]],
+    currency:['Считаю только в рублях. Сколько это в рублях?','<input type="number" inputmode="numeric" id="c-val" placeholder="сумма в рублях">',[]],
+    share:['Сколько можете внести сами?','<input type="number" inputmode="numeric" id="c-val" placeholder="например, 25000">',[['Плачу всё сам(а)','alone']]],
+  }[k];
+  $('c-q').textContent=Q[0]; $('c-input').innerHTML=Q[1];
+  $('c-chips').innerHTML=Q[2].map(([l,v])=>`<button class="chip" data-cv="${v}">${l}</button>`).join('');
+}
+function clarifyChip(v){
+  const i=$('c-val');
+  if(v==='alone'){i.value=S.draft.sum||'';S.draft.alone=true;return;}
+  if(v==='ny'){i.value=iso(new Date(today().getFullYear(),11,31));return;}
+  i.value=iso(addDays(today(),+v));
+}
+function clarifyOk(){
+  const k=S.clarify, i=$('c-val'), v=i.value, h=$('c-hint');
+  if(k==='date'||k==='datePast'){ if(!v||fromIso(v)<=today()){h.textContent=v?'Эта дата уже прошла или сегодня — выберите позже':'Выберите дату';h.hidden=false;return;} S.draft.date=fromIso(v); }
+  else { const n=+v; if(!(n>0)){h.textContent='Впишите сумму числом';h.hidden=false;return;} if(k==='share'){ if(n>S.draft.sum){h.textContent='Ваша часть больше всей суммы — поправьте';h.hidden=false;return;} S.draft.share=n; } else S.draft.sum=n; }
+  log('clarify_answered',{kind:k}); nextStep();
+}
+function missing(d){
+  if(S.foreign&&!S.foreignFixed) return ['currency'];
+  const m=[]; if(!d.sum)m.push('sum'); if(!d.date)m.push('date'); else if(d.date<=today())m.push('datePast'); if(!d.share)m.push('share');
+  return m;
+}
+function nextStep(){
+  const d=S.draft; if(S.clarify==='currency') S.foreignFixed=true;
+  const m=missing(d);
+  if(!m.length){ if(d.share>d.sum){S.fieldsMode='edit';go('fields');return;} commitDraft(); return; }
+  if(m.length===1){ startClarify(m[0]); return; }
+  S.fieldsMode='many'; go('fields');
+}
+function commitDraft(){
+  const d=S.draft; let p=P();
+  if(!p||S.newMode){ p={id:'p'+Date.now(),created:iso(today()),saved:0,partnerSaved:0,partner:'none',partnerShare:null,sentAt:null,acceptedAt:null,status:'active'}; S.purchases.push(p); S.cur=p.id; S.newMode=false; }
+  Object.assign(p,{title:d.title||'Покупка',sum:+d.sum,date:iso(d.date),share:+d.share,alone:!!(d.alone||+d.share===+d.sum)});
+  go('answer');
+}
+
+/* ---------- поля ---------- */
+function renderFields(){
+  const d=S.draft||{}, mode=S.fieldsMode;
+  $('f-fail').hidden=mode!=='fallback'; $('f-title').hidden=mode==='fallback';
+  $('f-h').textContent=mode==='fallback'?'Три поля':'Правильно понял?';
+  $('i-title').value=d.title||''; $('i-sum').value=d.sum||''; $('i-date').value=d.date?iso(d.date):''; $('i-share').value=d.share||'';
+  let miss=0; [['f-sum',d.sum],['f-date',d.date],['f-share',d.share]].forEach(([id,v])=>{const f=$(id);const bad=mode!=='fallback'&&!v;f.classList.toggle('miss',bad);f.querySelector('.hint').hidden=!bad;if(bad)miss++;});
+  $('f-share').querySelector('.hint').textContent='Сколько можете внести сами? Если платите всё — впишите всю сумму';
+  if(d.share&&d.sum&&d.share>d.sum){const f=$('f-share');f.classList.add('miss');const h=f.querySelector('.hint');h.hidden=false;h.textContent='Ваша часть больше всей суммы — поправьте';}
+  $('f-lead').hidden=mode==='fallback';
+  $('f-lead').textContent=mode==='many'?'Понял не всё — допишите подсвеченное:':'Проверьте, что я разобрал из фразы. Поправьте, если нужно.';
+}
+function fieldsCalc(){
+  const d={title:$('i-title').value.trim()||(S.draft&&S.draft.title)||'Покупка',sum:+$('i-sum').value,date:$('i-date').value?fromIso($('i-date').value):null,share:+$('i-share').value,alone:S.draft&&S.draft.alone};
+  let bad=false;
+  [['f-sum',d.sum>0,'Сколько примерно стоит?'],['f-date',d.date&&d.date>today(),d.date?'Эта дата уже прошла или сегодня — на какую переносим?':'К какой дате нужно?'],['f-share',d.share>0&&d.share<=d.sum,d.share>d.sum?'Ваша часть больше всей суммы — поправьте':'Сколько можете внести сами?']]
+    .forEach(([id,ok,msg])=>{const f=$(id);f.classList.toggle('miss',!ok);const h=f.querySelector('.hint');h.hidden=ok;h.textContent=msg;if(!ok)bad=true;});
+  if(bad){log('fields_incomplete',{});return;}
+  const q=S.parsed||{}; const ed=(q.title!==d.title)+(q.sum!==d.sum)+((q.date?iso(q.date):'')!==iso(d.date))+(q.share!==d.share); if(ed&&S.fieldsMode!=='fallback'){S.edits+=ed;log('fields_edited',{n:ed});}
+  S.draft=d; commitDraft();
+}
+
+/* ---------- ответ ---------- */
+function renderAnswer(){
+  const p=P(), c=calc(p); $('a-title').textContent=p.title;
+  $('a-status').className='status '+(c.gap?'gap':'ok');
+  $('a-k').textContent=c.gap?'Пока не хватает':'Сходится';
+  $('a-big').textContent=c.gap?rub(c.gap):rub(c.sum);
+  $('a-sub').textContent=c.gap?`к ${fmtDate(c.date)} — осталось ${c.days} ${plural(c.days,'день','дня','дней')}`:(p.alone?`к ${fmtDate(c.date)} — вы вносите всю сумму`:`к ${fmtDate(c.date)} — ваших частей хватает на всю сумму`);
+  $('a-rows').innerHTML=`<div class="row"><span>Стоит</span><span>${rub(c.sum)}</span></div><div class="row"><span>Вносите вы</span><span>${rub(c.mine)}</span></div>`+
+    (c.partner?`<div class="row"><span>Вносит партнёр</span><span>${rub(c.partner)}</span></div>`:'')+
+    `<div class="row"><span>Откладывать вам в день</span><span>≈ ${rub(c.perDay)}</span></div><div class="row"><span>или в месяц</span><span>≈ ${rub(c.perDay*30)}</span></div>`;
+  $('a-parsed').textContent=`Я понял так: ${p.title}, ${rub(c.sum)}, к ${fmtDate(c.date)}, вы — ${rub(c.mine)}`;
+  $('a-seg').hidden=!!S.seg;
+  const tips=[];
+  if(c.gap){
+    if(!p.alone&&!c.partner) tips.push(`Если партнёр внесёт ${rub(c.gap)} — покупка сходится. Отправьте ему расчёт одной кнопкой.`);
+    const d2=addDays(c.date,30), days2=Math.round((d2-today())/DAY);
+    tips.push(`Внести недостающее самим к ${fmtDate(c.date)} — ещё ≈ ${rub(Math.ceil(c.gap/c.days))} в день. Если сдвинуть срок на ${fmtDate(d2)} — ≈ ${rub(Math.ceil((c.sum-c.partner-(p.saved||0))/days2))} в день на всю сумму.`);
+  }
+  $('a-coach').hidden=!tips.length; $('a-tips').innerHTML=tips.map(x=>'<li>'+x+'</li>').join('');
+  $('a-bank').innerHTML=c.gap?'':bankCard();
+  $('a-partner').textContent=p.partner==='accepted'?'Партнёр видит покупку и общий прогресс, но не ваши деньги.':(p.alone?'Платите сами — партнёр не нужен. Можно всё равно показать ему покупку.':'Партнёр увидит только эту покупку, если вы её отправите.');
+  $('b-share').textContent=p.partner==='none'?(p.alone?'Показать партнёру':'Отправить партнёру'):'Отправить партнёру ещё раз';
+  if(!S.tAnswer){S.tAnswer=Date.now();log('purchase_answer_shown',{sec_from_phrase:S.tPhrase?Math.round((S.tAnswer-S.tPhrase)/1000):null,gap:c.gap,per_day:c.perDay,hints:S.hints,edits:S.edits});}
+  else log('answer_again',{gap:c.gap});
+}
+function bankCard(){return `<div class="card priv"><div class="blk-h"><h3 style="margin:0">Сумма сходится — как собрать деньги</h3><span class="later">после открытия</span></div><p class="small" style="margin:0">Заведите копилку или сбор в своём банке — у многих банков можно позвать второго человека, даже из другого банка. Переводите туда свою часть в день зарплаты, а здесь отмечайте «отложил» — план будет виден обоим.</p></div>`;}
+
+/* ---------- отправка ---------- */
+function shareText(remind){const p=P(), c=calc(p);
+  if(remind) return `Напоминаю про ${p.title.toLowerCase()} к ${fmtDate(c.date)} — ${rub(c.sum)}. Посмотри, сколько сможешь внести, это займёт минуту:\nhttps://…/p/демо`;
+  return `${p.title}: ${rub(c.sum)} к ${fmtDate(c.date)}. Я вношу ${rub(c.mine)}`+(c.gap?`, не хватает ${rub(c.gap)}. Сколько сможешь?`:'. Всё сходится 👍')+`\nhttps://…/p/демо`;}
+function renderShare(){ $('m-text').textContent=shareText(S.remind); $('sh-h').textContent=S.remind?'Напомнить партнёру':'Отправить партнёру'; $('sh-copied').hidden=true; }
+function markSent(){const p=P(); if(p.partner==='none'||p.partner==='revoked'){p.partner='sent';p.sentAt=Date.now();} save();}
+
+/* ---------- покупки ---------- */
+function renderList(){
+  const a=S.purchases;
+  $('pl-list').innerHTML=a.length?a.map(p=>{const c=calc(p); const pct=Math.min(100,Math.round(c.collected/c.sum*100));
+    return `<button class="pcard" data-open="${p.id}"><span class="t"><span>${esc(p.title)}</span><span class="num">${rub(c.sum)}</span></span>
+      <span class="cap">${p.status==='cancelled'?'отменена':'к '+fmtDate(c.date)} · собрано ${rub(c.collected)}</span><span class="prog" style="display:block"><i style="width:${pct}%"></i></span></button>`}).join('')
+    :'<p class="muted">Покупок пока нет. Добавьте первую — одной фразой.</p>';
+  const n=active().length; $('pl-sum').textContent=n>1?`Сейчас ${n} ${plural(n,'покупка','покупки','покупок')}: «Сегодня на себя» учитывает отложенное на все.`:'';
+}
+function esc(s){return String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]))}
+function renderPurchase(){
+  const p=P(); if(!p){go('purchases');return;} const c=calc(p);
+  $('pu-h').textContent=p.title;
+  const cancelled=p.status==='cancelled';
+  $('pu-cancel').hidden=!cancelled&&!p.moved; $('pu-cancel').textContent=cancelled?'Покупка отменена. Партнёр видит статус «отменена».':`Срок перенесён на ${fmtDate(c.date)}. Партнёр видит новый срок.`;
+  $('pu-when').textContent=cancelled?'отменена':`к ${fmtDate(c.date)} · ${c.days} ${plural(c.days,'день','дня','дней')}`;
+  $('pu-hero').textContent=rub(c.collected);
+  $('pu-of').textContent=`собрано из ${rub(c.sum)}`+(c.gap?` · не хватает по плану ${rub(c.gap)}`:'');
+  $('pu-bar').querySelector('i').style.width=Math.min(100,Math.round(c.collected/c.sum*100))+'%';
+  $('pu-bar').setAttribute('aria-valuenow',Math.round(c.collected/c.sum*100));
+  const pst={none:['не звали','off'],sent:['ещё не открыл приглашение','off'],opened:['открыл, пока не ответил','off'],accepted:[c.partner?`вносит ${rub(c.partner)}`:'принял','on'],left:['удалил свои данные','off'],revoked:['приглашение отозвано','off']}[p.partner];
+  const late=p.partner==='sent'&&p.sentAt&&Date.now()-p.sentAt>48*3600e3;
+  let partnerRight=`<span class="pill ${pst[1]}">${pst[0]}</span>`;
+  if(p.partner==='accepted') partnerRight+=`<div class="cap">${p.partnerOnPlan===false?'отстаёт от плана':'идёт по плану'}</div>`;
+  let partnerNote='';
+  if(late) partnerNote=`<div class="note" style="margin:var(--s2) 0 0">Приглашение отправлено 2 дня назад и не открыто. <button class="link" data-act="remind">Напомнить партнёру</button></div>`;
+  if(p.partner==='accepted'&&p.acceptedAt) partnerNote=`<div class="cap" style="margin-top:var(--s1)">Принял ${new Date(p.acceptedAt).toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}. <br><button class="link" data-act="chRevoke">Это не ваш партнёр? Отозвать приглашение</button></div>`;
+  if(p.partner==='none'&&!p.alone) partnerNote=`<div style="margin-top:var(--s2)"><button class="btn btn-line" data-act="toShare">Позвать партнёра</button></div>`;
+  $('pu-who').innerHTML=`<div class="who"><div><b>Вы</b><span class="cap">${c.onPlan?'идёте по плану':'отстаёте от плана'}</span></div><div class="r"><span class="pill ${c.onPlan?'on':'off'}">${c.onPlan?'по плану':'отстаёте'}</span></div></div>`+
+    (p.alone&&p.partner==='none'?'':`<div class="who"><div><b>Партнёр</b></div><div class="r">${partnerRight}</div></div>${partnerNote}`);
+  $('pu-over').innerHTML=c.over?overCard(c.over,c.mine):'';
+  $('pu-bank').innerHTML=!cancelled&&!c.gap&&!c.over?bankCard():'';
+  $('pu-mine').innerHTML=`<div class="row"><span>Ваша часть</span><span>${rub(c.mine)}</span></div><div class="row"><span>Отложено</span><span>${rub(p.saved||0)}</span></div><div class="row"><span>Откладывать в день</span><span>≈ ${rub(c.perDay)}</span></div>`;
+  $('pu-device').hidden=!((p.saved||0)>0);
+  document.querySelector('[data-s="purchase"] .foot').hidden=cancelled;
+}
+function overCard(over,mine){return `<div class="card priv"><p style="margin:0 0 var(--s2)"><b>Вы вдвоём вносите на ${rub(over)} больше суммы покупки.</b> Уменьшить вашу часть до ${rub(mine-over)}?</p><div class="row-btns"><button class="btn btn-calm" data-act="overKeep">Оставить</button><button class="btn btn-main" data-act="overFix">Уменьшить</button></div></div>`;}
+
+/* ---------- сегодня ---------- */
+function renderToday(){
+  if(S.inc==null){go('income');return;}
+  const d=daily(), over=d.left<0;
+  $('t-date').textContent=new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
+  $('t-status').className='status '+(over?'calm':'ok');
+  $('t-k').textContent=over?'Сегодня потрачено больше плана':'Можно ещё сегодня';
+  $('t-left').textContent=rub(Math.abs(d.left));
+  const t=today(), mEnd=new Date(t.getFullYear(),t.getMonth()+1,0), dl=Math.max(1,Math.round((mEnd-t)/DAY)), tom=Math.max(0,Math.floor(d.per+d.left/dl));
+  $('t-sub').textContent=over?`Ничего страшного: если разложить на ${dl} ${plural(dl,'день','дня','дней')} до конца месяца, завтра на себя ≈ ${rub(tom)}. Отложенное на покупки не трогаем.`:`из ${rub(d.per)} в день — после обязательных трат и ваших частей в покупках`;
+  $('t-list').innerHTML=d.todays.map(s=>`<li><span>${s.what?esc(s.what):'<span class="muted">без подписи</span>'}</span><span>${rub(s.v)}</span></li>`).join('');
+  const unl=S.spends.filter(s=>!s.what).length; $('t-unl').hidden=!unl; $('t-unl').textContent=`${unl} ${plural(unl,'трата','траты','трат')} без подписи — подпишите, когда будет минутка. На остаток это не влияет.`;
+  const n=active().length; $('t-plan').textContent=`На ${n>1?n+' '+plural(n,'покупку','покупки','покупок'):'покупку'} откладывается ≈ ${rub(d.reserve)} в день. Партнёр этого не видит.`;
+  log('daily_left_shown',{left:d.left,per:d.per});
+}
+function addSpend(text,src){
+  const n=numsIn(text).out; if(!n.length) return false;
+  const what=text.replace(/[\d\s.,]+(₽|р\.?|руб[а-я]*|тыс[а-я.]*|к)?/gi,' ').replace(/\s+/g,' ').trim();
+  S.spends.push({what,v:n[0].v,day:iso(today()),src:src||'text'}); log('spend_added',{v:n[0].v,labeled:!!what,src:src||'text'}); return true;
+}
+
+/* ---------- данные ---------- */
+function renderData(){
+  const n=S.purchases.length;
+  $('d-what').innerHTML=[['Покупки',n?`${n} ${plural(n,'покупка','покупки','покупок')}`:'нет'],['Приходы и обязательные траты',S.inc!=null?'заданы':'нет'],['Записанные траты',S.spends.length||'нет'],['Где хранится','серверы в России']].map(([a,b])=>`<li><span>${a}</span><span class="muted">${b}</span></li>`).join('');
+}
+
+/* ---------- партнёр ---------- */
+function renderPartner(){
+  const p=P(), c=calc(p);
+  $('ph-h').textContent=p.title; $('ph-left').hidden=!S.ownerLeft;
+  $('ph-changed').hidden=!p.ownerShareChanged; $('ph-changed').textContent=p.ownerShareChanged?`Второй участник поменял свою часть. Сейчас не хватает ${rub(c.gap)} — можно увеличить свою или перенести срок.`:'';
+  $('ph-when').textContent=`к ${fmtDate(c.date)}`;
+  $('ph-hero').textContent=rub(c.collected);
+  $('ph-of').textContent=`собрано вместе из ${rub(c.sum)}`+(c.gap?` · не хватает ${rub(c.gap)}`:'');
+  $('ph-bar').querySelector('i').style.width=Math.min(100,Math.round(c.collected/c.sum*100))+'%';
+  $('ph-who').innerHTML=`<div class="who"><div><b>Второй участник</b><span class="cap">${S.ownerLeft?'вышел из покупки':'суммы не показываем'}</span></div><div class="r"><span class="pill ${S.ownerLeft?'off':(c.onPlan?'on':'off')}">${S.ownerLeft?'вышел':(c.onPlan?'по плану':'отстаёт')}</span></div></div>`;
+  $('ph-over').innerHTML=c.over?`<div class="card priv"><p style="margin:0 0 var(--s2)"><b>Вы вдвоём вносите на ${rub(c.over)} больше суммы.</b> Уменьшить вашу часть до ${rub(c.partner-c.over)}?</p><div class="row-btns"><button class="btn btn-calm" data-act="overKeep">Оставить</button><button class="btn btn-main" data-act="pOverFix">Уменьшить</button></div></div>`:'';
+  $('ph-mine').innerHTML=`<div class="row"><span>Ваша часть</span><span>${rub(c.partner)}</span></div><div class="row"><span>Отложено</span><span>${rub(p.partnerSaved||0)}</span></div>`;
+}
+
+/* ---------- панель интервьюера ---------- */
+function renderObs(){ if($('obs').hidden) return; const a=S.tAnswer&&S.tPhrase?Math.round((S.tAnswer-S.tPhrase)/1000)+' с':'—'; const p=P();
+  $('o-kv').innerHTML=[['Дошёл до ответа',S.tAnswer?'да':'нет'],['Время до ответа',a],['Подсказок',S.hints],['Правок полей',S.edits],['Сегмент',S.seg||'—'],['Отправил партнёру',p&&p.partner!=='none'?'да':'нет'],['Партнёр внёс',p&&p.partnerShare?rub(p.partnerShare):'—'],['Трат записано',S.spends.length],['«Что не так»',S.fb.length]].map(([k,v])=>`<span>${k}</span><b>${v}</b>`).join('');
+  document.querySelectorAll('[data-flag]').forEach(i=>i.checked=!!S.flags[i.dataset.flag]);
+  $('o-log').textContent=S.log.slice(-60).map(x=>`${x.t}s ${x.ev} ${JSON.stringify(Object.fromEntries(Object.entries(x).filter(([k])=>k!=='t'&&k!=='ev')))}`).join('\n');}
+function results(){ return ['Проверка на прототипе · '+new Date().toLocaleString('ru-RU'),'Фраза: '+(S.phrase||'—'),'Дошёл до ответа: '+(S.tAnswer?'да':'нет'),'Время до ответа, с: '+(S.tAnswer&&S.tPhrase?Math.round((S.tAnswer-S.tPhrase)/1000):'—'),'Подсказок: '+S.hints,'Правок полей: '+S.edits,'Сегмент: '+(S.seg||'—'),'Отправил партнёру: '+(S.log.some(x=>x.ev==='share_clicked')?'да':'нет'),'Трат записано: '+S.spends.length,'Что не так: '+(S.fb.join(' | ')||'—'),'','Журнал:',...S.log.map(x=>x.t+'s '+x.ev+' '+JSON.stringify(x))].join('\n');}
+
+/* ---------- карта экранов: фикстуры для проверки покрытия и для разработчика ---------- */
+function demoP(o){return Object.assign({id:'p1',title:'Котёл',sum:40000,date:iso(addDays(today(),52)),share:25000,partnerShare:null,saved:0,partnerSaved:0,partner:'none',sentAt:null,acceptedAt:null,status:'active',alone:false,created:iso(addDays(today(),-10))},o||{});}
+function fx(o,screen,after){ const keep={log:S.log,t0:S.t0}; S=Object.assign(fresh(),{consent:true},o||{}); S.log=keep.log; S.t0=keep.t0; if(S.purchases.length&&!S.cur) S.cur=S.purchases[0].id; save(); closeSheets(); go(screen); if(after) after(); }
+const ACC=()=>demoP({partner:'accepted',partnerShare:15000,acceptedAt:Date.now()-3600e3,saved:5000,partnerSaved:3000});
+const STATES=[
+ ['consent','Согласие и обещание о данных',[1,2],[],()=>{S=Object.assign(fresh(),{log:S.log,t0:S.t0});save();closeSheets();go('consent')}],
+ ['policy','Политика: что храним и что уходит в GigaChat',[2],[7],()=>fx({},'consent',()=>sheet('sh-policy'))],
+ ['phrase','Фраза о покупке',[3],[],()=>fx({},'phrase')],
+ ['busy','«Разбираю фразу…»',[3],[],()=>fx({},'phrase',()=>{$('phrase').value='котёл 40 тысяч к 15 ноября, я могу 25';$('busy').hidden=false;})],
+ ['offline','Нет сети — фраза сохранена',[3],[16],()=>fx({phrase:'котёл 40 тысяч',flags:{offline:true,gigaFail:false,rateLimit:false}},'phrase')],
+ ['ratelimit','Лимит запросов',[3],[20],()=>fx({phrase:'котёл 40 тысяч',flags:{offline:false,gigaFail:false,rateLimit:true}},'phrase')],
+ ['clarifyDate','Уточнение: нет даты',[3],[4],()=>fx({draft:{title:'Котёл',sum:40000,share:25000},clarify:'date'},'clarify')],
+ ['clarifyPast','Уточнение: дата прошла',[3],[5],()=>fx({draft:{title:'Котёл',sum:40000,share:25000,date:addDays(today(),-3)},clarify:'datePast'},'clarify')],
+ ['clarifyShare','Уточнение: своя часть',[3],[4],()=>fx({draft:{title:'Котёл',sum:40000,date:addDays(today(),52)},clarify:'share'},'clarify')],
+ ['clarifyCur','Уточнение: сумма не в рублях',[3],[22],()=>fx({draft:{title:'Отпуск',date:addDays(today(),90),share:500},foreign:true,clarify:'currency'},'clarify')],
+ ['clarifyPii','Номер карты скрыт',[3],[7],()=>fx({draft:{title:'Котёл',sum:40000,share:25000},piiMasked:true,clarify:'date'},'clarify')],
+ ['fieldsEdit','Поля: поправить разбор',[3],[2],()=>fx({draft:{title:'Котёл',sum:40000,date:addDays(today(),52),share:25000},fieldsMode:'edit',purchases:[demoP()]},'fields')],
+ ['fieldsMany','Поля: понято не всё',[3],[4],()=>fx({draft:{title:'Котёл'},fieldsMode:'many'},'fields')],
+ ['fieldsFail','Запасная форма: GigaChat не ответил',[3],[1],()=>fx({draft:{},fieldsMode:'fallback'},'fields')],
+ ['fieldsOver','Своя часть больше суммы',[3],[6],()=>fx({draft:{title:'Котёл',sum:40000,date:addDays(today(),52),share:45000},fieldsMode:'edit'},'fields')],
+ ['answerGap','Ответ: не хватает + совет + вопрос о сегменте',[4,5,13],[],()=>fx({purchases:[demoP()],tPhrase:Date.now()-20000},'answer')],
+ ['answerOk','Ответ: сходится + как собрать в банке',[4,5,14],[],()=>fx({purchases:[demoP({share:40000,alone:true})],seg:'скинулись долями'},'answer')],
+ ['share','Отправить партнёру',[6],[17],()=>fx({purchases:[demoP()]},'share')],
+ ['pInvite','Партнёр: что увидит и чего нет',[7,8],[],()=>fx({role:'partner',purchases:[demoP({partner:'sent',sentAt:Date.now()})]},'pInvite')],
+ ['pUsed','Ссылку открыл второй человек',[7],[9],()=>fx({role:'partner',purchases:[ACC()]},'pUsed')],
+ ['pHome','Партнёр: покупка после принятия',[8,9],[],()=>fx({role:'partner',purchases:[ACC()]},'pHome')],
+ ['pOver','Партнёр: вдвоём больше суммы',[8],[6],()=>fx({role:'partner',purchases:[demoP({partner:'accepted',partnerShare:20000,saved:5000})]},'pHome')],
+ ['pChanged','Партнёр: второй поменял долю',[9],[10],()=>fx({role:'partner',purchases:[demoP({partner:'accepted',partnerShare:15000,share:15000,ownerShareChanged:true,saved:4000,partnerSaved:3000})]},'pHome')],
+ ['pLeft','Партнёр: второй удалил данные',[12],[21],()=>fx({role:'partner',ownerLeft:true,purchases:[demoP({partner:'accepted',partnerShare:15000,share:0,saved:0,partnerSaved:3000})]},'pHome')],
+ ['purchase','Покупка: партнёр не звали',[9],[],()=>fx({purchases:[demoP()]},'purchase')],
+ ['purchaseSent','Покупка: приглашение не открыто 2 дня',[6,9],[8],()=>fx({purchases:[demoP({partner:'sent',sentAt:Date.now()-50*3600e3})]},'purchase')],
+ ['purchaseAcc','Покупка: партнёр принял, можно отозвать',[8,9],[9],()=>fx({purchases:[ACC()]},'purchase')],
+ ['purchaseSaved','Покупка: после первого «отложил» — предупреждение об устройстве',[9,16],[15],()=>fx({purchases:[ACC()]},'purchase')],
+ ['purchaseOver','Покупка: вдвоём больше суммы',[9],[6],()=>fx({purchases:[demoP({partner:'accepted',partnerShare:20000,acceptedAt:Date.now()})]},'purchase')],
+ ['purchaseDone','Покупка: сумма сошлась — как собрать',[14],[],()=>fx({purchases:[demoP({partner:'accepted',partnerShare:15000,acceptedAt:Date.now(),saved:10000,partnerSaved:6000})]},'purchase')],
+ ['purchaseMoved','Покупка: срок перенесён',[9],[14],()=>fx({purchases:[demoP({moved:true,date:iso(addDays(today(),80))})]},'purchase')],
+ ['purchaseCancelled','Покупка отменена',[9],[14],()=>fx({purchases:[demoP({status:'cancelled'})]},'purchase')],
+ ['saveSheet','«Я отложил(а)»',[9],[],()=>fx({purchases:[ACC()]},'purchase',()=>sheet('sh-save'))],
+ ['changeSheet','Изменить: часть, срок, отозвать, отменить',[9],[10,14,9],()=>fx({purchases:[ACC()]},'purchase',()=>{$('ch-revoke').hidden=false;sheet('sh-change')})],
+ ['purchases2','Две покупки',[9],[13],()=>fx({purchases:[demoP(),demoP({id:'p2',title:'Отпуск',sum:150000,share:70000,date:iso(addDays(today(),91))})],inc:80000,must:30000},'purchases')],
+ ['income','Приходы и обязательные траты',[10],[],()=>fx({purchases:[demoP()]},'income')],
+ ['today','Сегодня на себя',[11],[],()=>fx({purchases:[demoP()],inc:80000,must:30000,spends:[{what:'кофе',v:300,day:iso(today())}]},'today')],
+ ['todayMinus','Сегодня в минус — без упрёков',[11],[11],()=>fx({purchases:[demoP()],inc:80000,must:30000,spends:[{what:'ужин',v:3200,day:iso(today())}]},'today')],
+ ['todayUnlabeled','Трата без подписи',[11],[12],()=>fx({purchases:[demoP()],inc:80000,must:30000,spends:[{what:'',v:300,day:iso(today())}]},'today')],
+ ['today2','Сегодня при двух покупках',[11],[13],()=>fx({purchases:[demoP(),demoP({id:'p2',title:'Отпуск',sum:150000,share:70000,date:iso(addDays(today(),91))})],inc:80000,must:30000},'today')],
+ ['shot','Трата скриншотом уведомления',[15],[],()=>fx({purchases:[demoP()],inc:80000,must:30000},'today',()=>sheet('sh-shot'))],
+ ['data','Мои данные',[12,16,17],[],()=>fx({purchases:[demoP()],inc:80000,must:30000},'data')],
+ ['email','Сохранить по почте',[16],[15],()=>fx({purchases:[demoP()]},'data',()=>sheet('sh-email'))],
+ ['install','На главный экран',[17],[],()=>fx({purchases:[demoP()]},'data',()=>sheet('sh-install'))],
+ ['delAsk','Удалить все данные: подтверждение',[12],[],()=>fx({purchases:[ACC()]},'data',()=>askDelete())],
+ ['deleted','Данные удалены',[12],[21],()=>fx({},'deleted')],
+ ['feedback','«Что не так?»',[18],[],()=>fx({purchases:[demoP()]},'answer',()=>sheet('sh-fb'))],
+ ['feedbackOk','«Что не так?» отправлено',[18],[],()=>fx({purchases:[demoP()]},'answer',()=>sheet('sh-fbok'))],
+];
+window.__STATES=STATES.map(s=>({id:s[0],title:s[1],req:s[2],edge:s[3]}));
+window.__open=id=>{const s=STATES.find(x=>x[0]===id); if(!s) throw new Error('нет состояния '+id); s[4]();};
+function renderMap(){ $('o-map').innerHTML=STATES.map(s=>`<button data-state="${s[0]}">${s[1]} <small>· треб. ${s[2].join(', ')||'—'}${s[3].length?' · случ. '+s[3].join(', '):''}</small></button>`).join(''); }
+
+/* ---------- подтверждения ---------- */
+function confirmAsk(h,p,ok,fn){S.confirm=fn; $('cf-h').textContent=h; $('cf-p').textContent=p; $('cf-ok').textContent=ok; sheet('sh-confirm');}
+function askDelete(){confirmAsk('Удалить все ваши данные?','Покупки, суммы, приходы и траты сотрутся навсегда. У партнёра покупка останется с пометкой «участник вышел».','Удалить','delete');}
+function askInput(kind){
+  S.ask=kind; const p=P(); $('ask-hint').hidden=true;
+  const isDate=kind==='date'; $('ask-text').hidden=isDate; $('ask-date').hidden=!isDate;
+  if(kind==='share'){ $('ask-h').textContent='Поменять мою часть'; $('ask-p').textContent='Например, «моя часть 15 000». Партнёр увидит только новый статус покупки.'; $('ask-text').value=''; $('ask-text').placeholder='моя часть 15000'; }
+  if(isDate){ $('ask-h').textContent='Перенести срок'; $('ask-p').textContent='Партнёр увидит новый срок.'; $('ask-date').value=p.date; }
+  sheet('sh-ask');
+}
+
+/* ---------- события ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act],[data-go],[data-ex],[data-seg],[data-inc],[data-tab],[data-open],[data-cv],[data-save],[data-state]'); if(!b) return;
+  if(b.dataset.state){ window.__open(b.dataset.state); return; }
+  if(b.dataset.go){go(b.dataset.go);return;}
+  if(b.dataset.tab){go(b.dataset.tab==='today'&&S.inc==null?'income':b.dataset.tab);return;}
+  if(b.dataset.open){S.cur=b.dataset.open;go('purchase');return;}
+  if(b.dataset.ex){$('phrase').value=b.dataset.ex;log('example_used',{});return;}
+  if(b.dataset.cv){clarifyChip(b.dataset.cv);return;}
+  if(b.dataset.save){$('save-text').value=b.dataset.save;return;}
+  if(b.dataset.inc){$('income').value=b.dataset.inc;const n=numsIn(b.dataset.inc).out;$('i-inc').value=n[0]?n[0].v:'';$('i-must').value=n[1]?n[1].v:'';return;}
+  if(b.dataset.seg){S.seg=b.dataset.seg;log('segment_answer',{seg:S.seg});$('a-seg').hidden=true;return;}
+  const p=P();
+  switch(b.dataset.act){
+    case 'consent': log('consent',{}); go('phrase'); break;
+    case 'policy': sheet('sh-policy'); log('policy_opened',{}); break;
+    case 'backFromPhrase': go(S.purchases.length?'purchases':'consent'); break;
+    case 'parse': {
+      const raw=$('phrase').value.trim(); if(!raw){$('phrase').focus();return;}
+      S.phrase=raw; const m=maskPII(raw); S.piiMasked=m.hit;
+      log('phrase_submitted',{text:m.t});
+      if(S.flags.offline){ $('ph-offline').hidden=false; log('phrase_queued_offline',{}); return; }
+      if(S.flags.rateLimit){ $('ph-limit').hidden=false; log('rate_limited',{}); return; }
+      b.disabled=true; $('busy').hidden=false;
+      setTimeout(()=>{ b.disabled=false; $('busy').hidden=true;
+        if(S.flags.gigaFail){ log('model_error',{code:'timeout'}); S.draft={}; S.parsed={}; S.fieldsMode='fallback'; go('fields'); return; }
+        const q=parsePhrase(m.t); S.parsed=q; S.foreign=/(евро|€|доллар|\$|usd|eur|юан)/i.test(m.t); S.foreignFixed=false;
+        S.draft={title:q.title,sum:q.sum,date:q.date,share:q.share,alone:q.alone};
+        log('phrase_parsed',{sum:!!q.sum,date:!!q.date,share:!!q.share});
+        nextStep(); },900);
+      break; }
+    case 'clarifyOk': clarifyOk(); break;
+    case 'fieldsBack': go(P()&&S.tAnswer?'answer':'phrase'); break;
+    case 'alone': $('i-share').value=$('i-sum').value; if(S.draft)S.draft.alone=true; $('f-share').classList.remove('miss'); $('f-share').querySelector('.hint').hidden=true; log('pay_alone',{}); break;
+    case 'calc': fieldsCalc(); break;
+    case 'edit': { const c=calc(p); S.draft={title:p.title,sum:c.sum,date:c.date,share:c.mine,alone:p.alone}; S.parsed=Object.assign({},S.draft); S.fieldsMode='edit'; go('fields'); break; }
+    case 'answerBack': go('purchase'); break;
+    case 'toShare': S.remind=false; log('share_clicked',{}); go('share'); break;
+    case 'remind': S.remind=true; log('remind_clicked',{}); go('share'); break;
+    case 'shareBack': go(S.remind?'purchase':'answer'); break;
+    case 'shareNow': { const txt=$('m-text').textContent; markSent(); log('share_sent',{via:navigator.share?'system':'copy'});
+      if(navigator.share&&!window.__noShare){ navigator.share({text:txt}).catch(()=>{}); } else { try{navigator.clipboard.writeText(txt)}catch(x){} $('sh-copied').hidden=false; } break; }
+    case 'copy': try{navigator.clipboard.writeText($('m-text').textContent)}catch(x){} markSent(); $('sh-copied').hidden=false; log('share_copied',{}); break;
+    case 'asPartner': markSent(); S.role='partner'; p.partner=p.partner==='accepted'?'accepted':'opened'; log('invite_opened',{}); go(p.partner==='accepted'?'pUsed':'pInvite'); break;
+    case 'partnerAccept': { const n=numsIn($('p-phrase').value).out; let v=n[0]?n[0].v:0; if(v&&v<1000&&p.sum>=1000) v*=1000; if(!v){$('pi-hint').hidden=false;$('p-phrase').focus();return;}
+      p.partnerShare=v; p.partner='accepted'; p.acceptedAt=Date.now(); log('invite_accepted',{v}); go('pHome'); break; }
+    case 'pSave': S.saveFor='partner'; $('save-text').value=''; $('save-hint').hidden=true; sheet('sh-save'); break;
+    case 'backToOwner': S.role='owner'; go(p?'purchase':'consent'); break;
+    case 'consentFromPartner': S.role='owner'; go('consent'); break;
+    case 'toPurchase': go('purchase'); break;
+    case 'newPurchase': S.newMode=true; S.draft=null; S.tAnswer=null; S.tPhrase=null; $('phrase').value=''; go('phrase'); break;
+    case 'saveOpen': S.saveFor='owner'; $('save-text').value=''; $('save-hint').hidden=true; sheet('sh-save'); break;
+    case 'saveOk': { const n=numsIn($('save-text').value).out; let v=n[0]?n[0].v:0; if(!v){$('save-hint').hidden=false;return;}
+      if(S.saveFor==='partner'){ p.partnerSaved=(p.partnerSaved||0)+v; log('saved',{who:'partner',v}); closeSheets(); go('pHome'); }
+      else { p.saved=(p.saved||0)+v; log('saved',{who:'owner',v}); closeSheets(); go('purchase'); } break; }
+    case 'changeOpen': $('ch-revoke').hidden=!(p.partner==='accepted'||p.partner==='sent'); sheet('sh-change'); break;
+    case 'chShare': askInput('share'); break;
+    case 'chDate': askInput('date'); break;
+    case 'chRevoke': confirmAsk('Отозвать приглашение?','Старая ссылка перестанет работать, часть партнёра обнулится. Можно отправить новое приглашение.','Отозвать','revoke'); break;
+    case 'chCancel': confirmAsk('Отменить покупку?','Партнёр увидит статус «отменена». Отложенные деньги остаются у вас.','Отменить покупку','cancel'); break;
+    case 'askOk': {
+      if(S.ask==='share'){ const n=numsIn($('ask-text').value).out; let v=n[0]?n[0].v:NaN; if(v<1000&&p.sum>=1000&&!/\d{4}/.test($('ask-text').value)) v*=1000; if(!(v>=0)||v>p.sum){$('ask-hint').textContent='Напишите сумму не больше стоимости покупки';$('ask-hint').hidden=false;return;} p.share=v; p.ownerShareChanged=true; log('share_changed',{}); }
+      if(S.ask==='date'){ const v=$('ask-date').value; if(!v||fromIso(v)<=today()){$('ask-hint').textContent='Выберите дату позже сегодняшней';$('ask-hint').hidden=false;return;} p.date=v; p.moved=true; log('date_moved',{}); }
+      closeSheets(); go('purchase'); break; }
+    case 'cfOk': {
+      const k=S.confirm; closeSheets();
+      if(k==='delete'){ const hadPartner=S.purchases.some(x=>x.partner==='accepted'); const keep=S.log.map(x=>({t:x.t,ev:x.ev})); S=Object.assign(fresh(),{log:keep,t0:S.t0}); log('data_deleted',{}); $('del-partner').hidden=!hadPartner; go('deleted'); }
+      if(k==='revoke'){ p.partner='revoked'; p.partnerShare=null; p.partnerSaved=0; log('invite_revoked',{}); go('purchase'); }
+      if(k==='cancel'){ p.status='cancelled'; log('purchase_cancelled',{}); go('purchase'); }
+      break; }
+    case 'overFix': { const c=calc(p); p.share=c.mine-c.over; log('over_fixed',{}); go(S.screen); break; }
+    case 'pOverFix': { const c=calc(p); p.partnerShare=c.partner-c.over; log('over_fixed',{who:'partner'}); go('pHome'); break; }
+    case 'overKeep': b.closest('.card').hidden=true; break;
+    case 'incomeSet': { if(!$('i-inc').value){const n=numsIn($('income').value).out;$('i-inc').value=n[0]?n[0].v:'';$('i-must').value=n[1]?n[1].v:'';}
+      if(!(+$('i-inc').value>0)){$('f-inc').classList.add('miss');$('f-inc').querySelector('.hint').hidden=false;return;} S.inc=+$('i-inc').value; S.must=+$('i-must').value||0; log('income_set',{}); go('today'); break; }
+    case 'incomeEdit': go('income'); break;
+    case 'spend': { if(!addSpend($('spend').value.trim())){$('spend').focus();return;} $('spend').value=''; renderToday(); break; }
+    case 'shotOpen': sheet('sh-shot'); break;
+    case 'shotOk': addSpend('такси 450','screenshot'); closeSheets(); renderToday(); break;
+    case 'email': $('em-1').hidden=false;$('em-2').hidden=true;$('em-3').hidden=true; sheet('sh-email'); break;
+    case 'emSend': $('em-1').hidden=true;$('em-2').hidden=false; log('email_code_sent',{}); break;
+    case 'emOk': $('em-2').hidden=true;$('em-3').hidden=false; log('email_linked',{}); break;
+    case 'install': sheet('sh-install'); break;
+    case 'delAsk': askDelete(); break;
+    case 'restart': S=Object.assign(fresh(),{log:S.log,t0:S.t0}); save(); go('consent'); break;
+    case 'fb': $('fb-text').value=''; sheet('sh-fb'); setTimeout(()=>$('fb-text').focus(),50); break;
+    case 'fbSend': { const t=$('fb-text').value.trim(); if(!t){$('fb-text').focus();return;} S.fb.push(t); log('feedback',{text:t,screen:S.screen}); sheet('sh-fbok'); break; }
+    case 'close': closeSheets(); break;
+    case 'hint': S.hints++; log('hint_given',{screen:S.screen}); break;
+    case 'copyLog': try{navigator.clipboard.writeText(results())}catch(x){} b.textContent='Скопировано'; break;
+    case 'reset': S=fresh(); save(); ['phrase','income','spend'].forEach(i=>$(i).value=''); $('obs').hidden=true; closeSheets(); go('consent'); break;
+    case 'obsClose': $('obs').hidden=true; break;
+  }
+  save();
+});
+document.addEventListener('change',e=>{const f=e.target.dataset&&e.target.dataset.flag; if(f){S.flags[f]=e.target.checked; save(); log('flag',{f,on:e.target.checked});}});
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheets(); if(e.key==='Enter'&&e.target.id==='spend'){e.preventDefault();document.querySelector('[data-act="spend"]').click();} });
+document.querySelectorAll('.sheet').forEach(s=>s.addEventListener('click',e=>{if(e.target===s){ if(s.id==='obs') s.hidden=true; else closeSheets(); }}));
+let taps=0,tt; $('brand').addEventListener('click',()=>{taps++;clearTimeout(tt);tt=setTimeout(()=>taps=0,1500);if(taps>=5){taps=0;$('obs').hidden=false;renderMap();renderObs();}});
+const qs=new URLSearchParams(location.search);
+if(qs.get('obs')==='1'){$('obs').hidden=false;renderMap();}
+if(qs.get('s')){ window.__open(qs.get('s')); } else { go(S.screen||'consent'); }
+renderObs();
+</script>
+</body>
+</html>
