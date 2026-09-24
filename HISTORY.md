@@ -1,0 +1,46 @@
+# История документов
+
+В репозитории лежат только действующие документы. Всё, что заменено, убрано через git — ни одна версия не потеряна.
+Этот файл — оглавление к истории: что было, чем заменено и как достать.
+
+- **Посмотреть старую версию:** `git show <хэш>:<путь>`
+- **Вернуть файл на диск:** `git checkout <хэш> -- <путь>`
+- **Вся история файла:** `git log --full-history -- <путь>`
+- **Почему принимались решения:** досье, раздел «Хронология решений».
+
+## Убрано из репозитория 24.09.2026
+
+Даты — из имени файла; если даты в имени нет — дата последнего изменения.
+
+| Дата | Файл | Что это было | Чем заменён | Последняя версия | Статус |
+|---|---|---|---|---|---|
+| изм. 01.09.2026 | `zayavka-vygruzka-plain.txt` | ЗАЯВКА В SBER500 x DISRUPT | zayavka.html — та же анкета; файл остаётся на диске как вход сборки досье | `62e3db4` | из индекса, файл на диске |
+| изм. 01.09.2026 | `zayavka-vygruzka.txt` | ЗАЯВКА В SBER500 x DISRUPT | zayavka.html — та же анкета; файл остаётся на диске как вход сборки досье | `62e3db4` | из индекса, файл на диске |
+| изм. 14.09.2026 | `onboarding-vygruzka.txt` | ОНБОРДИНГ SBER500 x DISRUPT | onboarding.html — та же анкета; файл остаётся на диске как вход сборки досье | `62e3db4` | из индекса, файл на диске |
+| 14.09.2026 | `prototype/2026-09-14_benefit-or-tax.md` | Выгода или налог · прототип Finance Assistant | prototype/2026-09-22_purchase-prototype.html | `62e3db4` | удалён |
+| 14.09.2026 | `prototype/2026-09-14_finance-assistant-jobs-and-segments.md` | Работы и сегменты из отзывов · Finance Assistant | interviews/2026-09-21_P01-P09_analyze-interviews.html | `62e3db4` | удалён |
+| 14.09.2026 | `prototype/2026-09-14_job-graph.html` | Граф работ пары · Finance Assistant | value/2026-09-21_segment-a-value-proposition.html, раздел 3а | `62e3db4` | удалён |
+| 14.09.2026 | `prototype/2026-09-14_prd-prototype.html` | Требования к прототипу · Finance Assistant | prd/2026-09-21_mvp-prd.html | `62e3db4` | удалён |
+| 14.09.2026 | `prototype/2026-09-14_prototype-guide.md` | Прототип Finance Assistant — прослеживаемость и сценарий показа | prototype/2026-09-22_usability-test-guide.md | `62e3db4` | удалён |
+| 14.09.2026 | `prototype/2026-09-14_value-proposition.html` | Ценностное предложение · Finance Assistant | value/2026-09-21_segment-a-value-proposition.html | `62e3db4` | удалён |
+| 19.09.2026 | `interviews/2026-09-19_P01-P02_analyze-interviews.html` | Разбор пар P01 и P02 | interviews/2026-09-21_P01-P09_analyze-interviews.html | `62e3db4` | удалён |
+| 19.09.2026 | `interviews/2026-09-19_P01_analyze-interviews.html` | Разбор пары P01 | interviews/2026-09-21_P01-P09_analyze-interviews.html | `62e3db4` | удалён |
+| 20.09.2026 | `interviews/2026-09-20_P01-P03_analyze-interviews.html` | Разбор пар P01, P02 и P03 | interviews/2026-09-21_P01-P09_analyze-interviews.html | `62e3db4` | удалён |
+| 20.09.2026 | `interviews/2026-09-20_P01-P04_analyze-interviews.html` | Разбор пар P01–P04 | interviews/2026-09-21_P01-P09_analyze-interviews.html | `62e3db4` | удалён |
+| 20.09.2026 | `prototype/2026-09-20_job-graph-interviews.html` | Граф работ пары по трём интервью | value/2026-09-21_segment-a-value-proposition.html, раздел 3а | `62e3db4` | удалён |
+| изм. 21.09.2026 | `dev-week1.md` | Неделя 1 разработки · 15–21 сентября 2026 | prd/2026-09-21_mvp-prd.html | `62e3db4` | удалён |
+| изм. 21.09.2026 | `plan/fix_plan_after_review.py` | -*- coding: utf-8 -*- """Правки плана по трём критикам 21.09. Номера задач сохранены, новые — с буквой.""" imp | разовый скрипт: его правки уже внесены в plan/ 21.09 | `62e3db4` | удалён |
+| изм. 21.09.2026 | `prd/fix_prd_after_review.py` | -*- coding: utf-8 -*- """Правки требований по трём критикам 21.09. Каждая замена — уникальная подстрока.""" im | разовый скрипт: его правки уже внесены в prd/ 21.09 | `62e3db4` | удалён |
+| изм. 21.09.2026 | `prototype/prototype.html` | Finance Assistant на двоих | prototype/2026-09-22_purchase-prototype.html | `62e3db4` | удалён |
+| изм. 21.09.2026 | `value/fix_vp_after_review.py` | -*- coding: utf-8 -*- """Правки ценностного предложения по находкам критика 21.09 (сегмент против данных). Каж | разовый скрипт: его правки уже внесены в value/ 21.09 | `62e3db4` | удалён |
+
+## Исходники, которые в репозиторий не попадают
+
+Лежат в папке проекта локально, перечислены в `.gitignore`:
+
+- `interviews/transcripts/`, `interviews/money-days-log.csv` — дословные расшифровки и дневник по парам: реальные высказывания не публикуются;
+- `polozhenie-konkursa.pdf`, `polozhenie-konkursa.txt` — документ организатора;
+- `zayavka-vygruzka*.txt`, `onboarding-vygruzka.txt` — текстовые выгрузки анкет, вход сборки досье;
+- `workshop-1-plan-results.pdf` — отчёт воркшопа курса; выводы — `review/2026-09-23_workshop-1-razbor.md`.
+
+Исходники интервью с именами хранятся вне проекта.

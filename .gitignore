@@ -7,3 +7,11 @@ interviews/money-days-log.csv
 # Документ организатора конкурса — не наша интеллектуальная собственность.
 polozhenie-konkursa.pdf
 polozhenie-konkursa.txt
+
+# Текстовые выгрузки анкет — вход сборки досье, в репозитории лежат HTML-версии.
+zayavka-vygruzka.txt
+zayavka-vygruzka-plain.txt
+onboarding-vygruzka.txt
+
+# Отчёт воркшопа курса — выводы в review/2026-09-23_workshop-1-razbor.md.
+workshop-1-plan-results.pdf
