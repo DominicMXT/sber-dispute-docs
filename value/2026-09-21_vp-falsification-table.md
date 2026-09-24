@@ -1,6 +1,6 @@
 # Фальсификация ценностного предложения от 14.09 — факты девяти пар
 
-Сделано скиллом `phs-falsify`, режим 1, 21 сентября 2026. Утверждения — из `prototype/2026-09-14_value-proposition.html`, факты — из `interviews/2026-09-21_P01-P09_analyze-interviews.html` и `interviews/money-days-log.csv`. Таблица собрана скриптом `falsify_table.py` из `2026-09-21_vp-falsification-input.json`, вывод вставлен без правок.
+Сделано скиллом `phs-falsify`, режим 1, 21 сентября 2026. Утверждения — из `prototype/2026-09-14_value-proposition.html` (удалён 24.09, см. HISTORY.md), факты — из `interviews/2026-09-21_P01-P09_analyze-interviews.html` и `interviews/money-days-log.csv`. Таблица собрана скриптом `falsify_table.py` из `2026-09-21_vp-falsification-input.json`, вывод вставлен без правок.
 
 **Гипотеза:** Ценностное предложение от 14.09 («общее видно обоим, личное — только вам» плюс польза до партнёра) держится для сегмента A на фактах девяти пар
 
