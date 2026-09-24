@@ -436,7 +436,7 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
     <div class="banner" id="sr-short" hidden></div>
     <div id="sr-goal"></div>
     <div class="sec-h">Советы к цели</div>
-    <p class="cap">Отметьте, что готовы попробовать. Суммы — оценка по вашим тратам; числа считает программа.</p>
+    <p class="cap" id="sr-tipcap">Отметьте, что готовы попробовать. Суммы — оценка по вашим тратам; числа считает программа.</p>
     <div id="sr-tips"></div>
     <div class="sec-h">Что я увидел</div>
     <div id="sr-facts"></div>
@@ -1126,9 +1126,10 @@ function renderStmt(){
   const plan=planSum();
   if(G){ const toDate=Math.round(plan*G.c.days/30.4), gap=G.c.gap, left=Math.max(0,gap-toDate);
     $('sr-goal').innerHTML=`<div class="status ${gap?(left?'gap':'ok'):'ok'}"><div class="k">${esc(G.p.title)} к ${fmtDate(G.c.date)}</div>`+
-      (gap?`<div class="hero num" style="font-size:32px">${left?'не хватает '+rub(left):'сходится'}</div><div class="sub">${plan?`с выбранными шагами за ${G.c.days} ${plural(G.c.days,'день','дня','дней')} наберётся ещё ≈ ${rub(toDate)} из ${rub(gap)}`:`не хватает ${rub(gap)} — отметьте шаги ниже`}</div>`
+      (gap?`<div class="hero num" style="font-size:32px">${left?'не хватает '+rub(left):'сходится'}</div><div class="sub">${plan?`${S.autoPicked&&!left?`недостающие ${rub(gap)} нашлись в ваших же тратах: `:''}с ${Object.values(S.tipsOn).filter(Boolean).length===1?'этим шагом':'этими шагами'} за ${G.c.days} ${plural(G.c.days,'день','дня','дней')} наберётся ещё ≈ ${rub(toDate)} из ${rub(gap)}`:`не хватает ${rub(gap)} — отметьте шаги ниже`}</div>`
         :`<div class="hero num" style="font-size:32px">сходится</div><div class="sub">шаги ниже помогут отложить быстрее</div>`)+`</div>`; }
   else $('sr-goal').innerHTML=`<div class="note">Покупки пока нет — советы покажу в рублях в месяц. <button class="link" data-act="newPurchase">Добавить покупку</button></div>`;
+  $('sr-tipcap').textContent=S.autoPicked?'Я подобрал самые выгодные шаги, которых хватает на покупку. Снимите то, что не подходит. Суммы — оценка по вашим тратам; числа считает программа.':'Отметьте, что готовы попробовать. Суммы — оценка по вашим тратам; числа считает программа.';
   $('sr-tips').innerHTML=T.length?T.map(t=>{ const on=!!S.tipsOn[t.id]; const eff=G&&G.c.gap?` · к сроку ≈ ${rub(Math.round(t.monthly*G.c.days/30.4))}`:'';
     return `<div class="tip" aria-pressed="${on}"><div class="tx"><b>${esc(t.title)}</b>${esc(t.why)}<small class="num">+${rub(t.monthly)} в месяц${eff}</small></div><button class="tg" data-tip="${t.id}" aria-pressed="${on}">${on?'В плане':'Беру'}</button></div>`; }).join('')
     :'<p class="muted small">Необязательных трат, на которых заметно сэкономить, я не нашёл.</p>';
@@ -1145,7 +1146,8 @@ function renderStmt(){
 function mandatoryConfirmed(){ const A=S.stmt; return A.recurring.filter(r=>!(S.recOk&&S.recOk[r.key]===false)).reduce((a,r)=>a+r.amount,0); }
 function nextPay(daysArr){ const t=today(); for(let k=0;k<62;k++){ const d=addDays(t,k); if(k>0&&daysArr.includes(d.getDate())) return d; } return null; }
 function loadStatement(ops,src){ const A=analyze(ops); if(A.error){ $('st-err').hidden=false; $('st-err').textContent=A.error==='empty'?'В файле нет операций. Проверьте период выгрузки или впишите деньги вручную.':'Не узнал формат файла.'; log('statement_error',{kind:A.error}); return; }
-  S.stmt=A; S.tipsOn={}; S.recOk={}; log('statement_parsed',{src,ops:A.count,days:A.days,rec:A.recurring.length,tips:tipsFor(A).length}); go('stmtResult'); }
+  S.stmt=A; S.tipsOn=autoPick(A); S.autoPicked=Object.keys(S.tipsOn).length>0; S.recOk={}; log('statement_parsed',{src,ops:A.count,days:A.days,rec:A.recurring.length,tips:tipsFor(A).length,auto:Object.keys(S.tipsOn).length}); go('stmtResult'); }
+function autoPick(A){ const G=goalFor(), on={}; if(!G||!G.c.gap) return on; let acc=0; for(const t of tipsFor(A)){ if(acc>=G.c.gap) break; on[t.id]=true; acc+=Math.round(t.monthly*G.c.days/30.4); } return on; }
 
 /* ---------- панель интервьюера ---------- */
 function renderObs(){ if($('obs').hidden) return; const a=S.tAnswer&&S.tPhrase?Math.round((S.tAnswer-S.tPhrase)/1000)+' с':'—'; const p=P();
@@ -1206,7 +1208,8 @@ const STATES=[
  ['stmtIntro','Выписка: согласие и загрузка',[19],[34,35],()=>fx({purchases:[demoP()]},'stmtIntro')],
  ['stmtBusy','Выписка: «Разбираю выписку…»',[19],[],()=>fx({purchases:[demoP()]},'stmtIntro',()=>{$('st-busy').hidden=false;})],
  ['stmtFormat','Выписка: чужой формат или PDF',[19],[29],()=>fx({purchases:[demoP()]},'stmtIntro',()=>{$('st-err').hidden=false;$('st-err').textContent='Не узнал формат: в файле нет столбцов даты и суммы. Выгрузите операции из приложения банка в CSV или впишите деньги вручную.';})],
- ['stmtResult','Разбор выписки: советы к цели, паттерны, платежи',[19,20],[31,32,33,35,36],()=>fx({purchases:[demoP()],stmt:analyze(demoOps().concat(demoOps().slice(0,6))),tipsOn:{},recOk:{}},'stmtResult')],
+ ['stmtResult','Разбор выписки: «ага» — недостающее нашлось, шаги подобраны',[19,20],[31,32,33,35,36],()=>{ fx({purchases:[demoP()],recOk:{}},'consent'); const A=analyze(demoOps().concat(demoOps().slice(0,6))); S.stmt=A; S.tipsOn=autoPick(A); S.autoPicked=true; save(); go('stmtResult'); }],
+ ['stmtManualPick','Разбор выписки: шаги сняты, выбор вручную',[20],[],()=>fx({purchases:[demoP()],stmt:analyze(demoOps()),tipsOn:{},recOk:{}},'stmtResult')],
  ['stmtPlan','Советы выбраны — покупка сходится',[20],[],()=>{ const A=analyze(demoOps()); const on={}; tipsFor(A).forEach(t=>on[t.id]=true); fx({purchases:[demoP()],stmt:A,tipsOn:on,recOk:{}},'stmtResult'); }],
  ['stmtShort','Выписка за 3 недели — мало данных',[19],[30],()=>fx({purchases:[demoP()],stmt:analyze(demoOps(20)),tipsOn:{},recOk:{}},'stmtResult')],
  ['stmtNoGoal','Разбор без покупки — советы в месяц',[20],[],()=>fx({stmt:analyze(demoOps()),tipsOn:{},recOk:{}},'stmtResult')],
