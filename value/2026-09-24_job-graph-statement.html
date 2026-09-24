@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Граф работ и «ага»: выписка</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#F0F2F5; --card-bg:#FFFFFF; --text-main:#111827; --text-muted:#5B6270;
+      --border:#E5E7EB; --accent:#1E88E5; --shadow:0 4px 20px rgba(0,0,0,0.08); --node-stroke:#1A1A1A;
+      --ok:#1B5E20; --ok-bg:#E8F5E9; --bad:#B71C1C; --bad-bg:#FDECEC; --hyp:#6A4C00; --hyp-bg:#FFF4D6;
+    }
+    [data-theme="dark"] {
+      --bg:#0F1117; --card-bg:#1A1D27; --text-main:#F9FAFB; --text-muted:#A7AEBB;
+      --border:#2A2D3A; --accent:#3B82F6; --shadow:0 4px 24px rgba(0,0,0,0.4); --node-stroke:#3A3D50;
+      --ok:#8FD99A; --ok-bg:#15301B; --bad:#FF9C9C; --bad-bg:#3A1C1C; --hyp:#F0CF7A; --hyp-bg:#3A2F12;
+    }
+    body { background:var(--bg); color:var(--text-main); display:flex; justify-content:center; padding:40px; font-family:'Inter',sans-serif; margin:0; line-height:1.55; transition:background 0.3s ease; }
+    .page { background:var(--card-bg); border-radius:24px; padding:48px; box-shadow:var(--shadow); width:100%; max-width:1100px; border:1px solid var(--border); box-sizing:border-box; }
+    header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:28px; flex-wrap:wrap; }
+    .title-group h1 { margin:0; font-size:32px; font-weight:900; letter-spacing:-0.02em; display:flex; align-items:center; gap:16px; }
+    .title-group h1::before { content:''; display:block; width:8px; height:36px; background:var(--accent); border-radius:4px; flex:none; }
+    .title-group p { margin:8px 0 0 24px; color:var(--text-muted); font-size:15px; font-weight:500; max-width:720px; }
+    .controls { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+    button { font:600 13px 'Inter',sans-serif; padding:10px 18px; border-radius:12px; cursor:pointer; min-height:44px; }
+    .btn-secondary { background:var(--card-bg); border:1px solid var(--border); color:var(--text-main); }
+    .btn-secondary:hover { border-color:var(--accent); }
+    select.style-select { font:600 13px 'Inter',sans-serif; padding:9px 12px; min-height:44px; border-radius:12px; cursor:pointer; border:1px solid var(--border); background:var(--card-bg); color:var(--text-main); }
+    h2 { font-size:22px; font-weight:800; margin:40px 0 8px; letter-spacing:-0.01em; }
+    p, li { font-size:15.5px; }
+    .muted { color:var(--text-muted); }
+    .diagram { border:1px solid var(--border); border-radius:16px; padding:16px; margin:12px 0 8px; overflow-x:auto; }
+    .mermaid svg { max-width:100%; height:auto; overflow:visible; }
+    .node rect,.node circle,.node polygon,.node path { stroke-width:2.5px !important; filter:drop-shadow(4px 4px 0px rgba(0,0,0,0.1)); }
+    .node text, .nodeLabel { font-weight:500 !important; font-size:14px !important; }
+    .edgePath .path { stroke-width:2.5px !important; }
+    .legend { display:flex; flex-wrap:wrap; gap:8px 18px; font-size:13.5px; color:var(--text-muted); margin:4px 0 0; }
+    .legend span::before { content:''; display:inline-block; width:12px; height:12px; border-radius:3px; margin-right:6px; vertical-align:-1px; border:2px solid var(--node-stroke); }
+    .l-core::before { background:#E3F2FD; } .l-new::before { background:#1E88E5 !important; } .l-small::before { background:#fff; border-style:dashed !important; } .l-micro::before { background:#FFFDE7; }
+    .l-aha::before { background:#E8F5E9; border-color:#2E7D32 !important; } .l-brk::before { background:#FDECEC; border-color:#C62828 !important; border-style:dashed !important; }
+    .aha { border-radius:16px; padding:18px 20px; background:var(--ok-bg); color:var(--ok); margin:12px 0; font-size:18px; font-weight:700; line-height:1.45; }
+    .card { border-radius:16px; padding:16px 20px; border:1px solid var(--border); margin:12px 0; }
+    .tag { display:inline-block; font-size:12px; font-weight:700; padding:2px 8px; border-radius:6px; white-space:nowrap; }
+    .t-data { background:var(--ok-bg); color:var(--ok); } .t-der { background:#E3F2FD; color:#0D47A1; } .t-hyp { background:var(--hyp-bg); color:var(--hyp); }
+    [data-theme="dark"] .t-der { background:#16273D; color:#9CC7FF; }
+    table { width:100%; border-collapse:collapse; font-size:14.5px; margin:8px 0; }
+    th, td { text-align:left; padding:10px 10px; border-bottom:1px solid var(--border); vertical-align:top; }
+    th { font-size:13px; color:var(--text-muted); font-weight:600; }
+    .tw { overflow-x:auto; }
+    code { font-family:'JetBrains Mono',monospace; font-size:13px; background:var(--bg); padding:1px 5px; border-radius:4px; }
+    footer { margin-top:40px; padding-top:16px; border-top:1px solid var(--border); color:var(--text-muted); font-size:13.5px; }
+    @media (max-width:640px) { body { padding:16px; } .page { padding:22px 16px; border-radius:18px; } .title-group h1 { font-size:24px; } .title-group p { margin-left:0; } .aha { font-size:16px; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation-duration:0.01ms !important; transition-duration:0.01ms !important; } }
+    @media print { .controls { display:none !important; } body { padding:0; background:#fff !important; } .page { box-shadow:none !important; border:none !important; max-width:100% !important; } }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <header>
+      <div class="title-group">
+        <h1>Граф работ и момент «ага»: выписка</h1>
+        <p>Finance Assistant · 24.09.2026. Чем получено: канон NMT (граф работ, критическая цепочка, «ага»), разбор 9 пар интервью, проверка нажатиями в прототипе. Каждое утверждение помечено: <span class="tag t-data">данные</span> <span class="tag t-der">выведено</span> <span class="tag t-hyp">гипотеза</span>.</p>
+      </div>
+      <div class="controls">
+        <select class="style-select" id="style-select" onchange="setDiagramStyle(this.value)" aria-label="Стиль схем">
+          <option value="default">Обычный</option>
+          <option value="minimal">Минимальный</option>
+          <option value="pastel">Пастель</option>
+          <option value="print">Для печати</option>
+        </select>
+        <button class="btn-secondary" onclick="toggleTheme()" id="theme-toggle">Тёмная тема</button>
+      </div>
+    </header>
+
+    <div class="aha" id="aha">«Ага»: недостающие 15 000 ₽ нашлись в моих же тратах — доставка по выходным и пятничное такси, — и котёл сходится к 15 ноября без отказа от чего-то важного.</div>
+    <p class="muted"><span class="tag t-hyp">гипотеза</span> Ни один участник интервью выписку не проверял. Проверка — на людях 25–27.09, задание З4 ниже.</p>
+
+    <h2>1. Граф работ: что человек делает и что делает продукт</h2>
+    <p class="muted">Срез вокруг основных задач продукта (Core Jobs), а не весь граф. Сверху — зачем, снизу — как. Основные задачи продукт выполняет целиком; соседние (Small Jobs) — того же уровня, но их делает кто-то другой.</p>
+    <p class="muted" style="font-size:13.5px;margin:0">На телефоне схему можно листать вбок.</p>
+    <div class="diagram"><div class="mermaid" id="g1" data-wide="1">
+flowchart TD
+  classDef yellow fill:#FFFDE7,stroke:#1A1A1A,stroke-width:2px;
+  classDef blue   fill:#E3F2FD,stroke:#1A1A1A,stroke-width:2px;
+  classDef green  fill:#E8F5E9,stroke:#1A1A1A,stroke-width:2px;
+  classDef purple fill:#F3E5F5,stroke:#1A1A1A,stroke-width:2px;
+  classDef teal   fill:#E0F7FA,stroke:#1A1A1A,stroke-width:2px;
+  classDef orange fill:#FFF3E0,stroke:#1A1A1A,stroke-width:2px;
+  classDef note   fill:#FFF9C4,stroke:#FBC02D,stroke-dasharray:4;
+  classDef newcore fill:#1E88E5,stroke:#0D47A1,stroke-width:3px,color:#FFFFFF;
+  classDef small fill:#FFFFFF,stroke:#6B7280,stroke-width:2px,stroke-dasharray:6 4;
+  SB["Жить вдвоём спокойно<br/>без ссор из-за денег"]:::purple
+  BJ["Купить крупное к сроку вместе,<br/>не открывая свои деньги"]:::orange
+  SB --> BJ
+  BJ --> K1["К1 · Сойдётся ли<br/>к сроку"]:::blue
+  BJ --> K2["К2 · Договориться<br/>о долях"]:::blue
+  BJ --> K3["К3 · Найти недостающее<br/>в своих тратах · новая"]:::newcore
+  BJ --> K4["К4 · Сколько на себя<br/>до зарплаты"]:::blue
+  BJ -.-> S1["С1 · Траты по категориям<br/>банк · 5 из 9 пар"]:::small
+  BJ -.-> S2["С2 · Собрать в копилке<br/>банк · следующая"]:::small
+  BJ -.-> S3["С3 · Учёт до рубля<br/>Excel, 1С · 2 из 3"]:::small
+  BJ -.-> S4["С4 · Обсудить голосом<br/>пара · 9 из 9"]:::small
+  K3 --> M1["Выгрузить CSV<br/>из банка"]:::yellow
+  M1 --> M2["Загрузить,<br/>дать согласие"]:::yellow
+  M2 --> M3["Проверить<br/>регулярные платежи"]:::yellow
+  M3 --> M4["Увидеть,<br/>где взять"]:::green
+  M4 --> M5["Выбрать шаги"]:::yellow
+  M5 --> M6["Отложить<br/>в день зарплаты"]:::yellow
+  M6 --> M7["Отметить<br/>«отложил»"]:::yellow
+    </div></div>
+    <div class="legend"><span class="l-core">основная задача продукта</span><span class="l-new">новая основная — К3</span><span class="l-small">соседняя, делает не наш продукт</span><span class="l-micro">мелкая задача под К3</span></div>
+
+    <h2>2. Критическая цепочка К3 во времени: где «ага» и где человек уходит</h2>
+    <p class="muted">Та же К3, развёрнутая по времени: только шаги, без которых результат не наступит. Сверху вниз — порядок. Разрыв — место, где человек чаще всего бросает (critical-chain.md §7).</p>
+    <div class="diagram"><div class="mermaid" id="g2">
+flowchart TD
+  classDef yellow fill:#FFFDE7,stroke:#1A1A1A,stroke-width:2px;
+  classDef blue   fill:#E3F2FD,stroke:#1A1A1A,stroke-width:2px;
+  classDef green  fill:#E8F5E9,stroke:#1A1A1A,stroke-width:2px;
+  classDef purple fill:#F3E5F5,stroke:#1A1A1A,stroke-width:2px;
+  classDef teal   fill:#E0F7FA,stroke:#1A1A1A,stroke-width:2px;
+  classDef orange fill:#FFF3E0,stroke:#1A1A1A,stroke-width:2px;
+  classDef note   fill:#FFF9C4,stroke:#FBC02D,stroke-dasharray:4;
+  classDef aha fill:#E8F5E9,stroke:#2E7D32,stroke-width:4px;
+  classDef brk fill:#FDECEC,stroke:#C62828,stroke-width:2px,stroke-dasharray:6 4;
+  C1["Узнал: не хватает<br/>15 000 ₽"]:::blue
+  C2["Нашёл выгрузку<br/>в приложении банка"]:::brk
+  C3["Загрузил файл,<br/>дал согласие"]:::yellow
+  C4["Подождал разбор"]:::yellow
+  C5["★ Недостающее нашлось —<br/>котёл сходится к 15.11"]:::aha
+  C6["Снял неподходящие шаги"]:::yellow
+  C7["В день зарплаты<br/>отложил"]:::brk
+  C8["Отметил «отложил»"]:::yellow
+  C9["Раз в месяц<br/>обновил выписку"]:::brk
+  C1 --> C2
+  C2 -->|"разрыв: чужое приложение"| C3
+  C3 --> C4
+  C4 --> C5
+  C5 --> C6
+  C6 --> C7
+  C7 -->|"разрыв: недели до срока"| C8
+  C8 --> C9
+  C9 -.->|"цикл: без напоминания гаснет"| C7
+    </div></div>
+    <div class="legend"><span class="l-aha">момент «ага»</span><span class="l-brk">разрыв — главное место ухода</span></div>
+
+    <h2>3. Почему «ага» именно здесь</h2>
+    <div class="card">
+      <p><b>Против какого ожидания.</b> 5 из 9 пар уже видят свои траты по категориям в приложении банка <span class="tag t-data">данные</span>. Значит, категории их не удивят — это их нынешнее ожидание <span class="tag t-der">выведено</span>. Удивить может только связь трат с их целью: сколько рублей и откуда к какому сроку <span class="tag t-hyp">гипотеза</span>.</p>
+      <p><b>Какие критерии успеха бьёт.</b></p>
+      <ul>
+        <li>Предсказуемость: «сколько мне нужно, сколько я могу выделить» — 2 пары из 3 в сегменте A (P04, P09) <span class="tag t-data">данные</span>.</li>
+        <li>Без ручного ввода: совместный учёт бросили 3 из 9 — «один день спросишь, второй день забудешь… всё сошло на нет» <span class="tag t-data">данные</span>. Выписка убирает ручной ввод прошлых трат <span class="tag t-der">выведено</span>.</li>
+        <li>Приватность: партнёр не видит ничего из выписки — проверено в прототипе <span class="tag t-data">данные</span>.</li>
+      </ul>
+    </div>
+
+    <h2>4. Как «ага» сдвинули левее</h2>
+    <div class="card">
+      <p><b>Было:</b> «ага» наступал только после того, как человек сам отметит советы, то есть через несколько нажатий после разбора.</p>
+      <p><b>Стало:</b> при первом показе разбора программа сама подбирает минимальный набор шагов, которых хватает на недостачу, и сразу пишет «сходится». Лишнее человек снимает. Из экрана «не хватает» до выписки — одно нажатие.</p>
+      <p><b>Проверено нажатиями в прототипе 24.09</b>, сценарии A1–A5, 5 из 5: «сходится» видно без единого нажатия на советы, набор минимальный (без последнего шага не хватило бы), «ага» помещается в первый экран телефона без прокрутки.</p>
+    </div>
+
+    <h2>5. Что осталось слабым</h2>
+    <div class="card">
+      <ul>
+        <li><b>Разрыв «найти выгрузку в приложении банка»</b> — передача хода в чужое приложение, у каждого банка шаги свои <span class="tag t-hyp">гипотеза</span>, главное место ухода. Кандидат: подсказка по шагам для Сбера, Т-Банка, Альфы и ВТБ — после того, как шаги проверены на живых приложениях.</li>
+        <li><b>PDF-выписки</b> (Сбер, ВТБ) — после открытия, разбор на сервере. Сейчас — CSV или демо.</li>
+        <li><b>Цикл «обновлять раз в месяц»</b> гаснет без напоминания — напоминание в день зарплаты, когда человек и так откладывает.</li>
+        <li><b>Разрыв во времени</b> до срока покупки — отметка «отложил» и живая точка у статуса, уже есть в прототипе.</li>
+      </ul>
+    </div>
+
+    <h2>6. Как проверить на людях 25–27.09</h2>
+    <div class="card">
+      <p><b>Задание З4:</b> «У вас не хватает на покупку. Найдите, где взять недостающее». Демо-выписка в прототипе.</p>
+      <p><b>Засчитать</b>, если за 60 секунд после открытия разбора человек своими словами говорит, откуда возьмутся деньги и сходится ли покупка.</p>
+      <p><b>Отклонить гипотезу «ага»</b>, если 2 из 4 и больше пересказывают только категории трат или не верят сумме.</p>
+    </div>
+
+    <h2>7. Откуда факты</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Утверждение</th><th>Кто</th><th>Статус</th></tr></thead>
+      <tbody>
+        <tr><td>Видят свои траты по категориям в приложении банка, только свои карты</td><td>5 из 9: P02, P03, P04, P05, P08</td><td><span class="tag t-data">данные</span></td></tr>
+        <tr><td>Совместный учёт с общим инструментом брошен</td><td>3 из 9: P01, P02, P07</td><td><span class="tag t-data">данные</span></td></tr>
+        <tr><td>Нужна предсказуемость: «сколько я могу выделить»</td><td>сегмент A, 2 из 3: P04, P09</td><td><span class="tag t-data">данные</span></td></tr>
+        <tr><td>Свой учёт до рубля у одного партнёра</td><td>сегмент A, 2 из 3: P04-B, P08-B</td><td><span class="tag t-data">данные</span></td></tr>
+        <tr><td>Крупную трату обсуждают голосом</td><td>9 из 9</td><td><span class="tag t-data">данные</span></td></tr>
+        <tr><td>Категории не удивят — это ожидание, от которого считается «ага»</td><td>из строки 1</td><td><span class="tag t-der">выведено</span></td></tr>
+        <tr><td>«Ага» — связь трат с целью в рублях к сроку</td><td>канон: value-creation.md §12</td><td><span class="tag t-hyp">гипотеза</span></td></tr>
+        <tr><td>Главное место ухода — поиск выгрузки в приложении банка</td><td>канон: critical-chain.md §7.1, передача хода</td><td><span class="tag t-hyp">гипотеза</span></td></tr>
+      </tbody>
+    </table></div>
+    <p class="muted">Источник данных: <code>interviews/2026-09-21_P01-P09_analyze-interviews.html</code>. Прототип: <code>prototype/2026-09-24_mvp-prototype.html</code>, состояния <code>?s=stmtResult</code> и <code>?s=stmtManualPick</code>.</p>
+
+    <footer>Канон: Next-Move-Theory-Canon/Advanced-Jobs-To-Be-Done — job-graph.md §2, §12; critical-chain.md §1–2, §7; value-creation.md §12. Методология — Next Move Theory, Иван Замесин, CC BY-NC-SA 4.0.</footer>
+  </div>
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    const els = [...document.querySelectorAll('.mermaid')];
+    els.forEach(el => el.dataset.source = el.textContent.trim());
+    const isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    if (isDark) { document.documentElement.setAttribute('data-theme', 'dark'); document.getElementById('theme-toggle').textContent = 'Светлая тема'; }
+    const THEMES = {
+      default: { theme:'base',    vars:{ primaryColor:'#FFFDE7', primaryBorderColor:'#1A1A1A', primaryTextColor:'#1A1A1A', lineColor:'#424242', clusterBkg:'#F8F9FA', clusterBorder:'#1A1A1A' }, classDefs:{ yellow:'fill:#FFFDE7,stroke:#1A1A1A,stroke-width:2px', blue:'fill:#E3F2FD,stroke:#1A1A1A,stroke-width:2px', green:'fill:#E8F5E9,stroke:#1A1A1A,stroke-width:2px', purple:'fill:#F3E5F5,stroke:#1A1A1A,stroke-width:2px', teal:'fill:#E0F7FA,stroke:#1A1A1A,stroke-width:2px', orange:'fill:#FFF3E0,stroke:#1A1A1A,stroke-width:2px', note:'fill:#FFF9C4,stroke:#FBC02D,stroke-dasharray:4' } },
+      minimal:  { theme:'neutral', vars:{ primaryColor:'#F8FAFC', primaryBorderColor:'#CBD5E1', primaryTextColor:'#111827', lineColor:'#94A3B8', clusterBkg:'#F8FAFC', clusterBorder:'#E2E8F0' }, classDefs:{ yellow:'fill:#FFFFFF,stroke:#D1D5DB,stroke-width:1.5px', blue:'fill:#F8FAFC,stroke:#CBD5E1,stroke-width:1.5px', green:'fill:#F0FDF4,stroke:#86EFAC,stroke-width:1.5px', purple:'fill:#FAF5FF,stroke:#D8B4FE,stroke-width:1.5px', teal:'fill:#F0FDFA,stroke:#99F6E4,stroke-width:1.5px', orange:'fill:#FFF7ED,stroke:#FED7AA,stroke-width:1.5px', note:'fill:#FEFCE8,stroke:#FDE047,stroke-dasharray:4' } },
+      pastel:   { theme:'base',    vars:{ primaryColor:'#FEF3C7', primaryBorderColor:'#F59E0B', primaryTextColor:'#1A1A1A', lineColor:'#6B7280', clusterBkg:'#FFF7ED', clusterBorder:'#FED7AA' }, classDefs:{ yellow:'fill:#FEF3C7,stroke:#F59E0B,stroke-width:2px', blue:'fill:#DBEAFE,stroke:#60A5FA,stroke-width:2px', green:'fill:#D1FAE5,stroke:#34D399,stroke-width:2px', purple:'fill:#EDE9FE,stroke:#A78BFA,stroke-width:2px', teal:'fill:#CFFAFE,stroke:#22D3EE,stroke-width:2px', orange:'fill:#FFE4E6,stroke:#FB7185,stroke-width:2px', note:'fill:#FEF9C3,stroke:#FBBF24,stroke-dasharray:4' } },
+      print:    { theme:'base',    vars:{ primaryColor:'#FFFFFF', primaryBorderColor:'#000000', primaryTextColor:'#000000', lineColor:'#333333', clusterBkg:'#F5F5F5', clusterBorder:'#000000' }, classDefs:{ yellow:'fill:#FFFFFF,stroke:#000000,stroke-width:2px', blue:'fill:#F5F5F5,stroke:#000000,stroke-width:2px', green:'fill:#EBEBEB,stroke:#000000,stroke-width:2px', purple:'fill:#E0E0E0,stroke:#000000,stroke-width:2px', teal:'fill:#D6D6D6,stroke:#000000,stroke-width:2px', orange:'fill:#CCCCCC,stroke:#000000,stroke-width:2px', note:'fill:#FFFFE0,stroke:#888,stroke-dasharray:4' } },
+    };
+    async function applyStyle(name) {
+      const t = THEMES[name] || THEMES.default;
+      mermaid.initialize({ startOnLoad:false, theme:t.theme, flowchart:{ htmlLabels:true, useMaxWidth:true, padding:12 }, themeVariables:{ fontFamily:'Inter, sans-serif', ...t.vars } });
+      for (const el of els) {
+        let src = el.dataset.source;
+        for (const [cn, def] of Object.entries(t.classDefs)) src = src.replace(new RegExp(`(classDef\\s+${cn}\\s+)[^;\\n]+`, 'g'), `$1${def}`);
+        el.textContent = src; el.removeAttribute('data-processed');
+        try { await mermaid.run({ nodes:[el] }); const svg=el.querySelector('svg'); if(el.dataset.wide&&svg&&svg.viewBox.baseVal.width>el.clientWidth){ svg.style.maxWidth='none'; svg.style.width=Math.round(svg.viewBox.baseVal.width*0.8)+'px'; } }
+        catch (err) { console.error('Mermaid render error:', err); el.innerHTML = `<pre style="color:#C62828;white-space:pre-wrap">Схема не отрисовалась: ${String(err.message||err).replace(/</g,'&lt;')}</pre>`; }
+      }
+      try { localStorage.setItem('vc-style', name); } catch(e) {}
+    }
+    const _saved = (() => { try { return localStorage.getItem('vc-style') || 'default'; } catch(e) { return 'default'; } })();
+    const _sel = document.getElementById('style-select'); if (_sel && THEMES[_saved]) _sel.value = _saved;
+    document.fonts.ready.then(() => applyStyle(THEMES[_saved] ? _saved : 'default'));
+    window.setDiagramStyle = applyStyle;
+    window.toggleTheme = () => {
+      const next = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', next);
+      document.getElementById('theme-toggle').textContent = next === 'dark' ? 'Светлая тема' : 'Тёмная тема';
+    };
+  </script>
+</body>
+</html>
