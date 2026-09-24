@@ -185,6 +185,12 @@ textarea{min-height:104px;resize:vertical}
 .live::before{content:"";width:8px;height:8px;border-radius:50%;background:currentColor;animation:pulse 1.6s ease-in-out infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.35;transform:scale(.7)}}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+.prod{display:flex;gap:var(--s3);align-items:flex-start;border-radius:var(--r-card);padding:var(--s3);margin:0 0 var(--s3);background:var(--card);box-shadow:var(--lift)}
+.prod .ph{flex:none;width:52px;height:52px;border-radius:var(--r-md);background:var(--shared-soft);color:var(--shared);display:grid;place-items:center;font:600 18px var(--font-display)}
+.prod .t{font-weight:600;line-height:1.3}
+.prod .m{font-size:13px;color:var(--ink3);margin-top:2px}
+.prod .pr{font-family:var(--font-display);font-size:20px;font-weight:600;margin-top:4px;font-variant-numeric:tabular-nums}
+.prod a{display:inline-flex;align-items:center;min-height:var(--hit);font-size:14px}
 .obs{font-size:13px}
 .obs pre{white-space:pre-wrap;background:var(--soft);padding:10px;border-radius:8px;max-height:180px;overflow:auto;font-size:12px}
 .obs .kv{display:grid;grid-template-columns:1fr auto;gap:4px 10px;margin:8px 0}
@@ -221,14 +227,15 @@ textarea{min-height:104px;resize:vertical}
   <div class="body">
     <div class="banner" id="ph-offline" hidden>Нет сети. Фраза сохранена на телефоне — посчитаю, когда появится связь.</div>
     <div class="banner" id="ph-limit" hidden>Слишком много запросов подряд. Фраза сохранена — попробуйте через минуту.</div>
-    <label for="phrase" class="small muted">Обычными словами, как написали бы партнёру</label>
-    <textarea id="phrase" placeholder="Например: котёл 40 тысяч к 15 ноября, я могу 25"></textarea>
+    <label for="phrase" class="small muted">Обычными словами, как написали бы партнёру, — или вставьте ссылку на товар</label>
+    <textarea id="phrase" inputmode="text" placeholder="Например: котёл 40 тысяч к 15 ноября, я могу 25"></textarea>
     <div class="chips" aria-label="Примеры">
       <button class="chip" data-ex="котёл 40 тысяч к 15 ноября, я могу 25">котёл 40 тысяч к 15 ноября, я могу 25</button>
       <button class="chip" data-ex="кровать 60к до нового года, плачу сам">кровать 60к до нового года, плачу сам</button>
       <button class="chip" data-ex="отпуск 150 000 через 3 месяца, с меня 70">отпуск 150 000 через 3 месяца, с меня 70</button>
+      <button class="chip" data-ex="https://www.ozon.ru/product/kotel-gazovyy-navien-deluxe-s-24k-1234567890/?utm_source=app&amp;sh=Ab12 к 15 ноября, я могу 25">ссылка на Ozon + к 15 ноября, я могу 25</button>
     </div>
-    <div class="busy" id="busy" hidden><i></i>GigaChat разбирает фразу…</div>
+    <div class="busy" id="busy" hidden><i></i><span id="busy-t">GigaChat разбирает фразу…</span></div>
     <p class="cap" style="margin-top:var(--s3)">Не пишите номера карт, телефоны и имена — они не нужны для расчёта.</p>
   </div>
   <div class="foot"><button class="btn btn-main" data-act="parse">Посчитать</button></div>
@@ -240,6 +247,8 @@ textarea{min-height:104px;resize:vertical}
   <div class="body">
     <div class="parsed"><span id="c-got"></span></div>
     <div class="note" id="c-pii" hidden>Номер карты или телефона я скрыл — в расчёт он не нужен.</div>
+    <div id="c-prod"></div>
+    <div class="note" id="c-lnote" hidden></div>
     <h1 id="c-q">К какой дате нужно?</h1>
     <div id="c-input"></div>
     <div class="chips" id="c-chips"></div>
@@ -269,6 +278,7 @@ textarea{min-height:104px;resize:vertical}
   <div class="body">
     <div class="parsed"><span id="a-parsed"></span><button data-act="edit">Поправить</button></div>
     <div class="status" id="a-status"><div class="k" id="a-k"></div><div class="hero num" id="a-big"></div><div class="sub" id="a-sub"></div></div>
+    <div id="a-prod"></div>
     <div class="blk-h"><span class="cap">Расчёт</span><span class="vis pr">видно только вам</span></div>
     <div class="rows num" id="a-rows"></div>
     <div class="coach" id="a-coach" hidden><h3>Что можно сделать</h3><ul id="a-tips"></ul></div>
@@ -330,6 +340,7 @@ textarea{min-height:104px;resize:vertical}
       <div class="prog" role="progressbar" aria-label="Собрано" id="pu-bar"><i></i></div>
       <div id="pu-who"></div>
     </div>
+    <div id="pu-prod"></div>
     <div id="pu-over"></div>
     <div id="pu-bank"></div>
     <div class="card priv">
@@ -407,6 +418,7 @@ textarea{min-height:104px;resize:vertical}
   <div class="bar"><button class="back" data-act="backToOwner" aria-label="Назад">←</button><h2>Вас позвали в покупку</h2><button class="fbk" data-act="fb">Что не так?</button></div>
   <div class="body">
     <h1 id="pi-title">Покупка</h1>
+    <div id="pi-prod"></div>
     <div class="cols">
       <div class="y"><b>Вы увидите</b><ul><li>что покупаем и к какому сроку</li><li>общую сумму и сколько собрано</li><li>свою часть</li></ul></div>
       <div class="n"><b>Никто не увидит</b><ul><li>остатков на картах</li><li>трат</li><li>доходов</li></ul></div>
@@ -647,6 +659,34 @@ function parsePhrase(text){
 }
 window.__parsePhrase=parsePhrase;
 
+/* ---------- ссылка на товар (требование 3а). В продукте страницу открывает СЕРВЕР:
+   разметка schema.org Product / Open Graph → название, цена, валюта; защита от SSRF; метки отслеживания срезаются.
+   В прототипе — имитация по демо-таблице, как и разбор фразы. ---------- */
+const URL_RE=/(https?:\/\/[^\s]+|(?:www\.)?(?:ozon\.ru|wildberries\.ru|wb\.ru|market\.yandex\.ru|aliexpress\.ru)\/[^\s]*)/i;
+const STORES={'ozon.ru':'Ozon','wildberries.ru':'Wildberries','wb.ru':'Wildberries','market.yandex.ru':'Яндекс Маркет','aliexpress.ru':'AliExpress','dns-shop.ru':'DNS','habr.com':'Хабр'};
+function cleanUrl(raw){ let u; try{u=new URL(/^https?:/i.test(raw)?raw:'https://'+raw);}catch(e){return null;}
+  [...u.searchParams.keys()].forEach(k=>{ if(/^(utm_|sh$|from|ref|asb|clid|yclid|gclid|_bctx|avtc|avte)/i.test(k)) u.searchParams.delete(k); });
+  u.hash=''; const host=u.hostname.replace(/^www\./,''); return {url:u.toString(),host,path:u.pathname}; }
+function slugTitle(path){ const seg=path.split('/').filter(Boolean).find(x=>/[a-z]-[a-z]/i.test(x)); if(!seg) return null;
+  const MAP={kotel:'котёл',gazovyy:'газовый',krovat:'кровать',robot:'робот',pylesos:'пылесос',divan:'диван',holodilnik:'холодильник',stiralnaya:'стиральная',mashina:'машина',noutbuk:'ноутбук'};
+  const w=seg.replace(/-?\d{5,}$/,'').split('-').filter(Boolean).map(x=>MAP[x]||x); const t=w.join(' '); return t.charAt(0).toUpperCase()+t.slice(1); }
+function mockFetch(c){ // что вернул бы сервер
+  if(c.host==='ozon.ru'&&/^\/t\//.test(c.path)) return mockFetch(cleanUrl('https://www.ozon.ru/product/kotel-gazovyy-navien-deluxe-s-24k-1234567890/'));
+  if(c.host==='ozon.ru') return {ok:true,store:'Ozon',title:'Котёл газовый Navien Deluxe S 24K',price:41990,cardPrice:39890,cardName:'по Ozon Карте',currency:'RUB',url:c.url};
+  if(/wildberries\.ru|wb\.ru/.test(c.host)) return {ok:true,store:'Wildberries',title:'Кровать двуспальная 160×200 с подъёмным механизмом',price:24500,currency:'RUB',url:c.url};
+  if(c.host==='market.yandex.ru') return {ok:true,store:'Яндекс Маркет',title:'Робот-пылесос Dreame L10s Ultra',price:54990,currency:'RUB',url:c.url};
+  if(c.host==='aliexpress.ru') return {ok:true,store:'AliExpress',title:'Кофемашина рожковая',price:189,currency:'USD',url:c.url};
+  if(c.host==='habr.com') return {ok:true,store:'Хабр',title:'Статья без цены',price:null,notProduct:true,currency:null,url:c.url};
+  return {ok:false,store:STORES[c.host]||c.host,title:slugTitle(c.path),url:c.url}; }
+function prodCard(l,opts){ if(!l) return ''; opts=opts||{};
+  const price=l.chosenPrice||l.price; const init=(l.store||'?').charAt(0).toUpperCase();
+  return `<div class="prod"><div class="ph" aria-hidden="true">${esc(init)}</div><div style="min-width:0;flex:1">
+    <div class="blk-h" style="margin:0"><span class="cap">${esc(l.store)} · по ссылке</span><span class="vis sh">видит партнёр</span></div>
+    <div class="t">${esc(l.title||'Товар по ссылке')}</div>
+    ${l.cardPrice&&!l.chosenPrice?`<div class="pr">${rub(l.price)} <span class="m" style="font-family:var(--font)">или ${rub(l.cardPrice)} ${esc(l.cardName)}</span></div><div class="m">цены на ${fmtDate(today())} — могут измениться</div>`:''}
+    ${(!l.cardPrice||l.chosenPrice)&&price&&l.currency==='RUB'?`<div class="pr">${rub(price)}</div><div class="m">цена на ${fmtDate(today())}${l.chosenNote?' · '+esc(l.chosenNote):''} — может измениться</div>`:''}
+    ${opts.open?`<a href="#" data-act="openLink">Открыть товар в магазине</a>`:''}</div></div>`; }
+
 /* ---------- расчёт: код, не модель (требования 4, 9, 10, 11) ---------- */
 function calc(p){
   const sum=+p.sum, mine=+p.share, partner=p.partnerShare?+p.partnerShare:0, date=fromIso(p.date);
@@ -694,7 +734,7 @@ const RENDER={
   income(){ $('f-inc').classList.remove('miss'); $('f-inc').querySelector('.hint').hidden=true; if(S.inc!=null){$('i-inc').value=S.inc;$('i-must').value=S.must;} },
   today: renderToday,
   data: renderData,
-  pInvite(){ const p=P(); $('pi-title').textContent=p.title+' — '+rub(p.sum)+' к '+fmtDate(fromIso(p.date)); $('pi-hint').hidden=true; },
+  pInvite(){ const p=P(); $('pi-title').textContent=p.title+' — '+rub(p.sum)+' к '+fmtDate(fromIso(p.date)); $('pi-prod').innerHTML=p.link?prodCard(p.link,{open:true}):''; $('pi-hint').hidden=true; },
   pHome: renderPartner,
 };
 
@@ -715,12 +755,14 @@ function renderClarify(){
   const got=[]; if(d.title&&d.title!=='Покупка')got.push(d.title); if(d.sum&&k!=='currency')got.push(rub(d.sum)); if(d.date&&k!=='datePast')got.push('к '+fmtDate(d.date)); if(d.share&&k!=='share')got.push('вы — '+rub(d.share));
   $('c-got').textContent='Понял: '+(got.join(', ')||'пока немного');
   $('c-pii').hidden=!S.piiMasked; $('c-hint').hidden=true;
+  $('c-prod').innerHTML=S.link&&S.link.ok!==false?prodCard(S.link):''; $('c-lnote').hidden=!S.linkNote; $('c-lnote').textContent=S.linkNote||'';
   const Q={
     date:['К какой дате нужно?','<input type="date" id="c-val">',[['через месяц',30],['через 3 месяца',91],['к новому году','ny']]],
     datePast:['Эта дата уже прошла. На какую переносим?','<input type="date" id="c-val">',[['через месяц',30],['через 3 месяца',91]]],
     sum:['Сколько примерно стоит?','<input type="number" inputmode="numeric" id="c-val" placeholder="например, 40000">',[]],
     currency:['Считаю только в рублях. Сколько это в рублях?','<input type="number" inputmode="numeric" id="c-val" placeholder="сумма в рублях">',[]],
     share:['Сколько можете внести сами?','<input type="number" inputmode="numeric" id="c-val" placeholder="например, 25000">',[['Плачу всё сам(а)','alone']]],
+    price:['На странице две цены. Какую считаем?','<input type="hidden" id="c-val">',S.link&&S.link.cardPrice?[[`${rub(S.link.price)} — обычная`,'p:'+S.link.price],[`${rub(S.link.cardPrice)} — ${S.link.cardName}`,'c:'+S.link.cardPrice]]:[]],
   }[k];
   $('c-q').textContent=Q[0]; $('c-input').innerHTML=Q[1];
   $('c-chips').innerHTML=Q[2].map(([l,v])=>`<button class="chip" data-cv="${v}">${l}</button>`).join('');
@@ -729,16 +771,20 @@ function clarifyChip(v){
   const i=$('c-val');
   if(v==='alone'){i.value=S.draft.sum||'';S.draft.alone=true;return;}
   if(v==='ny'){i.value=iso(new Date(today().getFullYear(),11,31));return;}
+  if(/^[pc]:/.test(v)){ i.value=v.slice(2); document.querySelectorAll('#c-chips .chip').forEach(c=>c.setAttribute('aria-pressed',c.dataset.cv===v)); S.link.chosenNote=v[0]==='c'?S.link.cardName:''; return; }
   i.value=iso(addDays(today(),+v));
 }
 function clarifyOk(){
   const k=S.clarify, i=$('c-val'), v=i.value, h=$('c-hint');
   if(k==='date'||k==='datePast'){ if(!v||fromIso(v)<=today()){h.textContent=v?'Эта дата уже прошла или сегодня — выберите позже':'Выберите дату';h.hidden=false;return;} S.draft.date=fromIso(v); }
+  else if(k==='price'){ if(!(+v>0)){h.textContent='Выберите цену';h.hidden=false;return;} S.draft.sum=+v; S.link.chosenPrice=+v; S.priceChosen=true; if(S.draft.alone) S.draft.share=+v; }
   else { const n=+v; if(!(n>0)){h.textContent='Впишите сумму числом';h.hidden=false;return;} if(k==='share'){ if(n>S.draft.sum){h.textContent='Ваша часть больше всей суммы — поправьте';h.hidden=false;return;} S.draft.share=n; } else S.draft.sum=n; }
+  if(S.link&&S.draft.share&&S.draft.sum&&S.draft.share<1000&&S.draft.sum>=1000) S.draft.share*=1000;
   log('clarify_answered',{kind:k}); nextStep();
 }
 function missing(d){
   if(S.foreign&&!S.foreignFixed) return ['currency'];
+  if(S.link&&S.link.cardPrice&&!S.priceChosen) return ['price'];
   const m=[]; if(!d.sum)m.push('sum'); if(!d.date)m.push('date'); else if(d.date<=today())m.push('datePast'); if(!d.share)m.push('share');
   return m;
 }
@@ -753,6 +799,7 @@ function commitDraft(){
   const d=S.draft; let p=P();
   if(!p||S.newMode){ p={id:'p'+Date.now(),created:iso(today()),saved:0,partnerSaved:0,partner:'none',partnerShare:null,sentAt:null,acceptedAt:null,status:'active'}; S.purchases.push(p); S.cur=p.id; S.newMode=false; }
   Object.assign(p,{title:d.title||'Покупка',sum:+d.sum,date:iso(d.date),share:+d.share,alone:!!(d.alone||+d.share===+d.sum)});
+  if(S.link&&!S.link.notProduct){ p.link=Object.assign({},S.link); } S.link=null; S.linkNote=null;
   go('answer');
 }
 
@@ -788,7 +835,8 @@ function renderAnswer(){
   $('a-rows').innerHTML=`<div class="row"><span>Стоит</span><span>${rub(c.sum)}</span></div><div class="row"><span>Вносите вы</span><span>${rub(c.mine)}</span></div>`+
     (c.partner?`<div class="row"><span>Вносит партнёр</span><span>${rub(c.partner)}</span></div>`:'')+
     `<div class="row"><span>Откладывать вам в день</span><span>≈ ${rub(c.perDay)}</span></div><div class="row"><span>или в месяц</span><span>≈ ${rub(c.perDay*30)}</span></div>`;
-  $('a-parsed').textContent=`Я понял так: ${p.title}, ${rub(c.sum)}, к ${fmtDate(c.date)}, вы — ${rub(c.mine)}`;
+  $('a-parsed').textContent=`Я понял так: ${p.title}, ${rub(c.sum)}${p.link?' (по ссылке '+p.link.store+')':''}, к ${fmtDate(c.date)}, вы — ${rub(c.mine)}`;
+  $('a-prod').innerHTML=p.link?prodCard(p.link):'';
   $('a-seg').hidden=!!S.seg;
   const tips=[];
   if(c.gap){
@@ -808,7 +856,7 @@ function bankCard(){return `<div class="card priv"><div class="blk-h"><h3 style=
 /* ---------- отправка ---------- */
 function shareText(remind){const p=P(), c=calc(p);
   if(remind) return `Напоминаю про ${p.title.toLowerCase()} к ${fmtDate(c.date)} — ${rub(c.sum)}. Посмотри, сколько сможешь внести, это займёт минуту:\nhttps://…/p/демо`;
-  return `${p.title}: ${rub(c.sum)} к ${fmtDate(c.date)}. Я вношу ${rub(c.mine)}`+(c.gap?`, не хватает ${rub(c.gap)}. Сколько сможешь?`:'. Всё сходится 👍')+`\nhttps://…/p/демо`;}
+  return `${p.title}: ${rub(c.sum)} к ${fmtDate(c.date)}. Я вношу ${rub(c.mine)}`+(c.gap?`, не хватает ${rub(c.gap)}. Сколько сможешь?`:'. Всё сходится 👍')+(p.link?`\nТовар: ${p.link.url}`:'')+`\nhttps://…/p/демо`;}
 function renderShare(){ $('m-text').textContent=shareText(S.remind); $('sh-h').textContent=S.remind?'Напомнить партнёру':'Отправить партнёру'; $('sh-copied').hidden=true; }
 function markSent(){const p=P(); if(p.partner==='none'||p.partner==='revoked'){p.partner='sent';p.sentAt=Date.now();} save();}
 
@@ -843,6 +891,7 @@ function renderPurchase(){
   if(p.partner==='none'&&!p.alone) partnerNote=`<div style="margin-top:var(--s2)"><button class="btn btn-line" data-act="toShare">Позвать партнёра</button></div>`;
   $('pu-who').innerHTML=`<div class="who"><div><b>Вы</b></div><div class="r"><span class="pill ${c.onPlan?'on':'off'}">${c.onPlan?'по плану':'отстаёте'}</span></div></div>`+
     (p.alone&&p.partner==='none'?'':`<div class="who"><div><b>Партнёр</b></div><div class="r">${partnerRight}</div></div>${partnerNote}`);
+  $('pu-prod').innerHTML=p.link?prodCard(p.link,{open:true}):'';
   $('pu-over').innerHTML=c.over?overCard(c.over,c.mine):'';
   $('pu-bank').innerHTML=!cancelled&&!c.gap&&!c.over?bankCard():'';
   $('pu-mine').innerHTML=`<div class="row"><span>Ваша часть</span><span>${rub(c.mine)}</span></div><div class="row"><span>Отложено</span><span>${rub(p.saved||0)}</span></div><div class="row"><span>Откладывать в день</span><span>≈ ${rub(c.perDay)}</span></div>`;
@@ -902,6 +951,7 @@ function results(){ return ['Проверка на прототипе · '+new D
 /* ---------- карта экранов: фикстуры для проверки покрытия и для разработчика ---------- */
 function demoP(o){return Object.assign({id:'p1',title:'Котёл',sum:40000,date:iso(addDays(today(),52)),share:25000,partnerShare:null,saved:0,partnerSaved:0,partner:'none',sentAt:null,acceptedAt:null,status:'active',alone:false,created:iso(addDays(today(),-10))},o||{});}
 function fx(o,screen,after){ const keep={log:S.log,t0:S.t0}; S=Object.assign(fresh(),{consent:true},o||{}); S.log=keep.log; S.t0=keep.t0; if(S.purchases.length&&!S.cur) S.cur=S.purchases[0].id; save(); closeSheets(); go(screen); if(after) after(); }
+const LNK=o=>Object.assign({ok:true,host:'ozon.ru',store:'Ozon',title:'Котёл газовый Navien Deluxe S 24K',price:41990,cardPrice:39890,cardName:'по Ozon Карте',currency:'RUB',url:'https://www.ozon.ru/product/kotel-gazovyy-navien-deluxe-s-24k-1234567890/'},o||{});
 const ACC=()=>demoP({partner:'accepted',partnerShare:15000,acceptedAt:Date.now()-3600e3,saved:5000,partnerSaved:3000});
 const STATES=[
  ['consent','Согласие и обещание о данных',[1,2],[],()=>{S=Object.assign(fresh(),{log:S.log,t0:S.t0});save();closeSheets();go('consent')}],
@@ -919,6 +969,13 @@ const STATES=[
  ['fieldsMany','Поля: понято не всё',[3],[4],()=>fx({draft:{title:'Котёл'},fieldsMode:'many'},'fields')],
  ['fieldsFail','Запасная форма: GigaChat не ответил',[3],[1],()=>fx({draft:{},fieldsMode:'fallback'},'fields')],
  ['fieldsOver','Своя часть больше суммы',[3],[6],()=>fx({draft:{title:'Котёл',sum:40000,date:addDays(today(),52),share:45000},fieldsMode:'edit'},'fields')],
+ ['linkBusy','Ссылка: «Смотрю страницу товара…»',['3а'],[],()=>fx({},'phrase',()=>{$('phrase').value='https://www.ozon.ru/product/kotel-gazovyy-navien-deluxe-s-24k-1234567890/ к 15 ноября, я могу 25';$('busy-t').textContent='Смотрю страницу товара…';$('busy').hidden=false;})],
+ ['linkTwo','Ссылка: на странице две цены',['3а'],[25],()=>fx({link:LNK(),draft:{title:'Котёл газовый Navien Deluxe S 24K',date:addDays(today(),52),share:25000},clarify:'price'},'clarify')],
+ ['linkFail','Ссылка: страница не открылась',['3а'],[23],()=>fx({link:{ok:false,store:'DNS',title:'Холодильник',url:'https://www.dns-shop.ru/product/holodilnik/'},linkNote:'Не получилось открыть страницу DNS. Напишите цену — остальное я запомнил.',draft:{title:'Холодильник',date:addDays(today(),60),share:30000},clarify:'sum'},'clarify')],
+ ['linkNoPrice','Ссылка: не товар, цены нет',['3а'],[24],()=>fx({link:{ok:true,notProduct:true,store:'Хабр',url:'https://habr.com/ru/articles/1/'},linkNote:'По ссылке нет товара с ценой. Напишите, сколько стоит покупка.',draft:{title:'Покупка',date:addDays(today(),60),share:30000},clarify:'sum'},'clarify')],
+ ['linkCurrency','Ссылка: цена в долларах',['3а'],[22],()=>fx({link:{ok:true,store:'AliExpress',title:'Кофемашина рожковая',price:189,currency:'USD',url:'https://aliexpress.ru/item/1.html'},foreign:true,linkNote:'На странице цена в другой валюте: 189 $.',draft:{title:'Кофемашина рожковая',date:addDays(today(),40),share:10000},clarify:'currency'},'clarify')],
+ ['answerLink','Ответ по ссылке: карточка товара',['3а',4],[28],()=>fx({purchases:[demoP({title:'Котёл газовый Navien Deluxe S 24K',sum:41990,link:LNK({chosenPrice:41990})})]},'answer')],
+ ['pInviteLink','Партнёр видит товар по ссылке',['3а',7],[],()=>fx({role:'partner',purchases:[demoP({title:'Котёл газовый Navien Deluxe S 24K',sum:41990,partner:'sent',sentAt:Date.now(),link:LNK({chosenPrice:41990})})]},'pInvite')],
  ['answerGap','Ответ: не хватает + совет + вопрос о сегменте',[4,5,13],[],()=>fx({purchases:[demoP()],tPhrase:Date.now()-20000},'answer')],
  ['answerOk','Ответ: сходится + как собрать в банке',[4,5,14],[],()=>fx({purchases:[demoP({share:40000,alone:true})],seg:'скинулись долями'},'answer')],
  ['share','Отправить партнёру',[6],[17],()=>fx({purchases:[demoP()]},'share')],
@@ -987,15 +1044,24 @@ document.addEventListener('click',e=>{
     case 'backFromPhrase': go(S.purchases.length?'purchases':'consent'); break;
     case 'parse': {
       const raw=$('phrase').value.trim(); if(!raw){$('phrase').focus();return;}
-      S.phrase=raw; const m=maskPII(raw); S.piiMasked=m.hit;
-      log('phrase_submitted',{text:m.t});
+      S.phrase=raw; const m=maskPII(raw); S.piiMasked=m.hit; S.link=null; S.linkNote=null; S.priceChosen=false;
+      const lm=m.t.match(URL_RE); const lc=lm?cleanUrl(lm[0].replace(/[),.]+$/,'')):null; const rest=lm?m.t.replace(lm[0],' ').replace(/\s+/g,' ').trim():m.t;
+      log('phrase_submitted',{text:lm?rest+' [ссылка: '+(lc?lc.host:'?')+']':m.t});
       if(S.flags.offline){ $('ph-offline').hidden=false; log('phrase_queued_offline',{}); return; }
       if(S.flags.rateLimit){ $('ph-limit').hidden=false; log('rate_limited',{}); return; }
-      b.disabled=true; $('busy').hidden=false;
+      b.disabled=true; $('busy-t').textContent=lc?'Смотрю страницу товара…':'GigaChat разбирает фразу…'; $('busy').hidden=false;
       setTimeout(()=>{ b.disabled=false; $('busy').hidden=true;
         if(S.flags.gigaFail){ log('model_error',{code:'timeout'}); S.draft={}; S.parsed={}; S.fieldsMode='fallback'; go('fields'); return; }
-        const q=parsePhrase(m.t); S.parsed=q; S.foreign=/(евро|€|доллар|\$|usd|eur|юан)/i.test(m.t); S.foreignFixed=false;
+        const q=parsePhrase(rest||'покупка'); S.parsed=q; S.foreign=/(евро|€|доллар|\$|usd|eur|юан)/i.test(rest); S.foreignFixed=false;
         S.draft={title:q.title,sum:q.sum,date:q.date,share:q.share,alone:q.alone};
+        if(lc){ const r=mockFetch(lc); S.link=Object.assign({host:lc.host},r);
+          const textShare=q.share||q.sum; let sh=textShare; const base=r.price||0; if(sh&&sh<1000&&base>=1000) sh*=1000;
+          S.draft={title:r.title||q.title||'Покупка',sum:null,date:q.date,share:q.alone?null:sh,alone:q.alone};
+          if(r.ok&&r.price&&r.currency==='RUB'){ S.draft.sum=r.price; if(q.alone) S.draft.share=r.price; }
+          else if(r.ok&&r.price&&r.currency!=='RUB'){ S.foreign=true; S.linkNote=`На странице цена в другой валюте: ${r.price} ${r.currency==='USD'?'$':r.currency}.`; }
+          else if(r.notProduct){ S.draft.title=q.title!=='Покупка'?q.title:'Покупка'; S.linkNote='По ссылке нет товара с ценой. Напишите, сколько стоит покупка.'; }
+          else { S.linkNote=`Не получилось открыть страницу ${r.store}. Напишите цену — остальное я запомнил.`; }
+          log('link_parsed',{host:lc.host,ok:!!r.ok,price:!!r.price,two:!!r.cardPrice}); }
         log('phrase_parsed',{sum:!!q.sum,date:!!q.date,share:!!q.share});
         nextStep(); },900);
       break; }
@@ -1056,6 +1122,7 @@ document.addEventListener('click',e=>{
     case 'fb': $('fb-text').value=''; sheet('sh-fb'); setTimeout(()=>$('fb-text').focus(),50); break;
     case 'fbSend': { const t=$('fb-text').value.trim(); if(!t){$('fb-text').focus();return;} S.fb.push(t); log('feedback',{text:t,screen:S.screen}); sheet('sh-fbok'); break; }
     case 'close': closeSheets(); break;
+    case 'openLink': e.preventDefault(); log('link_opened',{}); b.textContent='Откроется страница магазина (в прототипе без перехода)'; break;
     case 'hint': S.hints++; log('hint_given',{screen:S.screen}); break;
     case 'copyLog': try{navigator.clipboard.writeText(results())}catch(x){} b.textContent='Скопировано'; break;
     case 'reset': S=fresh(); save(); ['phrase','income','spend'].forEach(i=>$(i).value=''); $('obs').hidden=true; closeSheets(); go('consent'); break;
