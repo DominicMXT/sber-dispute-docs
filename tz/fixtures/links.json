@@ -1,0 +1,25 @@
+{
+ "rule": "метки отслеживания (utm_*, sh, from, ref, clid, yclid, gclid и т.п.) срезаются до сохранения; в журнал — только домен",
+ "cases": [
+  {
+   "input": "https://www.ozon.ru/product/kotel-gazovyy-navien-deluxe-s-24k-1234567890/?utm_source=share&sh=abc&from=app",
+   "expected_clean": "https://www.ozon.ru/product/kotel-gazovyy-navien-deluxe-s-24k-1234567890/",
+   "host": "ozon.ru"
+  },
+  {
+   "input": "https://www.wildberries.ru/catalog/12345678/detail.aspx?targetUrl=GP&ref=partner",
+   "expected_clean": "https://www.wildberries.ru/catalog/12345678/detail.aspx?targetUrl=GP",
+   "host": "wildberries.ru"
+  },
+  {
+   "input": "market.yandex.ru/product--robot-pylesos/123?clid=999&utm_medium=cpc",
+   "expected_clean": "https://market.yandex.ru/product--robot-pylesos/123",
+   "host": "market.yandex.ru"
+  },
+  {
+   "input": "https://habr.com/ru/articles/1/",
+   "expected_clean": "https://habr.com/ru/articles/1/",
+   "host": "habr.com"
+  }
+ ]
+}

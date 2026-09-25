@@ -1,0 +1,167 @@
+{
+ "today": "2026-10-03",
+ "rules": [
+  "days = max(1, дата − сегодня, в днях)",
+  "gap = max(0, сумма − моя часть − часть партнёра)",
+  "over = max(0, моя часть + часть партнёра − сумма)",
+  "per_day = ceil(max(0, моя часть − отложено) / days) — вверх до рубля",
+  "collected = отложено мной + отложено партнёром",
+  "on_plan = отложено ≥ floor(моя часть × прошло дней / всего дней) − 1"
+ ],
+ "vectors": [
+  {
+   "name": "доля одного, партнёра нет",
+   "input": {
+    "id": "p",
+    "title": "Котёл",
+    "sum": 40000,
+    "share": 25000,
+    "partnerShare": null,
+    "saved": 0,
+    "partnerSaved": 0,
+    "date": "2026-11-15",
+    "created": "2026-10-03"
+   },
+   "expected": {
+    "days": 43,
+    "gap": 15000,
+    "over": 0,
+    "per_day": 582,
+    "collected": 0,
+    "on_plan": true
+   }
+  },
+  {
+   "name": "партнёр внёс свою часть",
+   "input": {
+    "id": "p",
+    "title": "Котёл",
+    "sum": 40000,
+    "share": 25000,
+    "partnerShare": 15000,
+    "saved": 0,
+    "partnerSaved": 0,
+    "date": "2026-11-15",
+    "created": "2026-10-03"
+   },
+   "expected": {
+    "days": 43,
+    "gap": 0,
+    "over": 0,
+    "per_day": 582,
+    "collected": 0,
+    "on_plan": true
+   }
+  },
+  {
+   "name": "доли больше суммы (случай 6)",
+   "input": {
+    "id": "p",
+    "title": "Котёл",
+    "sum": 40000,
+    "share": 25000,
+    "partnerShare": 20000,
+    "saved": 0,
+    "partnerSaved": 0,
+    "date": "2026-11-15",
+    "created": "2026-10-03"
+   },
+   "expected": {
+    "days": 43,
+    "gap": 0,
+    "over": 5000,
+    "per_day": 582,
+    "collected": 0,
+    "on_plan": true
+   }
+  },
+  {
+   "name": "уже отложено 9 000",
+   "input": {
+    "id": "p",
+    "title": "Котёл",
+    "sum": 40000,
+    "share": 25000,
+    "partnerShare": null,
+    "saved": 9000,
+    "partnerSaved": 0,
+    "date": "2026-11-15",
+    "created": "2026-09-20"
+   },
+   "expected": {
+    "days": 43,
+    "gap": 15000,
+    "over": 0,
+    "per_day": 373,
+    "collected": 9000,
+    "on_plan": true
+   }
+  },
+  {
+   "name": "плачу сам, 100%",
+   "input": {
+    "id": "p",
+    "title": "Котёл",
+    "sum": 40000,
+    "share": 40000,
+    "partnerShare": null,
+    "saved": 0,
+    "partnerSaved": 0,
+    "date": "2026-11-15",
+    "created": "2026-10-03"
+   },
+   "expected": {
+    "days": 43,
+    "gap": 0,
+    "over": 0,
+    "per_day": 931,
+    "collected": 0,
+    "on_plan": true
+   }
+  },
+  {
+   "name": "срок завтра",
+   "input": {
+    "id": "p",
+    "title": "Котёл",
+    "sum": 40000,
+    "share": 25000,
+    "partnerShare": null,
+    "saved": 0,
+    "partnerSaved": 0,
+    "date": "2026-10-04",
+    "created": "2026-10-03"
+   },
+   "expected": {
+    "days": 1,
+    "gap": 15000,
+    "over": 0,
+    "per_day": 25000,
+    "collected": 0,
+    "on_plan": true
+   }
+  },
+  {
+   "name": "отстаёт от плана",
+   "input": {
+    "id": "p",
+    "title": "Котёл",
+    "sum": 40000,
+    "share": 25000,
+    "partnerShare": null,
+    "saved": 1000,
+    "partnerSaved": 0,
+    "date": "2026-11-15",
+    "created": "2026-09-03"
+   },
+   "expected": {
+    "days": 43,
+    "gap": 15000,
+    "over": 0,
+    "per_day": 559,
+    "collected": 1000,
+    "on_plan": false
+   }
+  }
+ ]
+}

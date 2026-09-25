@@ -1,0 +1,67 @@
+{
+ "today": "2026-10-03",
+ "rules": [
+  "reserve_per_day = сумма per_day по активным покупкам",
+  "per_day = floor((приход в месяц − обязательные − reserve_per_day × 30) / 30)",
+  "left_today = per_day − траты за сегодня; «сегодня» — по часовому поясу устройства (случай 18)",
+  "next_pay — ближайший день выплаты после сегодня"
+ ],
+ "vectors": [
+  {
+   "name": "одна покупка, две траты сегодня",
+   "input": {
+    "income_month": 80000,
+    "mandatory_month": 30000,
+    "pay_days": [
+     10,
+     25
+    ],
+    "purchases": [
+     "Котёл из calc-vectors"
+    ],
+    "spends_today": [
+     300,
+     450
+    ],
+    "spends_yesterday": [
+     900
+    ]
+   },
+   "expected": {
+    "reserve_per_day": 582,
+    "per_day": 1084,
+    "spent_today": 750,
+    "left_today": 334,
+    "next_pay": "2026-10-10",
+    "days_to_pay": 7
+   }
+  },
+  {
+   "name": "две покупки (случай 13) и перерасход (случай 11)",
+   "input": {
+    "income_month": 80000,
+    "mandatory_month": 30000,
+    "pay_days": [
+     10,
+     25
+    ],
+    "purchases": [
+     "Котёл",
+     "Диван 30 000 к 31.12, моя часть 15 000"
+    ],
+    "spends_today": [
+     1900
+    ]
+   },
+   "expected": {
+    "reserve_per_day": 751,
+    "per_day": 915,
+    "spent_today": 1900,
+    "left_today": -985,
+    "next_pay": "2026-10-10",
+    "days_to_pay": 7
+   },
+   "ui": "left_today < 0 → нейтральный текст «сегодня сверх плана N ₽», без красного"
+  }
+ ]
+}

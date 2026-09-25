@@ -1,0 +1,172 @@
+{
+ "today": "2026-10-03",
+ "source": "statement-demo.csv — синтетика из прототипа (demoOps, зерно 7), реальных данных нет. Имя и телефон в переводе вымышлены.",
+ "expected": {
+  "period": {
+   "from": "2026-07-11",
+   "to": "2026-10-03",
+   "days": 85
+  },
+  "operations": 174,
+  "duplicates_skipped": 1,
+  "failed_skipped": 1,
+  "pii_masked": 4,
+  "own_transfers": {
+   "count": 3,
+   "sum": 15000
+  },
+  "refunds": {
+   "count": 1,
+   "sum": 1200
+  },
+  "fx_operations": 1,
+  "income": {
+   "monthly": 80000,
+   "pay_days": [
+    10,
+    25
+   ]
+  },
+  "recurring": [
+   {
+    "name": "ЖКУ квартплата",
+    "amount": 6800,
+    "day": 12,
+    "subscription": false
+   },
+   {
+    "name": "Okko",
+    "amount": 399,
+    "day": 14,
+    "subscription": true
+   },
+   {
+    "name": "Яндекс Плюс",
+    "amount": 399,
+    "day": 20,
+    "subscription": true
+   },
+   {
+    "name": "Кинопоиск",
+    "amount": 299,
+    "day": 3,
+    "subscription": true
+   },
+   {
+    "name": "МТС связь",
+    "amount": 550,
+    "day": 5,
+    "subscription": false
+   },
+   {
+    "name": "Ростелеком интернет",
+    "amount": 700,
+    "day": 7,
+    "subscription": false
+   },
+   {
+    "name": "Перевод по номеру [телефон] [человек]",
+    "amount": 3000,
+    "day": 9,
+    "subscription": false
+   }
+  ],
+  "mandatory_monthly": 12147,
+  "categories_monthly": [
+   {
+    "name": "Продукты",
+    "monthly": 26958
+   },
+   {
+    "name": "Кафе и кофе",
+    "monthly": 9076
+   },
+   {
+    "name": "Доставка еды",
+    "monthly": 8937
+   },
+   {
+    "name": "Маркетплейсы",
+    "monthly": 6268
+   },
+   {
+    "name": "Такси",
+    "monthly": 4628
+   },
+   {
+    "name": "Подписки",
+    "monthly": 340
+   }
+  ],
+  "small_frequent": [
+   {
+    "name": "Кофейня Surf",
+    "count": 19,
+    "avg": 250,
+    "monthly": 4649
+   }
+  ],
+  "peak_weekday": {
+   "day": "пятницу",
+   "ratio": 2.9,
+   "top": [
+    "Доставка еды",
+    "Такси"
+   ],
+   "monthly": 12005
+  },
+  "after_payday": {
+   "share": 20,
+   "norm": 20
+  },
+  "goal": {
+   "purchase": "Котёл 40 000 ₽ к 15.11.2026, моя часть 25 000 ₽, партнёра нет",
+   "gap": 15000,
+   "days": 43
+  },
+  "tips": [
+   {
+    "id": "food",
+    "title": "Доставка еды — вдвое реже",
+    "monthly": 4469,
+    "to_deadline": 6321
+   },
+   {
+    "id": "leak",
+    "title": "Кофейня Surf — через день",
+    "monthly": 2325,
+    "to_deadline": 3289
+   },
+   {
+    "id": "taxi",
+    "title": "Такси в пятницу — через раз на метро",
+    "monthly": 1784,
+    "to_deadline": 2523
+   },
+   {
+    "id": "mp",
+    "title": "Маркетплейсы — правило «полежит в корзине сутки»",
+    "monthly": 1567,
+    "to_deadline": 2216
+   },
+   {
+    "id": "subs",
+    "title": "Оставить одну видеоподписку",
+    "monthly": 399,
+    "to_deadline": 564
+   }
+  ],
+  "auto_pick": [
+   "food",
+   "leak",
+   "taxi",
+   "mp",
+   "subs"
+  ],
+  "after_auto_pick": {
+   "covered_to_deadline": 14913,
+   "left": 87,
+   "ui": "left > 0 → «не хватает N ₽» + вариант сдвинуть срок, посчитанный кодом; left = 0 → «сходится»"
+  }
+ }
+}
