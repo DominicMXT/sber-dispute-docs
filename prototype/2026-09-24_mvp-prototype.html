@@ -365,6 +365,8 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
       <div class="prog" role="progressbar" aria-label="Собрано" id="pu-bar"><i></i></div>
       <div id="pu-who"></div>
     </div>
+    <div id="pu-price"></div>
+    <div id="pu-took"></div>
     <div id="pu-prod"></div>
     <div id="pu-over"></div>
     <div id="pu-bank"></div>
@@ -594,6 +596,7 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
 <div class="sheet" id="sh-change" hidden><div class="card">
   <h3>Изменить покупку</h3>
   <div class="menu">
+    <button data-act="chTook">Пришлось взять из отложенного<span aria-hidden="true">›</span></button>
     <button data-act="chShare">Поменять мою часть<span aria-hidden="true">›</span></button>
     <button data-act="chDate">Перенести срок<span aria-hidden="true">›</span></button>
     <button data-act="chRevoke" id="ch-revoke">Отозвать приглашение партнёра<span aria-hidden="true">›</span></button>
@@ -656,6 +659,7 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
       <label><input type="checkbox" data-flag="gigaFail"> GigaChat не ответил (случай 1)</label>
       <label><input type="checkbox" data-flag="offline"> Нет сети (случай 16)</label>
       <label><input type="checkbox" data-flag="rateLimit"> Лимит запросов (случай 20)</label>
+      <button class="chip" data-act="priceBump">Цена по ссылке выросла на 2 000 ₽ (случай 38)</button>
     </div></details>
   <details><summary style="min-height:36px;cursor:pointer">Карта экранов</summary><div class="map" id="o-map"></div></details>
   <pre id="o-log"></pre>
@@ -980,6 +984,9 @@ function renderPurchase(){
   $('pu-who').innerHTML=`<div class="who"><div><b>Вы</b></div><div class="r"><span class="pill ${c.onPlan?'on':'off'}">${c.onPlan?'по плану':'отстаёте'}</span></div></div>`+
     (p.alone&&p.partner==='none'?'':`<div class="who"><div><b>Партнёр</b></div><div class="r">${partnerRight}</div></div>${partnerNote}`);
   $('pu-prod').innerHTML=p.link?prodCard(p.link,{open:true}):'';
+  const L=p.link; $('pu-price').innerHTML=L&&L.newPrice&&L.newPrice!==(L.chosenPrice||L.price)&&p.status!=='cancelled'?
+    `<div class="card priv"><p style="margin:0 0 var(--s2)"><b>${esc(L.store)}: цена ${L.newPrice>(L.chosenPrice||L.price)?'выросла':'снизилась'} — ${rub(L.chosenPrice||L.price)} → ${rub(L.newPrice)}</b> (${L.newPrice>(L.chosenPrice||L.price)?'+':'−'}${rub(Math.abs(L.newPrice-(L.chosenPrice||L.price)))}). Пересчитать план под новую цену?</p><div class="row-btns"><button class="btn btn-calm" data-act="priceKeep">Оставить ${rub(p.sum)}</button><button class="btn btn-main" data-act="priceUse">Пересчитать</button></div></div>`:'';
+  $('pu-took').innerHTML=p.took?`<div class="status calm"><div class="k">План пересчитан — так бывает</div><div class="sub">Вы взяли ${rub(p.took.v)} из отложенного. Чтобы успеть к ${fmtDate(c.date)}, откладывать ≈ ${rub(c.perDay)} в день вместо ${rub(p.took.before)}.${p.took.shift?'':` Или сдвинуть срок на ${fmtDate(fromIso(p.took.altDate))} — и остаться на ${rub(p.took.before)} в день.`}</div>${p.took.shift?'':`<button class="btn btn-line" data-act="tookShift" style="margin-top:var(--s3)">Сдвинуть срок на ${fmtDate(fromIso(p.took.altDate))}</button>`}<button class="btn-quiet btn" data-act="tookOk">Понятно</button></div>`:'';
   $('pu-over').innerHTML=c.over?overCard(c.over,c.mine):'';
   $('pu-bank').innerHTML=!cancelled&&!c.gap&&!c.over?bankCard():'';
   $('pu-mine').innerHTML=`<div class="row"><span>Ваша часть</span><span>${rub(c.mine)}</span></div><div class="row"><span>Отложено</span><span>${rub(p.saved||0)}</span></div><div class="row"><span>Откладывать в день</span><span>≈ ${rub(c.perDay)}</span></div>`;
@@ -1201,6 +1208,9 @@ const STATES=[
  ['purchaseDone','Покупка: сумма сошлась — как собрать',[14],[],()=>fx({purchases:[demoP({partner:'accepted',partnerShare:15000,acceptedAt:Date.now(),saved:10000,partnerSaved:6000})]},'purchase')],
  ['purchaseMoved','Покупка: срок перенесён',[9],[14],()=>fx({purchases:[demoP({moved:true,date:iso(addDays(today(),80))})]},'purchase')],
  ['purchaseCancelled','Покупка отменена',[9],[14],()=>fx({purchases:[demoP({status:'cancelled'})]},'purchase')],
+ ['took','Взял из отложенного — план пересчитан без упрёка',[9],[37],()=>fx({purchases:[demoP({saved:9000,took:{v:3000,before:385,altDate:iso(addDays(today(),60)),shift:false}})]},'purchase')],
+ ['tookSheet','«Сколько пришлось взять?»',[9],[37],()=>fx({purchases:[demoP({saved:9000})]},'purchase',()=>askInput('took'))],
+ ['priceUp','Цена по ссылке выросла — пересчитать?',['3а'],[38],()=>fx({purchases:[demoP({title:'Котёл газовый Navien Deluxe S 24K',sum:41990,link:LNK({chosenPrice:41990,newPrice:43990})})]},'purchase')],
  ['saveSheet','«Я отложил(а)»',[9],[],()=>fx({purchases:[ACC()]},'purchase',()=>sheet('sh-save'))],
  ['changeSheet','Изменить: часть, срок, отозвать, отменить',[9],[10,14,9],()=>fx({purchases:[ACC()]},'purchase',()=>{$('ch-revoke').hidden=false;sheet('sh-change')})],
  ['purchases2','Две покупки',[9],[13],()=>fx({purchases:[demoP(),demoP({id:'p2',title:'Отпуск',sum:150000,share:70000,date:iso(addDays(today(),91))})],inc:80000,must:30000},'purchases')],
@@ -1239,6 +1249,7 @@ function askDelete(){confirmAsk('Удалить все ваши данные?','
 function askInput(kind){
   S.ask=kind; const p=P(); $('ask-hint').hidden=true;
   const isDate=kind==='date'; $('ask-text').hidden=isDate; $('ask-date').hidden=!isDate;
+  if(kind==='took'){ $('ask-h').textContent='Сколько пришлось взять?'; $('ask-p').textContent='Непредвиденное бывает у всех. Пересчитаю план — без упрёков. Партнёр увидит только общий прогресс.'; $('ask-text').value=''; $('ask-text').placeholder='взял 3000'; }
   if(kind==='share'){ $('ask-h').textContent='Поменять мою часть'; $('ask-p').textContent='Например, «моя часть 15 000». Партнёр увидит только новый статус покупки.'; $('ask-text').value=''; $('ask-text').placeholder='моя часть 15000'; }
   if(isDate){ $('ask-h').textContent='Перенести срок'; $('ask-p').textContent='Партнёр увидит новый срок.'; $('ask-date').value=p.date; }
   sheet('sh-ask');
@@ -1312,11 +1323,20 @@ document.addEventListener('click',e=>{
       else { p.saved=(p.saved||0)+v; log('saved',{who:'owner',v}); closeSheets(); go('purchase'); joy(document.querySelector('[data-s="purchase"] .card')); } break; }
     case 'changeOpen': $('ch-revoke').hidden=!(p.partner==='accepted'||p.partner==='sent'); sheet('sh-change'); break;
     case 'chShare': askInput('share'); break;
+    case 'chTook': askInput('took'); break;
+    case 'tookShift': { p.date=p.took.altDate; p.moved=true; p.took.shift=true; log('took_shift',{}); go('purchase'); break; }
+    case 'tookOk': { p.took=null; go('purchase'); break; }
+    case 'priceUse': { const L=p.link; p.sum=L.newPrice; L.chosenPrice=L.newPrice; L.priceDate=iso(today()); delete L.newPrice; log('price_updated',{}); go('purchase'); break; }
+    case 'priceKeep': { delete p.link.newPrice; log('price_kept',{}); go('purchase'); break; }
     case 'chDate': askInput('date'); break;
     case 'chRevoke': confirmAsk('Отозвать приглашение?','Старая ссылка перестанет работать, часть партнёра обнулится. Можно отправить новое приглашение.','Отозвать','revoke'); break;
     case 'chCancel': confirmAsk('Отменить покупку?','Партнёр увидит статус «отменена». Отложенные деньги остаются у вас.','Отменить покупку','cancel'); break;
     case 'askOk': {
       if(S.ask==='share'){ const n=numsIn($('ask-text').value).out; let v=n[0]?n[0].v:NaN; if(v<1000&&p.sum>=1000&&!/\d{4}/.test($('ask-text').value)) v*=1000; if(!(v>=0)||v>p.sum){$('ask-hint').textContent='Напишите сумму не больше стоимости покупки';$('ask-hint').hidden=false;return;} p.share=v; p.ownerShareChanged=true; log('share_changed',{}); }
+      if(S.ask==='took'){ const n=numsIn($('ask-text').value).out; let v=n[0]?n[0].v:0; if(!(v>0)){$('ask-hint').textContent='Напишите сумму, например «взял 3000»';$('ask-hint').hidden=false;return;}
+        v=Math.min(v,p.saved||0); if(!v){$('ask-hint').textContent='Отложенного пока нет — брать нечего';$('ask-hint').hidden=false;return;}
+        const before=calc(p).perDay; p.saved=(p.saved||0)-v; const need=Math.max(0,+p.share-p.saved); const days=Math.max(1,Math.ceil(need/Math.max(1,before)));
+        p.took={v,before,altDate:iso(addDays(today(),days)),shift:false}; log('saved_withdrawn',{}); }
       if(S.ask==='date'){ const v=$('ask-date').value; if(!v||fromIso(v)<=today()){$('ask-hint').textContent='Выберите дату позже сегодняшней';$('ask-hint').hidden=false;return;} p.date=v; p.moved=true; log('date_moved',{}); }
       closeSheets(); go('purchase'); break; }
     case 'cfOk': {
@@ -1354,6 +1374,7 @@ document.addEventListener('click',e=>{
     case 'stmtUse': { const A=S.stmt; S.inc=A.income.monthly||S.inc; S.must=mandatoryConfirmed(); S.payDays=A.income.days.length?A.income.days:null; S.source='statement'; log('statement_used',{}); go('today'); break; }
     case 'stmtDel': confirmAsk('Удалить данные выписки?','Разбор, советы и найденные платежи сотрутся. Файл и так не хранился. «Сегодня» перейдёт на ручные цифры.','Удалить','stmtDel'); break;
     case 'openLink': e.preventDefault(); log('link_opened',{}); b.textContent='Откроется страница магазина (в прототипе без перехода)'; break;
+    case 'priceBump': { const q=S.purchases.find(x=>x.link); if(q){ q.link.newPrice=(q.link.chosenPrice||q.link.price)+2000; S.cur=q.id; $('obs').hidden=true; log('price_bump_demo',{}); go('purchase'); } else b.textContent='Сначала заведите покупку по ссылке'; break; }
     case 'hint': S.hints++; log('hint_given',{screen:S.screen}); break;
     case 'copyLog': try{navigator.clipboard.writeText(results())}catch(x){} b.textContent='Скопировано'; break;
     case 'reset': S=fresh(); save(); ['phrase','income','spend'].forEach(i=>$(i).value=''); $('obs').hidden=true; closeSheets(); go('consent'); break;
