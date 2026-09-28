@@ -15,3 +15,6 @@ onboarding-vygruzka.txt
 
 # Отчёт воркшопа курса — выводы в review/2026-09-23_workshop-1-razbor.md.
 workshop-1-plan-results.pdf
+
+# PDF БТ и ТЗ собираются из Markdown: python tools/build_docs.py --pdf
+pdf/
