@@ -121,6 +121,9 @@ textarea{min-height:104px;resize:vertical}
 .status .sub{font-size:14px}
 .note{background:var(--soft);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;color:var(--ink2);margin:0 0 var(--s3)}
 .note.warn{background:var(--warn-soft);color:var(--warn)}
+.push{position:fixed;left:8px;right:8px;top:8px;z-index:60;background:var(--surface,#fff);color:var(--ink);border-radius:18px;box-shadow:0 12px 40px rgba(0,0,0,.28);padding:12px 14px;max-width:460px;margin:0 auto}
+.push .ph{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted)}.push .ic{width:22px;height:22px;border-radius:6px;background:var(--accent,#122654);color:#fff;display:grid;place-items:center;font-weight:700;font-size:12px}
+.push .pt{font-weight:650;margin:6px 0 2px}.push .pb{font-size:14px;margin:0 0 10px}.push .row-btns{display:flex;gap:8px}.push .row-btns .btn{min-height:44px}
 .banner{display:flex;gap:var(--s2);align-items:flex-start;background:var(--calm-soft);color:var(--calm);border-radius:var(--r-sm);padding:10px 12px;font-size:14px;margin:0 0 var(--s3)}
 .parsed{display:flex;justify-content:space-between;gap:10px;align-items:center;background:var(--soft);border-radius:var(--r-sm);padding:4px 4px 4px 12px;font-size:14px;margin-bottom:var(--s3)}
 .parsed button{font:inherit;font-size:14px;color:var(--shared);background:none;border:0;min-height:var(--hit);cursor:pointer;padding:0 10px;white-space:nowrap;font-weight:600}
@@ -232,10 +235,10 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
 
 <!-- Требования 1, 2 -->
 <section class="screen" data-s="consent">
-  <div class="bar"><h2 id="brand">Крупная покупка к дате</h2><button class="fbk" data-act="fb">Что не так?</button></div>
+  <div class="bar"><h2 id="brand">Крупная покупка к дате</h2></div>
   <div class="body">
     <h1>Посчитаем, сойдётся ли покупка к сроку</h1>
-    <p class="muted">Напишите одной фразой, что покупаете, сколько стоит, к какому сроку и сколько можете внести сами. Регистрация не нужна.</p>
+    <p class="muted">Регистрация не нужна.</p>
     <div class="card priv" style="margin-top:var(--s4)">
       <p style="margin:0 0 var(--s3)"><b>Партнёр не видит ваши деньги.</b> Только общую покупку и её прогресс — никаких ваших остатков, трат и доходов.</p>
       <p style="margin:0 0 var(--s3)"><b>Фраза уходит в GigaChat без номеров карт и телефонов.</b> Суммы считает программа, а не нейросеть.</p>
@@ -261,7 +264,7 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
       <button class="chip" data-ex="https://www.ozon.ru/product/kotel-gazovyy-navien-deluxe-s-24k-1234567890/?utm_source=app&amp;sh=Ab12 к 15 ноября, я могу 25">ссылка на Ozon + к 15 ноября, я могу 25</button>
     </div>
     <div class="busy" id="busy" hidden><i></i><span id="busy-t">GigaChat разбирает фразу…</span></div>
-    <p class="cap" style="margin-top:var(--s3)">Не пишите номера карт, телефоны и имена — они не нужны для расчёта.</p>
+    <p class="cap" style="margin-top:var(--s3)">Хватит суммы и срока — номера карт и имена не нужны. Можно надиктовать: микрофон на клавиатуре.</p>
   </div>
   <div class="foot"><button class="btn btn-main" data-act="parse">Посчитать</button></div>
 </section>
@@ -306,7 +309,7 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
     <div id="a-prod"></div>
     <div class="blk-h"><span class="cap">Расчёт</span><span class="vis pr">видно только вам</span></div>
     <div class="rows num" id="a-rows"></div>
-    <div class="coach" id="a-coach" hidden><h3>Что можно сделать</h3><ul id="a-tips"></ul><button class="link" data-act="stmtOpen">Найти недостающее в моих тратах — по выписке</button></div>
+    <div class="coach" id="a-coach" hidden><h3>Что можно сделать</h3><button class="btn btn-line" data-act="stmtOpen" style="margin:0 0 var(--s3)">Найти недостающее в моих тратах</button><ul id="a-tips"></ul></div>
     <div id="a-bank"></div>
     <div class="card priv" id="a-seg" hidden>
       <p style="font-weight:600;margin-bottom:var(--s2)">Один вопрос: как вы решали последнюю крупную покупку?</p>
@@ -323,7 +326,7 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
   </div>
   <div class="foot">
     <button class="btn btn-main" data-act="toShare" id="b-share">Отправить партнёру</button>
-    <button class="btn btn-line" data-act="toPurchase">Готово — к покупке</button>
+    <button class="btn btn-line" data-act="toPurchase">К моей покупке</button>
   </div>
 </section>
 
@@ -365,6 +368,7 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
       <div class="prog" role="progressbar" aria-label="Собрано" id="pu-bar"><i></i></div>
       <div id="pu-who"></div>
     </div>
+    <div id="pu-seg"></div>
     <div id="pu-price"></div>
     <div id="pu-took"></div>
     <div id="pu-prod"></div>
@@ -400,10 +404,10 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
 <section class="screen has-tabs" data-s="source" hidden>
   <div class="bar"><h2>Сегодня на себя</h2><button class="fbk" data-act="fb">Что не так?</button></div>
   <div class="body">
-    <h1>Откуда брать ваши деньги?</h1>
-    <p class="muted small">Чтобы посчитать, сколько можно тратить на себя и не сорвать покупку. Партнёр не видит ни то, ни другое.</p>
-    <button class="pick" data-act="srcManual"><b>Вписать самому</b><span>Одна фраза: доход, дни зарплаты и обязательные траты. Быстро, но приблизительно.</span></button>
-    <button class="pick" data-act="srcStatement"><b>Загрузить выписку</b><span>Разберу 2–3 месяца операций: найду зарплату, регулярные платежи и подскажу, где сэкономить на покупку.</span></button>
+    <h1>Сколько можно тратить на себя и не сорвать покупку?</h1>
+    <p class="muted small">Посчитаю одним из двух способов. Партнёр не видит ни то, ни другое.</p>
+    <button class="pick" data-act="srcManual"><b>Вписать самому</b><span>Одна фраза: доход, дни зарплаты и обязательные траты. Готово за минуту.</span></button>
+    <button class="pick" data-act="srcStatement"><b>Найти деньги на покупку в моих тратах</b><span>По выписке или снимкам экрана за 2–3 месяца: найду зарплату, регулярные платежи и шаги экономии к сроку.</span></button>
     <p class="cap">Источник можно поменять в «Моих данных».</p>
   </div>
 </section>
@@ -421,12 +425,15 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
       <li>партнёр не увидит ничего из выписки.</li>
     </ul>
     <p class="small"><b>Какую выписку:</b> свою, за последние 2–3 месяца — так регулярные платежи успевают повториться. Выписку партнёра не загружайте: это его данные.</p>
-    <p class="small"><b>Формат:</b> CSV-выгрузка операций из приложения банка. PDF-выписки <span class="later">после открытия</span></p>
+    <p class="small"><b>Подойдёт:</b> CSV из приложения банка, PDF-выписка Сбербанка или снимки экрана со списком операций — несколько штук, чтобы захватить 2–3 месяца.</p>
+    <p class="small" style="background:var(--calm-soft);border-radius:var(--r-sm);padding:10px 12px"><b>Про снимки экрана.</b> Снимок уходит в GigaChat целиком — вместе с именами и номерами, если они на нём видны. В разбор и в базу они не попадут, сам снимок удаляю сразу после распознавания.</p>
+    <p class="cap">Нажимая кнопку ниже, вы соглашаетесь на разбор по этим правилам.</p>
     <div class="busy" id="st-busy" hidden><i></i><span id="st-busy-t">Разбираю выписку…</span></div>
   </div>
   <div class="foot">
-    <label class="btn btn-main filebtn" style="display:flex;align-items:center;justify-content:center">Согласен, выбрать файл<input type="file" id="st-file" accept=".csv,.txt,.pdf,text/csv"></label>
-    <button class="btn btn-line" data-act="stmtDemo">Согласен, показать на демо-выписке</button>
+    <label class="btn btn-main filebtn" style="display:flex;align-items:center;justify-content:center">Выбрать файл выписки<input type="file" id="st-file" accept=".csv,.txt,.pdf,text/csv"></label>
+    <label class="btn btn-line filebtn" style="display:flex;align-items:center;justify-content:center">Сфотографировать операции<input type="file" id="st-shot" accept="image/*" multiple></label>
+    <button class="btn btn-quiet" data-act="stmtDemo" id="st-demo" hidden>Демо-выписка — для интервью</button>
   </div>
 </section>
 
@@ -438,14 +445,14 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
     <div class="banner" id="sr-short" hidden></div>
     <div id="sr-goal"></div>
     <div class="sec-h">Советы к цели</div>
-    <p class="cap" id="sr-tipcap">Отметьте, что готовы попробовать. Суммы — оценка по вашим тратам; числа считает программа.</p>
+    <p class="cap" id="sr-tipcap">Отметьте, что готовы попробовать.</p>
     <div id="sr-tips"></div>
+    <div id="sr-subs"></div>
     <div class="sec-h">Что я увидел</div>
     <div id="sr-facts"></div>
-    <div class="sec-h">Куда уходят деньги в месяц</div>
-    <div class="bars num" id="sr-cats"></div>
+    <details class="how"><summary>Куда уходят деньги в месяц</summary><div class="bars num" id="sr-cats"></div></details>
     <div class="sec-h">Регулярные платежи</div>
-    <p class="cap">Проверьте: я считаю их обязательными и в советы не беру.</p>
+    <p class="cap">Вычитаю их из «Сегодня» и в советы не беру.</p>
     <div id="sr-rec"></div>
     <p class="cap" id="sr-clean"></p>
   </div>
@@ -460,10 +467,10 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
     <div class="status ok" id="t-status"><div class="k" id="t-k"></div><div class="hero num" id="t-left"></div><div class="sub" id="t-sub"></div></div>
     <label for="spend" class="small muted">Потратили? Напишите, например «кофе 300»</label>
     <div style="display:flex;gap:var(--s2);margin:6px 0 var(--s2)"><input type="text" id="spend" placeholder="кофе 300" autocomplete="off"><button class="btn btn-main" style="width:auto;flex:none" data-act="spend">Записать</button></div>
-    <button class="chip" data-act="shotOpen">Записать скриншотом уведомления банка<span class="later">после открытия</span></button>
     <ul class="list num" id="t-list" style="margin-top:var(--s3)"></ul>
     <p class="cap" id="t-unl" hidden></p>
     <p class="cap" id="t-plan"></p>
+    <div id="t-push"></div>
     <details class="how" id="t-how"><summary>Как я посчитал</summary><div id="t-how-b"></div></details>
     <button class="link" data-act="stmtOpen" id="t-stmt">Где сэкономить на покупку — разбор выписки</button><br>
     <button class="link" data-act="incomeEdit">Изменить приходы и обязательные траты</button>
@@ -478,7 +485,8 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
     <ul class="list" id="d-what"></ul>
     <div class="menu">
       <button data-act="email">Сохранить на другом устройстве<span class="later">после открытия</span></button>
-      <button data-act="install">Поставить на главный экран<span class="later">после открытия</span></button>
+      <button data-act="install">Поставить на главный экран<span aria-hidden="true">›</span></button>
+      <button data-act="pushToggle" id="d-push">Напоминания<span aria-hidden="true">›</span></button>
       <button data-act="srcSwitch">Откуда беру ваши деньги: <span id="d-src"></span><span aria-hidden="true">›</span></button>
       <button data-act="stmtDel" id="d-stmtdel">Удалить данные выписки<span aria-hidden="true">›</span></button>
       <button data-act="policy">Как мы обращаемся с данными<span aria-hidden="true">›</span></button>
@@ -576,8 +584,8 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
   <h3>Как мы обращаемся с данными</h3>
   <ul class="small" style="padding-left:18px;margin:0 0 var(--s3)">
     <li><b>Что храним:</b> покупки, суммы, сроки, доли, отложенное, приходы и обязательные траты, записанные траты, ответы на вопросы.</li>
-    <li><b>Что уходит в GigaChat:</b> только текст фразы, номера карт и телефонов заменяются до отправки. Суммы считает программа.</li>
-    <li><b>Что видит партнёр:</b> покупку, общую сумму, сколько собрано вместе, свою часть и «по плану / отстаёт» у второго — без сумм.</li>
+    <li><b>Что уходит в GigaChat:</b> текст фразы — номера карт и телефонов заменяются до отправки; снимки экрана с операциями, если вы их выбрали, — целиком, после распознавания удаляются. Суммы считает программа.</li>
+    <li><b>Что видит партнёр:</b> покупку, общую сумму, сколько собрано вместе и свою часть. Метку «по плану» у второго — только после его первой отметки «отложил», без сумм.</li>
     <li><b>Где и сколько:</b> серверы в России, 12 месяцев с последнего входа.</li>
     <li><b>Удаление:</b> «Мои данные» → «Удалить все мои данные». Остаются только обезличенные записи о действиях.</li>
   </ul>
@@ -637,11 +645,23 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
 </div></div>
 
 <div class="sheet" id="sh-install" hidden><div class="card">
-  <h3>На главный экран <span class="later">после открытия</span></h3>
+  <h3>На главный экран</h3>
   <p class="cap">Чтобы открывать одним касанием, как приложение.</p>
   <p class="small"><b>iPhone, Safari:</b> кнопка «Поделиться» внизу → «На экран „Домой“» → «Добавить».</p>
   <p class="small"><b>Android, Chrome:</b> меню ⋮ справа сверху → «Добавить на главный экран».</p>
   <button class="btn btn-line" data-act="close">Понятно</button>
+</div></div>
+
+<div class="push" id="push" role="alert" hidden></div>
+<div class="sheet" id="sh-push" hidden><div class="card">
+  <h3>Напоминать в день зарплаты</h3>
+  <p class="cap">Уведомления на телефоне работают, когда приложение стоит на главном экране.</p>
+  <p class="small"><b>1. Поставьте на главный экран.</b> iPhone, Safari: «Поделиться» → «На экран „Домой“». Android, Chrome: меню ⋮ → «Добавить на главный экран».</p>
+  <p class="small"><b>2. Разрешите уведомления</b> — телефон спросит один раз.</p>
+  <label class="small" style="display:flex;gap:8px;align-items:center;margin:0 0 var(--s3)"><input type="checkbox" id="push-stmt" checked> И раз в месяц — обновить выписку</label>
+  <p class="cap">Пишу только в день зарплаты и раз в месяц. Отключить — в «Моих данных».</p>
+  <button class="btn btn-main" data-act="pushAllow">Разрешить уведомления</button>
+  <button class="btn btn-quiet" data-act="close">Не сейчас</button>
 </div></div>
 
 <!-- Панель интервьюера: 5 касаний по заголовку первого экрана или ?obs=1 -->
@@ -660,6 +680,7 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
       <label><input type="checkbox" data-flag="offline"> Нет сети (случай 16)</label>
       <label><input type="checkbox" data-flag="rateLimit"> Лимит запросов (случай 20)</label>
       <button class="chip" data-act="priceBump">Цена по ссылке выросла на 2 000 ₽ (случай 38)</button>
+      <button class="chip" data-act="pushDemo">Уведомление в день зарплаты (требование 21)</button>
     </div></details>
   <details><summary style="min-height:36px;cursor:pointer">Карта экранов</summary><div class="map" id="o-map"></div></details>
   <pre id="o-log"></pre>
@@ -803,7 +824,7 @@ function go(s){
   const prev=S.screen;
   document.querySelectorAll('.screen').forEach(e=>{e.hidden=e.dataset.s!==s; e.classList.remove('enter','enter-fade');});
   const cur=document.querySelector('.screen[data-s="'+s+'"]'); if(cur&&prev!==s&&!RM()){ void cur.offsetWidth; cur.classList.add(TABBED.includes(s)&&TABBED.includes(prev)?'enter-fade':'enter'); }
-  S.screen=s; save();
+  S.screen=s; save(); if(s==='stmtIntro'&&$('st-demo')) $('st-demo').hidden=!S.obsMode;
   const tabs=$('tabs'); tabs.hidden=!TABBED.includes(s);
   const tab=s==='purchase'?'purchases':(s==='income'||s==='source'||s==='stmtResult')?'today':s;
   tabs.querySelectorAll('button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===tab?'page':'false'));
@@ -921,20 +942,20 @@ function fieldsCalc(){
 function renderAnswer(){
   const p=P(), c=calc(p); $('a-title').textContent=p.title;
   $('a-status').className='status '+(c.gap?'gap':'ok');
-  $('a-k').textContent=c.gap?'Пока не хватает':'Сходится';
+  $('a-k').textContent=c.gap?`Чтобы ${p.title.toLowerCase()} сошёлся к ${fmtDate(c.date)}, найти ещё`:'Сходится';
   countTo($('a-big'),c.gap?c.gap:c.sum); if(!c.gap) joy($('a-status'));
-  $('a-sub').textContent=c.gap?`к ${fmtDate(c.date)} — осталось ${c.days} ${plural(c.days,'день','дня','дней')}`:(p.alone?`к ${fmtDate(c.date)} — вы вносите всю сумму`:`к ${fmtDate(c.date)} — ваших частей хватает на всю сумму`);
+  $('a-sub').textContent=c.gap?`осталось ${c.days} ${plural(c.days,'день','дня','дней')}`:(p.alone?`к ${fmtDate(c.date)} — вы вносите всю сумму`:`к ${fmtDate(c.date)} — ваших частей хватает на всю сумму`);
   $('a-rows').innerHTML=`<div class="row"><span>Стоит</span><span>${rub(c.sum)}</span></div><div class="row"><span>Вносите вы</span><span>${rub(c.mine)}</span></div>`+
     (c.partner?`<div class="row"><span>Вносит партнёр</span><span>${rub(c.partner)}</span></div>`:'')+
-    `<div class="row"><span>Откладывать вам в день</span><span>≈ ${rub(c.perDay)}</span></div><div class="row"><span>или в месяц</span><span>≈ ${rub(c.perDay*30)}</span></div>`;
+    `<div class="row"><span>Ваши ${rub(c.mine)} будут к ${fmtDate(c.date)}, если откладывать</span><span>≈ ${rub(c.perDay)} в день</span></div><div class="row"><span>это в месяц</span><span>≈ ${rub(c.perDay*30)}</span></div>`;
   $('a-parsed').textContent=`Я понял так: ${p.title}, ${rub(c.sum)}${p.link?' (по ссылке '+p.link.store+')':''}, к ${fmtDate(c.date)}, вы — ${rub(c.mine)}`;
   $('a-prod').innerHTML=p.link?prodCard(p.link):'';
-  $('a-seg').hidden=!!S.seg;
+  $('a-seg').hidden=true; // вопрос о сегменте — после ответа, на экране покупки
   const tips=[];
   if(c.gap){
     if(!p.alone&&!c.partner) tips.push(`Если партнёр внесёт ${rub(c.gap)} — покупка сходится. Отправьте ему расчёт одной кнопкой.`);
     const d2=addDays(c.date,30), days2=Math.round((d2-today())/DAY);
-    tips.push(`Внести недостающее самим к ${fmtDate(c.date)} — ещё ≈ ${rub(Math.ceil(c.gap/c.days))} в день. Если сдвинуть срок на ${fmtDate(d2)} — ≈ ${rub(Math.ceil((c.sum-c.partner-(p.saved||0))/days2))} в день на всю сумму.`);
+    tips.push(`Внести недостающее самим к ${fmtDate(c.date)} — ещё ≈ ${rub(Math.ceil(c.gap/c.days))} в день. Или сдвинуть срок на ${fmtDate(d2)} и закрыть недостающее самим — ≈ ${rub(Math.ceil((c.sum-c.partner-(p.saved||0))/days2))} в день вместо ${rub(c.perDay)}.`);
   }
   $('a-coach').hidden=!tips.length; $('a-tips').innerHTML=tips.map(x=>'<li>'+x+'</li>').join('');
   $('a-bank').innerHTML=c.gap?'':bankCard();
@@ -948,7 +969,7 @@ function bankCard(){return `<div class="card priv"><div class="blk-h"><h3 style=
 /* ---------- отправка ---------- */
 function shareText(remind){const p=P(), c=calc(p);
   if(remind) return `Напоминаю про ${p.title.toLowerCase()} к ${fmtDate(c.date)} — ${rub(c.sum)}. Посмотри, сколько сможешь внести, это займёт минуту:\nhttps://…/p/демо`;
-  return `${p.title}: ${rub(c.sum)} к ${fmtDate(c.date)}. Я вношу ${rub(c.mine)}`+(c.gap?`, не хватает ${rub(c.gap)}. Сколько сможешь?`:'. Всё сходится 👍')+(p.link?`\nТовар: ${p.link.url}`:'')+`\nhttps://…/p/демо`;}
+  return `${p.title} к ${fmtDate(c.date)}, ${rub(c.sum)}. ${rub(c.mine)} беру на себя`+(c.gap?`. Посмотри, сможешь ли добавить, — там видно только покупку, а не мои деньги.`:'. Всё сходится 👍')+(p.link?`\nТовар: ${p.link.url}`:'')+`\nhttps://…/p/демо`;}
 function renderShare(){ $('m-text').textContent=shareText(S.remind); $('sh-h').textContent=S.remind?'Напомнить партнёру':'Отправить партнёру'; $('sh-copied').hidden=true; }
 function markSent(){const p=P(); if(p.partner==='none'||p.partner==='revoked'){p.partner='sent';p.sentAt=Date.now();} save();}
 
@@ -972,7 +993,7 @@ function renderPurchase(){
   $('pu-of').textContent=`собрано из ${rub(c.sum)}`+(c.gap?` · не хватает по плану ${rub(c.gap)}`:'');
   $('pu-bar').querySelector('i').style.width=Math.min(100,Math.round(c.collected/c.sum*100))+'%';
   $('pu-bar').setAttribute('aria-valuenow',Math.round(c.collected/c.sum*100));
-  const pst={none:['не звали','off'],sent:['ещё не открыл приглашение','off'],opened:['открыл, пока не ответил','off'],accepted:[c.partner?`вносит ${rub(c.partner)}`:'принял','on'],left:['удалил свои данные','off'],revoked:['приглашение отозвано','off']}[p.partner];
+  const pst={none:['ещё не знает','off'],sent:['ещё не открыл приглашение','off'],opened:['открыл, пока не ответил','off'],accepted:[c.partner?`вносит ${rub(c.partner)}`:'принял','on'],left:['удалил свои данные','off'],revoked:['приглашение отозвано','off']}[p.partner];
   const late=p.partner==='sent'&&p.sentAt&&Date.now()-p.sentAt>48*3600e3;
   const waiting=p.partner==='sent'||p.partner==='opened';
   let partnerRight=`<span class="pill ${pst[1]}${waiting?' live':''}">${pst[0]}</span>`;
@@ -981,9 +1002,10 @@ function renderPurchase(){
   if(late) partnerNote=`<div class="note" style="margin:var(--s2) 0 var(--s2)">Приглашение отправлено 2 дня назад и не открыто.</div><button class="btn btn-line" data-act="remind">Напомнить партнёру</button>`;
   if(p.partner==='accepted'&&p.acceptedAt) partnerNote=`<div class="cap" style="margin-top:var(--s1)">Принял ${new Date(p.acceptedAt).toLocaleString('ru-RU',{day:'numeric',month:'long',hour:'2-digit',minute:'2-digit'})}. <br><button class="link" data-act="chRevoke">Это не ваш партнёр? Отозвать приглашение</button></div>`;
   if(p.partner==='none'&&!p.alone) partnerNote=`<div style="margin-top:var(--s2)"><button class="btn btn-line" data-act="toShare">Позвать партнёра</button></div>`;
-  $('pu-who').innerHTML=`<div class="who"><div><b>Вы</b></div><div class="r"><span class="pill ${c.onPlan?'on':'off'}">${c.onPlan?'по плану':'отстаёте'}</span></div></div>`+
+  $('pu-who').innerHTML=`<div class="who"><div><b>Вы</b></div><div class="r"><span class="pill ${c.onPlan?'on':'off'}">${c.onPlan?'по плану':`догнать план: ≈ ${rub(c.perDay)} в день`}</span></div></div>`+
     (p.alone&&p.partner==='none'?'':`<div class="who"><div><b>Партнёр</b></div><div class="r">${partnerRight}</div></div>${partnerNote}`);
   $('pu-prod').innerHTML=p.link?prodCard(p.link,{open:true}):'';
+  $('pu-seg').innerHTML=S.seg?'':`<div class="card priv"><p style="font-weight:600;margin-bottom:var(--s2)">Один вопрос: как вы решали последнюю крупную покупку?</p><div class="chips" style="margin:0">`+[['скинулись долями','Скинулись, каждый своей частью'],['обсудили, заплатил один','Обсудили, заплатил один'],['с общего счёта','С общего счёта'],['не обсуждали','Не обсуждали'],['не было','Не было крупных'],['пропустил','Пропустить']].map(([v,t])=>`<button class="chip" data-seg="${v}">${t}</button>`).join('')+`</div></div>`;
   const L=p.link; $('pu-price').innerHTML=L&&L.newPrice&&L.newPrice!==(L.chosenPrice||L.price)&&p.status!=='cancelled'?
     `<div class="card priv"><p style="margin:0 0 var(--s2)"><b>${esc(L.store)}: цена ${L.newPrice>(L.chosenPrice||L.price)?'выросла':'снизилась'} — ${rub(L.chosenPrice||L.price)} → ${rub(L.newPrice)}</b> (${L.newPrice>(L.chosenPrice||L.price)?'+':'−'}${rub(Math.abs(L.newPrice-(L.chosenPrice||L.price)))}). Пересчитать план под новую цену?</p><div class="row-btns"><button class="btn btn-calm" data-act="priceKeep">Оставить ${rub(p.sum)}</button><button class="btn btn-main" data-act="priceUse">Пересчитать</button></div></div>`:'';
   $('pu-took').innerHTML=p.took?`<div class="status calm"><div class="k">План пересчитан — так бывает</div><div class="sub">Вы взяли ${rub(p.took.v)} из отложенного. Чтобы успеть к ${fmtDate(c.date)}, откладывать ≈ ${rub(c.perDay)} в день вместо ${rub(p.took.before)}.${p.took.shift?'':` Или сдвинуть срок на ${fmtDate(fromIso(p.took.altDate))} — и остаться на ${rub(p.took.before)} в день.`}</div>${p.took.shift?'':`<button class="btn btn-line" data-act="tookShift" style="margin-top:var(--s3)">Сдвинуть срок на ${fmtDate(fromIso(p.took.altDate))}</button>`}<button class="btn-quiet btn" data-act="tookOk">Понятно</button></div>`:'';
@@ -998,6 +1020,7 @@ function overCard(over,mine){return `<div class="card priv"><p style="margin:0 0
 /* ---------- сегодня ---------- */
 function renderToday(){
   if(S.inc==null){go(S.source?'income':'source');return;}
+  if($('st-demo')) $('st-demo').hidden=!S.obsMode;
   const d=daily(), over=d.left<0;
   $('t-date').textContent=new Date().toLocaleDateString('ru-RU',{weekday:'long',day:'numeric',month:'long'});
   $('t-status').className='status '+(over?'calm':'ok');
@@ -1008,10 +1031,11 @@ function renderToday(){
   $('t-list').innerHTML=d.todays.map(s=>`<li><span>${s.what?esc(s.what):'<span class="muted">без подписи</span>'}</span><span>${rub(s.v)}</span></li>`).join('');
   const unl=S.spends.filter(s=>!s.what).length; $('t-unl').hidden=!unl; $('t-unl').textContent=`${unl} ${plural(unl,'трата','траты','трат')} без подписи — подпишите, когда будет минутка. На остаток это не влияет.`;
   const n=active().length; $('t-plan').textContent=`На ${n>1?n+' '+plural(n,'покупку','покупки','покупок'):'покупку'} откладывается ≈ ${rub(d.reserve)} в день. Партнёр этого не видит.`;
-  const src=S.source==='statement'?'выписки':'ваших слов';
+  const src=S.source==='statement'&&S.stmt?`выписки по ${new Date(S.stmt.to).toLocaleDateString('ru-RU')}`:'ваших слов';
   $('t-how-b').innerHTML=`Источник — ${src}. Приход ${rub(+S.inc)} в месяц − обязательные ${rub(+S.must)} − на покупки ${rub(d.reserve*30)} = ${rub(d.month)} на себя в месяц, ≈ ${rub(d.per)} в день.`+
     (d.np?` До следующей зарплаты ${d.np.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})} — ${d.toPay} ${plural(d.toPay,'день','дня','дней')}: на себя за это время ≈ ${rub(Math.max(0,d.per*d.toPay-d.spent))}.`:' Дни зарплаты не указаны — считаю по среднему дню месяца.')+` Сегодня потрачено ${rub(d.spent)}.`;
   $('t-stmt').textContent=S.stmt?'Разбор выписки и советы к цели':'Где сэкономить на покупку — разбор выписки';
+  const pa=payAmount(); $('t-push').innerHTML=!pa?'':S.push?`<div class="banner">🔔 Напомню ${pa.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}, в день зарплаты: отложить ≈ ${rub(pa.sum)} на покупки.${S.pushStmt&&S.stmt?' Раз в месяц — обновить выписку.':''}</div>`:`<div class="card priv"><p style="margin:0 0 var(--s2)"><b>Напомнить в день зарплаты?</b> ${pa.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})} пришлю: «отложить ≈ ${rub(pa.sum)} на ${active().length>1?'покупки':esc(active()[0].title.toLowerCase())}» — отметите одним касанием.</p><button class="btn btn-line" data-act="pushSetup">Напоминать</button></div>`;
   log('daily_left_shown',{left:d.left,per:d.per});
 }
 function addSpend(text,src){
@@ -1022,6 +1046,7 @@ function addSpend(text,src){
 
 /* ---------- данные ---------- */
 function renderData(){
+  if($('d-push')) $('d-push').firstChild.textContent=S.push?'Напоминания: включены — выключить':'Напоминания в день зарплаты';
   const n=S.purchases.length; $('d-src').textContent=S.source==='statement'?'выписка':S.source==='manual'?'вручную':'не выбрано'; $('d-stmtdel').hidden=!S.stmt;
   $('d-what').innerHTML=[['Покупки',n?`${n} ${plural(n,'покупка','покупки','покупок')}`:'нет'],['Приходы и обязательные траты',S.inc!=null?'заданы':'нет'],['Записанные траты',S.spends.length||'нет'],['Разбор выписки',S.stmt?`${S.stmt.count} операций, файл не хранится`:'нет'],['Где хранится','серверы в России']].map(([a,b])=>`<li><span>${a}</span><span class="muted">${b}</span></li>`).join('');
 }
@@ -1035,7 +1060,7 @@ function renderPartner(){
   countTo($('ph-hero'),c.collected);
   $('ph-of').textContent=`собрано вместе из ${rub(c.sum)}`+(c.gap?` · не хватает ${rub(c.gap)}`:'');
   $('ph-bar').querySelector('i').style.width=Math.min(100,Math.round(c.collected/c.sum*100))+'%';
-  $('ph-who').innerHTML=`<div class="who"><div><b>Второй участник</b><span class="cap">${S.ownerLeft?'вышел из покупки':'суммы не показываем'}</span></div><div class="r"><span class="pill ${S.ownerLeft?'off':(c.onPlan?'on':'off')}">${S.ownerLeft?'вышел':(c.onPlan?'по плану':'отстаёт')}</span></div></div>`;
+  $('ph-who').innerHTML=`<div class="who"><div><b>Второй участник</b><span class="cap">${S.ownerLeft?'вышел из покупки':'суммы не показываем'}</span></div><div class="r"><span class="pill ${S.ownerLeft?'off':(c.onPlan&&p.saved?'on':'off')}">${S.ownerLeft?'вышел':(!p.saved?'только начали':(c.onPlan?'по плану':'нужна помощь'))}</span></div></div>`;
   $('ph-over').innerHTML=c.over?`<div class="card priv"><p style="margin:0 0 var(--s2)"><b>Вы вдвоём вносите на ${rub(c.over)} больше суммы.</b> Уменьшить вашу часть до ${rub(c.partner-c.over)}?</p><div class="row-btns"><button class="btn btn-calm" data-act="overKeep">Оставить</button><button class="btn btn-main" data-act="pOverFix">Уменьшить</button></div></div>`:'';
   $('ph-mine').innerHTML=`<div class="row"><span>Ваша часть</span><span>${rub(c.partner)}</span></div><div class="row"><span>Отложено</span><span>${rub(p.partnerSaved||0)}</span></div>`;
 }
@@ -1127,16 +1152,17 @@ function goalFor(){ const p=active()[0]; if(!p) return null; const c=calc(p); re
 function planSum(){ const A=S.stmt; if(!A) return 0; return tipsFor(A).filter(t=>S.tipsOn&&S.tipsOn[t.id]).reduce((a,t)=>a+t.monthly,0); }
 function renderStmt(){
   const A=S.stmt; if(!A){go('stmtIntro');return;}
-  $('sr-period').textContent=`${A.from.toLocaleDateString('ru-RU')} – ${A.to.toLocaleDateString('ru-RU')} · ${A.count} операций`;
+  const npS=A.income.days.length?nextPay(A.income.days):null;
+  $('sr-period').textContent=`по ${S.stmtSrc==='screenshot'?`${S.shots||1} ${plural(S.shots||1,'снимку','снимкам','снимкам')}`:'выписке'} с ${new Date(A.from).toLocaleDateString('ru-RU')} по ${new Date(A.to).toLocaleDateString('ru-RU')}`+(npS?` · обновить после зарплаты ${npS.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}`:'');
   const short=A.days<45; $('sr-short').hidden=!short; $('sr-short').textContent=short?`Выписка всего за ${A.days} ${plural(A.days,'день','дня','дней')}: регулярные платежи видны, только если повторились дважды. Для точных советов нужна выписка за 2–3 месяца.`:'';
   const T=tipsFor(A), G=goalFor(); S.tipsOn=S.tipsOn||{};
   const plan=planSum();
   if(G){ const toDate=Math.round(plan*G.c.days/30.4), gap=G.c.gap, left=Math.max(0,gap-toDate);
     $('sr-goal').innerHTML=`<div class="status ${gap?(left?'gap':'ok'):'ok'}"><div class="k">${esc(G.p.title)} к ${fmtDate(G.c.date)}</div>`+
-      (gap?`<div class="hero num" style="font-size:32px">${left?'не хватает '+rub(left):'сходится'}</div><div class="sub">${plan?`${S.autoPicked&&!left?`недостающие ${rub(gap)} нашлись в ваших же тратах: `:''}с ${Object.values(S.tipsOn).filter(Boolean).length===1?'этим шагом':'этими шагами'} за ${G.c.days} ${plural(G.c.days,'день','дня','дней')} наберётся ещё ≈ ${rub(toDate)} из ${rub(gap)}`:`не хватает ${rub(gap)} — отметьте шаги ниже`}</div>`
+      (gap?`<div class="hero num" style="font-size:32px">${left?'не хватает '+rub(left):'сходится'}</div><div class="sub">${plan?(left?`с ${Object.values(S.tipsOn).filter(Boolean).length===1?'этим шагом':'этими шагами'} к ${fmtDate(G.c.date)} наберётся ≈ ${rub(Math.round(toDate/100)*100)} из недостающих ${rub(gap)}`:`недостающие ${rub(gap)} нашлись в ваших же тратах: к ${fmtDate(G.c.date)} наберётся ≈ ${rub(Math.round(toDate/100)*100)}`+(toDate-gap>=100?` — на ${rub(Math.round((toDate-gap)/100)*100)} больше нужного`:'')):`не хватает ${rub(gap)} — отметьте шаги ниже`}</div>`
         :`<div class="hero num" style="font-size:32px">сходится</div><div class="sub">шаги ниже помогут отложить быстрее</div>`)+`</div>`; }
   else $('sr-goal').innerHTML=`<div class="note">Покупки пока нет — советы покажу в рублях в месяц. <button class="link" data-act="newPurchase">Добавить покупку</button></div>`;
-  $('sr-tipcap').textContent=S.autoPicked?'Я подобрал самые выгодные шаги, которых хватает на покупку. Снимите то, что не подходит. Суммы — оценка по вашим тратам; числа считает программа.':'Отметьте, что готовы попробовать. Суммы — оценка по вашим тратам; числа считает программа.';
+  $('sr-tipcap').textContent=S.autoPicked?'Отметил шаги, которых хватает. Лишнее снимите.':'Отметьте, что готовы попробовать.';
   $('sr-tips').innerHTML=T.length?T.map(t=>{ const on=!!S.tipsOn[t.id]; const eff=G&&G.c.gap?` · к сроку ≈ ${rub(Math.round(t.monthly*G.c.days/30.4))}`:'';
     return `<div class="tip" aria-pressed="${on}"><div class="tx"><b>${esc(t.title)}</b>${esc(t.why)}<small class="num">+${rub(t.monthly)} в месяц${eff}</small></div><button class="tg" data-tip="${t.id}" aria-pressed="${on}">${on?'В плане':'Беру'}</button></div>`; }).join('')
     :'<p class="muted small">Необязательных трат, на которых заметно сэкономить, я не нашёл.</p>';
@@ -1147,12 +1173,23 @@ function renderStmt(){
   if(A.subs.length) F.push(`<div class="fact">Подписок: ${A.subs.length} на ${rub(A.subs.reduce((a,x)=>a+x.amount,0))} в месяц<small>${A.subs.map(x=>esc(x.name)).join(', ')}</small></div>`);
   $('sr-facts').innerHTML=F.join('');
   const max=Math.max(1,...A.cats.map(c=>c.monthly)); $('sr-cats').innerHTML=A.cats.slice(0,7).map(c=>`<div class="bar-row"><span>${esc(c.name)}</span><span>${rub(c.monthly)}</span><i><b style="width:${Math.round(c.monthly/max*100)}%"></b></i></div>`).join('');
-  S.recOk=S.recOk||{}; $('sr-rec').innerHTML=A.recurring.map(r=>{ const st=S.recOk[r.key]; return `<div class="rec"><span>${esc(r.name)} · ${r.day}-го<br><b class="num">${rub(r.amount)}</b></span><span class="ctl"><button data-rec="${esc(r.key)}" data-v="1" aria-pressed="${st!==false}">Регулярный</button><button data-rec="${esc(r.key)}" data-v="0" aria-pressed="${st===false}">Нет</button></span></div>`; }).join('')||'<p class="muted small">Регулярных платежей не нашёл.</p>';
+  const subT=A.subs.reduce((a,x)=>a+x.amount,0);
+  $('sr-subs').innerHTML=A.subs.length?`<div class="sec-h">Подписки</div><div class="rows num">`+A.subs.map(x=>`<div class="row"><span>${esc(x.name)} · ${x.day}-го</span><span>${rub(x.amount)} в месяц</span></div>`).join('')+`</div><p class="cap">Всего ${A.subs.length} на ${rub(subT)} в месяц.${G&&G.c.gap?` Каждая отменённая — плюс к покупке: ${rub(A.subs[0].amount)} в месяц дают к ${fmtDate(G.c.date)} ≈ ${rub(Math.round(A.subs[0].amount*G.c.days/30.4))}.`:''}</p>`:'';
+  S.recOk=S.recOk||{}; const recAsk=A.recurring.filter(r=>/перевод|\[человек\]/i.test(r.name)), recAuto=A.recurring.filter(r=>!recAsk.includes(r));
+  const recRow=r=>{ const st=S.recOk[r.key]; return `<div class="rec"><span>${esc(r.name)} · ${r.day}-го<br><b class="num">${rub(r.amount)}</b></span><span class="ctl"><button data-rec="${esc(r.key)}" data-v="1" aria-pressed="${st!==false}">Регулярный</button><button data-rec="${esc(r.key)}" data-v="0" aria-pressed="${st===false}">Нет</button></span></div>`; };
+  if(!S.recAll){ $('sr-rec').innerHTML=(recAuto.length?`<p class="small" style="margin:0 0 var(--s2)">Считаю обязательными: ${recAuto.filter(r=>S.recOk[r.key]!==false).map(r=>`${esc(r.name)} ${rub(r.amount)}`).join(', ')}. <button class="link" data-act="recAll">Что-то лишнее?</button></p>`:'')+(recAsk.length?`<p class="cap" style="margin:var(--s2) 0">Переводы людям — это регулярный платёж?</p>`+recAsk.map(recRow).join(''):''); }
+  else $('sr-rec').innerHTML=A.recurring.map(r=>{ const st=S.recOk[r.key]; return `<div class="rec"><span>${esc(r.name)} · ${r.day}-го<br><b class="num">${rub(r.amount)}</b></span><span class="ctl"><button data-rec="${esc(r.key)}" data-v="1" aria-pressed="${st!==false}">Регулярный</button><button data-rec="${esc(r.key)}" data-v="0" aria-pressed="${st===false}">Нет</button></span></div>`; }).join('')||'<p class="muted small">Регулярных платежей не нашёл.</p>';
   $('sr-clean').textContent=[A.own.count?`Переводы между своими счетами (${A.own.count}) — не траты, в расчёт не беру.`:'',A.refunds.count?`Возвраты (${A.refunds.count}, ${rub(A.refunds.sum)}) уменьшили траты категорий.`:'',A.fx?`Операции в валюте (${A.fx}) — посчитаны по сумме в рублях из выписки.`:'',A.dups?`Повторы операций (${A.dups}) пропустил.`:'',A.masked?`Скрыто персональных данных в описаниях: ${A.masked}.`:''].filter(Boolean).join(' ');
 }
 function mandatoryConfirmed(){ const A=S.stmt; return A.recurring.filter(r=>!(S.recOk&&S.recOk[r.key]===false)).reduce((a,r)=>a+r.amount,0); }
+function payAmount(){ const days=S.payDays&&S.payDays.length?S.payDays:null; if(!days||!active().length) return null; const d1=nextPay(days); if(!d1) return null;
+  let d2=null; for(let k=1;k<62;k++){ const d=addDays(d1,k); if(days.includes(d.getDate())){d2=d;break;} } const gap=d2?Math.round((d2-d1)/DAY):30;
+  const reserve=active().reduce((a,p)=>a+calc(p).perDay,0); return {date:d1,days:gap,sum:Math.round(reserve*gap/100)*100}; }
+function showPush(){ const pa=payAmount(); if(!pa) return false; const p=active()[0];
+  $('push').innerHTML=`<div class="ph"><span class="ic">₽</span><span>Крупная покупка к дате · сейчас</span></div><div class="pt">Зарплата пришла — отложите ≈ ${rub(pa.sum)}</div><p class="pb">${active().length>1?'На ваши покупки':'На '+esc(p.title.toLowerCase())} до следующей зарплаты. Партнёр увидит только общий прогресс.</p><div class="row-btns"><button class="btn btn-main" data-act="pushSaved">Отложил</button><button class="btn btn-calm" data-act="pushLater">Вечером</button></div>`;
+  $('push').hidden=false; log('push_payday_shown',{}); return true; }
 function nextPay(daysArr){ const t=today(); for(let k=0;k<62;k++){ const d=addDays(t,k); if(k>0&&daysArr.includes(d.getDate())) return d; } return null; }
-function loadStatement(ops,src){ const A=analyze(ops); if(A.error){ $('st-err').hidden=false; $('st-err').textContent=A.error==='empty'?'В файле нет операций. Проверьте период выгрузки или впишите деньги вручную.':'Не узнал формат файла.'; log('statement_error',{kind:A.error}); return; }
+function loadStatement(ops,src){ S.stmtSrc=src; S.recAll=false; const A=analyze(ops); if(A.error){ $('st-err').hidden=false; $('st-err').textContent=A.error==='empty'?'В файле нет операций. Проверьте период выгрузки или впишите деньги вручную.':'Не узнал формат файла.'; log('statement_error',{kind:A.error}); return; }
   S.stmt=A; S.tipsOn=autoPick(A); S.autoPicked=Object.keys(S.tipsOn).length>0; S.recOk={}; log('statement_parsed',{src,ops:A.count,days:A.days,rec:A.recurring.length,tips:tipsFor(A).length,auto:Object.keys(S.tipsOn).length}); go('stmtResult'); }
 function autoPick(A){ const G=goalFor(), on={}; if(!G||!G.c.gap) return on; let acc=0; for(const t of tipsFor(A)){ if(acc>=G.c.gap) break; on[t.id]=true; acc+=Math.round(t.monthly*G.c.days/30.4); } return on; }
 
@@ -1165,7 +1202,7 @@ function results(){ return ['Проверка на прототипе · '+new D
 
 /* ---------- карта экранов: фикстуры для проверки покрытия и для разработчика ---------- */
 function demoP(o){return Object.assign({id:'p1',title:'Котёл',sum:40000,date:iso(addDays(today(),52)),share:25000,partnerShare:null,saved:0,partnerSaved:0,partner:'none',sentAt:null,acceptedAt:null,status:'active',alone:false,created:iso(addDays(today(),-10))},o||{});}
-function fx(o,screen,after){ const keep={log:S.log,t0:S.t0}; S=Object.assign(fresh(),{consent:true},o||{}); S.log=keep.log; S.t0=keep.t0; if(S.purchases.length&&!S.cur) S.cur=S.purchases[0].id; save(); closeSheets(); go(screen); if(after) after(); }
+function fx(o,screen,after){ const keep={log:S.log,t0:S.t0}; S=Object.assign(fresh(),{consent:true},o||{}); S.log=keep.log; S.t0=keep.t0; if(S.purchases.length&&!S.cur) S.cur=S.purchases[0].id; save(); closeSheets(); $('push').hidden=true; go(screen); if(after) after(); }
 const LNK=o=>Object.assign({ok:true,host:'ozon.ru',store:'Ozon',title:'Котёл газовый Navien Deluxe S 24K',price:41990,cardPrice:39890,cardName:'по Ozon Карте',currency:'RUB',url:'https://www.ozon.ru/product/kotel-gazovyy-navien-deluxe-s-24k-1234567890/'},o||{});
 const ACC=()=>demoP({partner:'accepted',partnerShare:15000,acceptedAt:Date.now()-3600e3,saved:5000,partnerSaved:3000});
 const STATES=[
@@ -1191,7 +1228,7 @@ const STATES=[
  ['linkCurrency','Ссылка: цена в долларах',['3а'],[22],()=>fx({link:{ok:true,store:'AliExpress',title:'Кофемашина рожковая',price:189,currency:'USD',url:'https://aliexpress.ru/item/1.html'},foreign:true,linkNote:'На странице цена в другой валюте: 189 $.',draft:{title:'Кофемашина рожковая',date:addDays(today(),40),share:10000},clarify:'currency'},'clarify')],
  ['answerLink','Ответ по ссылке: карточка товара',['3а',4],[28],()=>fx({purchases:[demoP({title:'Котёл газовый Navien Deluxe S 24K',sum:41990,link:LNK({chosenPrice:41990})})]},'answer')],
  ['pInviteLink','Партнёр видит товар по ссылке',['3а',7],[],()=>fx({role:'partner',purchases:[demoP({title:'Котёл газовый Navien Deluxe S 24K',sum:41990,partner:'sent',sentAt:Date.now(),link:LNK({chosenPrice:41990})})]},'pInvite')],
- ['answerGap','Ответ: не хватает + совет + вопрос о сегменте',[4,5,13],[],()=>fx({purchases:[demoP()],tPhrase:Date.now()-20000},'answer')],
+ ['answerGap','Ответ: не хватает + совет',[4,5],[],()=>fx({purchases:[demoP()],tPhrase:Date.now()-20000},'answer')],
  ['answerOk','Ответ: сходится + как собрать в банке',[4,5,14],[],()=>fx({purchases:[demoP({share:40000,alone:true})],seg:'скинулись долями'},'answer')],
  ['share','Отправить партнёру',[6],[17],()=>fx({purchases:[demoP()]},'share')],
  ['pInvite','Партнёр: что увидит и чего нет',[7,8],[],()=>fx({role:'partner',purchases:[demoP({partner:'sent',sentAt:Date.now()})]},'pInvite')],
@@ -1200,7 +1237,12 @@ const STATES=[
  ['pOver','Партнёр: вдвоём больше суммы',[8],[6],()=>fx({role:'partner',purchases:[demoP({partner:'accepted',partnerShare:20000,saved:5000})]},'pHome')],
  ['pChanged','Партнёр: второй поменял долю',[9],[10],()=>fx({role:'partner',purchases:[demoP({partner:'accepted',partnerShare:15000,share:15000,ownerShareChanged:true,saved:4000,partnerSaved:3000})]},'pHome')],
  ['pLeft','Партнёр: второй удалил данные',[12],[21],()=>fx({role:'partner',ownerLeft:true,purchases:[demoP({partner:'accepted',partnerShare:15000,share:0,saved:0,partnerSaved:3000})]},'pHome')],
- ['purchase','Покупка: партнёр не звали',[9],[],()=>fx({purchases:[demoP()]},'purchase')],
+ ['purchase','Покупка: партнёр ещё не знает + вопрос о сегменте',[9,13],[],()=>fx({purchases:[demoP()]},'purchase')],
+ ['pushOffer','«Сегодня»: предложение напоминать в день зарплаты',[21],[],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual'},'today')],
+ ['pushSetup','Напоминания: на главный экран и разрешение',[21,17],[39],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual'},'today',()=>sheet('sh-push'))],
+ ['pushOn','«Сегодня»: напоминание включено',[21],[],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual',push:true},'today')],
+ ['pushPayday','Уведомление в день зарплаты: «Отложил» одним касанием',[21,9],[],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual',push:true},'purchase',()=>showPush())],
+ ['stmtShot','Выписка по снимкам экрана: мало дней',[22,19],[40,41,30],()=>fx({purchases:[demoP()],shots:3},'stmtResult',()=>{loadStatement(demoOps(39),'screenshot');})],
  ['purchaseSent','Покупка: приглашение не открыто 2 дня',[6,9],[8],()=>fx({purchases:[demoP({partner:'sent',sentAt:Date.now()-50*3600e3})]},'purchase')],
  ['purchaseAcc','Покупка: партнёр принял, можно отозвать',[8,9],[9],()=>fx({purchases:[ACC()]},'purchase')],
  ['purchaseSaved','Покупка: после первого «отложил» — предупреждение об устройстве',[9,16],[15],()=>fx({purchases:[ACC()]},'purchase')],
@@ -1268,7 +1310,7 @@ document.addEventListener('click',e=>{
   if(b.dataset.cv){clarifyChip(b.dataset.cv);return;}
   if(b.dataset.save){$('save-text').value=b.dataset.save;return;}
   if(b.dataset.inc){$('income').value=b.dataset.inc;const n=numsIn(b.dataset.inc).out;$('i-inc').value=n[0]?n[0].v:'';$('i-must').value=n[1]?n[1].v:'';return;}
-  if(b.dataset.seg){S.seg=b.dataset.seg;log('segment_answer',{seg:S.seg});$('a-seg').hidden=true;return;}
+  if(b.dataset.seg){S.seg=b.dataset.seg;log('segment_answer',{seg:S.seg});$('a-seg').hidden=true;if($('pu-seg'))$('pu-seg').innerHTML='';return;}
   const p=P();
   switch(b.dataset.act){
     case 'consent': log('consent',{}); go('phrase'); break;
@@ -1365,11 +1407,19 @@ document.addEventListener('click',e=>{
     case 'fbSend': { const t=$('fb-text').value.trim(); if(!t){$('fb-text').focus();return;} S.fb.push(t); log('feedback',{text:t,screen:S.screen}); sheet('sh-fbok'); break; }
     case 'close': closeSheets(); break;
     case 'srcManual': S.source='manual'; log('source_chosen',{src:'manual'}); go('income'); break;
-    case 'srcStatement': log('source_chosen',{src:'statement'}); go(S.stmt?'stmtResult':'stmtIntro'); break;
+    case 'srcStatement': log('source_chosen',{src:'statement'}); $('st-demo').hidden=!S.obsMode; go(S.stmt?'stmtResult':'stmtIntro'); break;
     case 'srcSwitch': go('source'); break;
     case 'stmtOpen': go(S.stmt?'stmtResult':'stmtIntro'); break;
     case 'stmtBack': go(S.stmt?'stmtResult':'source'); break;
     case 'toToday': go(S.inc!=null?'today':'source'); break;
+    case 'pushToggle': if(S.push){ S.push=false; log('push_disabled',{}); renderData(); } else sheet('sh-push'); break;
+    case 'pushSetup': sheet('sh-push'); log('push_offer_opened',{}); break;
+    case 'pushAllow': S.push=true; S.pushStmt=$('push-stmt').checked; log('push_enabled',{stmt:S.pushStmt}); closeSheets(); if(S.screen==='today') renderToday(); if(S.screen==='data') renderData(); break;
+    case 'pushOff': S.push=false; log('push_disabled',{}); renderData(); break;
+    case 'pushDemo': { $('obs').hidden=true; if(!showPush()) b.textContent='Нужны покупка и дни зарплаты'; break; }
+    case 'pushSaved': { const pa=payAmount(); $('push').hidden=true; if(pa){ const ps=active(), tot=ps.reduce((a,p)=>a+calc(p).perDay,0)||1; ps.forEach(p=>{ p.saved=(p.saved||0)+Math.round(pa.sum*calc(p).perDay/tot); }); S.cur=ps[0].id; log('saved_marked',{src:'push'}); go('purchase'); } break; }
+    case 'pushLater': $('push').hidden=true; log('push_snoozed',{}); break;
+    case 'recAll': S.recAll=true; renderStmt(); break;
     case 'stmtDemo': log('statement_consent',{}); $('st-busy-t').textContent='Разбираю демо-выписку…'; $('st-busy').hidden=false; setTimeout(()=>{ $('st-busy').hidden=true; loadStatement(demoOps(),'demo'); },900); break;
     case 'stmtUse': { const A=S.stmt; S.inc=A.income.monthly||S.inc; S.must=mandatoryConfirmed(); S.payDays=A.income.days.length?A.income.days:null; S.source='statement'; log('statement_used',{}); go('today'); break; }
     case 'stmtDel': confirmAsk('Удалить данные выписки?','Разбор, советы и найденные платежи сотрутся. Файл и так не хранился. «Сегодня» перейдёт на ручные цифры.','Удалить','stmtDel'); break;
@@ -1382,8 +1432,10 @@ document.addEventListener('click',e=>{
   }
   save();
 });
-document.addEventListener('change',e=>{ if(e.target.id==='st-file'&&e.target.files[0]){ const f=e.target.files[0]; log('statement_consent',{}); $('st-err').hidden=true;
-    if(/\.pdf$/i.test(f.name)){ $('st-err').hidden=false; $('st-err').textContent='PDF-выписки разберу после открытия. Сейчас — CSV-выгрузка операций из приложения банка или демо-выписка.'; log('statement_error',{kind:'pdf'}); e.target.value=''; return; }
+document.addEventListener('change',e=>{ if(e.target.id==='st-shot'&&e.target.files.length){ const n=e.target.files.length; e.target.value=''; log('statement_consent',{src:'screenshot'}); $('st-err').hidden=true;
+    $('st-busy-t').textContent=`Распознаю ${n} ${plural(n,'снимок','снимка','снимков')}…`; $('st-busy').hidden=false; setTimeout(()=>{ $('st-busy').hidden=true; S.shots=n; loadStatement(demoOps(Math.min(84,n*13)),'screenshot'); },1200); return; }
+  if(e.target.id==='st-file'&&e.target.files[0]){ const f=e.target.files[0]; log('statement_consent',{}); $('st-err').hidden=true;
+    if(/\.pdf$/i.test(f.name)){ e.target.value=''; $('st-busy-t').textContent='Разбираю PDF-выписку…'; $('st-busy').hidden=false; setTimeout(()=>{ $('st-busy').hidden=true; loadStatement(demoOps(),'pdf'); },900); return; }
     $('st-busy-t').textContent='Разбираю выписку…'; $('st-busy').hidden=false;
     f.arrayBuffer().then(buf=>{ let t; try{ t=new TextDecoder('utf-8',{fatal:true}).decode(buf); }catch(x){ t=new TextDecoder('windows-1251').decode(buf); }
       const r=parseCSV(t); $('st-busy').hidden=true; e.target.value='';
@@ -1396,9 +1448,9 @@ document.querySelectorAll('.sheet>.card').forEach(card=>{ let y0=null,dy=0;
   card.addEventListener('pointermove',e=>{ if(y0==null) return; dy=Math.max(0,e.clientY-y0); card.style.transform='translateY('+dy+'px)'; });
   const end=()=>{ if(y0==null) return; card.style.transition='transform var(--d-spatial) var(--m-spatial)'; if(dy>90){ const sh=card.parentElement; card.style.transform=''; if(sh.id==='obs') sh.hidden=true; else closeSheets(); log('sheet_swiped',{}); } else card.style.transform=''; y0=null; };
   card.addEventListener('pointerup',end); card.addEventListener('pointercancel',end); });
-let taps=0,tt; $('brand').addEventListener('click',()=>{taps++;clearTimeout(tt);tt=setTimeout(()=>taps=0,1500);if(taps>=5){taps=0;$('obs').hidden=false;renderMap();renderObs();}});
+let taps=0,tt; $('brand').addEventListener('click',()=>{taps++;clearTimeout(tt);tt=setTimeout(()=>taps=0,1500);if(taps>=5){taps=0;S.obsMode=true;save();$('obs').hidden=false;renderMap();renderObs();}});
 const qs=new URLSearchParams(location.search);
-if(qs.get('obs')==='1'){$('obs').hidden=false;renderMap();}
+if(qs.get('obs')==='1'){S.obsMode=true;save();$('obs').hidden=false;renderMap();}
 if(qs.get('s')){ window.__open(qs.get('s')); } else { go(S.screen||'consent'); }
 renderObs();
 </script>
