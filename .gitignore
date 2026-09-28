@@ -19,3 +19,17 @@ workshop-1-plan-results.pdf
 # PDF БТ и ТЗ собираются из Markdown: python tools/build_docs.py --pdf
 pdf/
 __pycache__/
+
+# Исследование и планирование — вне репозитория разработки (28.09.2026), см. HISTORY.md
+interviews/
+market/
+value/
+review/
+plan/
+dossier.html
+zayavka.html
+onboarding.html
+2026-09-01_17-55_lichnyy-finansovyy-kouch-market-research-result.html
+prototype/2026-09-22_usability-test-guide.md
+prototype/2026-09-24_coverage.md
+prototype/2026-09-24_design-research.md

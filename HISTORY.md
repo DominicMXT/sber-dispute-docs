@@ -58,6 +58,39 @@
 | 25.09.2026 | `tz/openspec/ — 12 файлов: project, proposal, design, tasks, 9 спецификаций` | ТЗ v0.9 в формате OpenSpec | tz/TZ_finance-assistant.md — ТЗ v1.0 одним документом | `b01fb78` | удалён |
 | 25.09.2026 | `tz/fixtures/ — 5 JSON и statement-demo.csv` | Тестовые векторы | tz/TZ_finance-assistant.md, Приложение Б (пересчитывает tools/vectors.js); выписка — tz/statement-demo.csv | `b01fb78` | удалён |
 
+## Снято с учёта 28.09.2026: репозиторий — только для разработки
+
+Разработчики попросили убрать из репозитория всё, что не нужно для сборки. Файлы остались на диске у владельца и в истории git.
+
+| Файл | Последняя версия | Статус |
+|---|---|---|
+| `2026-09-01_17-55_lichnyy-finansovyy-kouch-market-research-result.html` | `02b8d4f` | снят с учёта, файл на диске |
+| `dossier.html` | `02b8d4f` | снят с учёта, файл на диске |
+| `interviews/2026-09-21_P01-P09_analyze-interviews.html` | `02b8d4f` | снят с учёта, файл на диске |
+| `interviews/interview-kit.html` | `02b8d4f` | снят с учёта, файл на диске |
+| `interviews/score_assumption.py` | `02b8d4f` | снят с учёта, файл на диске |
+| `market/2026-09-21_competitor-research.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `market/2026-09-24_forum-barriers.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `market/2026-09-28_competitor-features-problems.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `market/2026-09-28_launch-platforms-ai-finance.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `onboarding.html` | `02b8d4f` | снят с учёта, файл на диске |
+| `plan/2026-09-21_stage1-plan.html` | `02b8d4f` | снят с учёта, файл на диске |
+| `prototype/2026-09-22_usability-test-guide.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `prototype/2026-09-24_coverage.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `prototype/2026-09-24_design-research.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `review/2026-09-21_diagnose-vs-constraint.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `review/2026-09-21_polozhenie-falsification-input.json` | `02b8d4f` | снят с учёта, файл на диске |
+| `review/2026-09-21_polozhenie-falsification-table.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `review/2026-09-21_review.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `review/2026-09-23_workshop-1-razbor.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `review/2026-09-28_trends-taxes-exits.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `value/2026-09-21_segment-a-value-proposition.html` | `02b8d4f` | снят с учёта, файл на диске |
+| `value/2026-09-21_vp-falsification-input.json` | `02b8d4f` | снят с учёта, файл на диске |
+| `value/2026-09-21_vp-falsification-table.md` | `02b8d4f` | снят с учёта, файл на диске |
+| `value/2026-09-24_job-graph-statement.html` | `02b8d4f` | снят с учёта, файл на диске |
+| `value/rice_segment_a.py` | `02b8d4f` | снят с учёта, файл на диске |
+| `zayavka.html` | `02b8d4f` | снят с учёта, файл на диске |
+
 ## Исходники, которые в репозиторий не попадают
 
 Лежат в папке проекта локально, перечислены в `.gitignore`:
