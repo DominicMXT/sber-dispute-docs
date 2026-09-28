@@ -4,19 +4,25 @@ import io, json, os, re, subprocess, sys
 sys.stdout.reconfigure(encoding="utf-8")
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 rd = lambda p: io.open(os.path.join(ROOT, p), encoding="utf-8").read()
-bt, tz, cov = rd("prd/BT_finance-assistant.md"), rd("tz/TZ_finance-assistant.md"), rd("prototype/2026-09-24_coverage.md")
+bt, tz = rd("prd/BT_finance-assistant.md"), rd("tz/TZ_finance-assistant.md")
+COV = os.path.join(ROOT, "prototype", "2026-09-24_coverage.md")  # покрытие прототипа живёт вне git; если его нет — сверка БТ ↔ ТЗ без него
+cov = io.open(COV, encoding="utf-8").read() if os.path.exists(COV) else None
 fails = []
 def check(name, ok, detail=""):
     print(("OK  " if ok else "FAIL"), name, ("— " + str(detail) if detail and not ok else ""))
     if not ok: fails.append(name)
 
-# 1. номера требований и случаев из покрытия прототипа
-req_cov = re.findall(r"^\| (\d+а?) \|", cov.split("## Требования")[1].split("## Пограничные")[0], re.M)
-case_cov = [int(x) for x in re.findall(r"^\| (\d+) \|", cov.split("## Пограничные случаи")[1].split("## Решения")[0], re.M)]
+# 1. номера требований и случаев: БТ — основа; покрытие прототипа — если есть на диске
 req_bt = re.findall(r"^\| Т-(\d+а?) \|", bt, re.M)
 case_bt = sorted(int(x) for x in re.findall(r"^\| (\d+) \|", bt.split("## 7. Пограничные случаи")[1].split("## 8.")[0], re.M))
-check(f"БТ: требования = покрытию ({len(req_cov)})", sorted(req_bt) == sorted(req_cov), set(req_cov) ^ set(req_bt))
-check(f"БТ: случаи = покрытию ({len(case_cov)})", case_bt == sorted(case_cov), set(case_cov) ^ set(case_bt))
+check(f"БТ: случаи 1–{len(case_bt)} подряд", case_bt == list(range(1, len(case_bt) + 1)), case_bt)
+if cov:
+    req_cov = re.findall(r"^\| (\d+а?) \|", cov.split("## Требования")[1].split("## Пограничные")[0], re.M)
+    case_cov = [int(x) for x in re.findall(r"^\| (\d+) \|", cov.split("## Пограничные случаи")[1].split("## Решения")[0], re.M)]
+    check(f"БТ: требования = покрытию прототипа ({len(req_cov)})", sorted(req_bt) == sorted(req_cov), set(req_cov) ^ set(req_bt))
+    check(f"БТ: случаи = покрытию прототипа ({len(case_cov)})", case_bt == sorted(case_cov), set(case_cov) ^ set(case_bt))
+else:
+    print("—   покрытие прототипа не найдено на диске — сверка только БТ ↔ ТЗ")
 
 # 2. ТЗ: все Т и случаи упомянуты
 req_tz = set(re.findall(r"(?<!Ф)Т-(\d+а?)\b", tz))
@@ -76,7 +82,7 @@ check(f"секреты и персональные данные: {len(files)} ф
 # 7. PDF
 try:
     import pypdf
-    for name in ["TZ_finance-assistant_v1.0.pdf", "BT_finance-assistant_v1.0.pdf"]:
+    for name in sorted(x for x in os.listdir(os.path.join(ROOT, "pdf")) if x.endswith(".pdf")):
         r = pypdf.PdfReader(os.path.join(ROOT, "pdf", name)); t = r.pages[0].extract_text()
         check(f"PDF {name}: {len(r.pages)} стр., кириллица читается", len(r.pages) > 3 and ("задание" in t or "требования" in t), t[:80])
 except ImportError:
