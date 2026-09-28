@@ -18,3 +18,4 @@ workshop-1-plan-results.pdf
 
 # PDF БТ и ТЗ собираются из Markdown: python tools/build_docs.py --pdf
 pdf/
+__pycache__/
