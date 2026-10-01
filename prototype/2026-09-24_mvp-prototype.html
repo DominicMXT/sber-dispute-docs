@@ -136,6 +136,18 @@ textarea{min-height:104px;resize:vertical}
 .row>span:last-child{font-weight:600;text-align:right}
 .coach{border-left:3px solid var(--shared);padding:2px 0 2px var(--s3);margin:0 0 var(--s4)}
 .coach ul{margin:0;padding-left:18px}.coach li{margin-bottom:6px}
+.chat{--ch:#2481CC;--ch-soft:#E3F0FA}
+.chat[data-ch="max"]{--ch:#5B3FD9;--ch-soft:#ECE8FB}
+.chat .bar{background:var(--ch);color:#fff;gap:10px}.chat .bar h2,.chat .bar .back{color:#fff}
+.chat .cav{flex:none;width:34px;height:34px;border-radius:50%;background:#fff;color:var(--ch);display:grid;place-items:center;font-weight:700}
+.cbody{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--soft)}
+.bub{max-width:86%;padding:8px 12px;border-radius:14px;white-space:pre-wrap;font-size:15px;line-height:1.38}
+.bub.bot{align-self:flex-start;background:var(--card);color:var(--ink);border-bottom-left-radius:4px;box-shadow:var(--lift)}
+.bub.me{align-self:flex-end;background:var(--ch-soft);color:#0B1A2A;border-bottom-right-radius:4px}
+.bub .bcap{display:block;margin-top:4px;font-size:11px;color:var(--ink3)}
+.ikb{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.ikb button{flex:1 1 auto;min-height:40px;border-radius:10px;border:0;background:var(--ch-soft);color:#0B1A2A;font:inherit;font-size:14px;font-weight:600;padding:6px 10px;cursor:pointer}
+.cin{display:flex;gap:8px;padding:8px;background:var(--card);border-top:1px solid var(--line)}.cin input{flex:1;min-width:0}
+.cin button{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:var(--ch);color:#fff;font-size:18px;cursor:pointer}
 .msg{background:var(--soft);border-radius:14px 14px 14px 4px;padding:12px 14px;margin:var(--s2) 0 var(--s4);white-space:pre-wrap}
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:var(--s3) 0 var(--s4)}
 .cols>div{border-radius:var(--r-md);padding:var(--s3);font-size:14px}
@@ -426,7 +438,7 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
     </ul>
     <p class="small"><b>Какую выписку:</b> свою, за последние 2–3 месяца — так регулярные платежи успевают повториться. Выписку партнёра не загружайте: это его данные.</p>
     <p class="small"><b>Подойдёт:</b> CSV из приложения банка, PDF-выписка Сбербанка или снимки экрана со списком операций — несколько штук, чтобы захватить 2–3 месяца.</p>
-    <p class="small" style="background:var(--calm-soft);border-radius:var(--r-sm);padding:10px 12px"><b>Про снимки экрана.</b> Снимок уходит в GigaChat целиком — вместе с именами и номерами, если они на нём видны. В разбор и в базу они не попадут, сам снимок удаляю сразу после распознавания.</p>
+    <p class="small" style="background:var(--calm-soft);border-radius:var(--r-sm);padding:10px 12px"><b>Про снимки экрана.</b> Снимок распознаю на своём сервере в России; имена, номера карт и телефонов скрываю до GigaChat. Сам снимок удаляю сразу после распознавания.</p>
     <p class="cap">Нажимая кнопку ниже, вы соглашаетесь на разбор по этим правилам.</p>
     <div class="busy" id="st-busy" hidden><i></i><span id="st-busy-t">Разбираю выписку…</span></div>
   </div>
@@ -560,6 +572,13 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
   </div>
 </section>
 
+<!-- Бот в Telegram или Max (30.09): напоминания, утреннее «сегодня на себя», траты и «влезет ли» сообщением. Мини-приложение — тот же веб. -->
+<section class="screen chat" data-s="chat" data-ch="tg" hidden>
+  <div class="bar"><button class="back" data-act="chatBack" aria-label="Назад">←</button><span class="cav" aria-hidden="true">₽</span><div style="flex:1;min-width:0"><h2 style="margin:0">Крупная покупка к дате</h2><span class="small" id="c-sub" style="opacity:.85">бот · Telegram</span></div></div>
+  <div class="cbody" id="c-body" aria-live="polite"></div>
+  <div class="cin"><input type="text" id="c-in" placeholder="«кофе 300» или «влезут кроссовки за 7000?»" autocomplete="off" aria-label="Сообщение боту"><button data-act="chatSend" aria-label="Отправить">➤</button></div>
+</section>
+
 <nav class="tabs" id="tabs" hidden aria-label="Разделы">
   <button data-tab="purchases">Покупки</button>
   <button data-tab="today">Сегодня</button>
@@ -584,7 +603,7 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
   <h3>Как мы обращаемся с данными</h3>
   <ul class="small" style="padding-left:18px;margin:0 0 var(--s3)">
     <li><b>Что храним:</b> покупки, суммы, сроки, доли, отложенное, приходы и обязательные траты, записанные траты, ответы на вопросы.</li>
-    <li><b>Что уходит в GigaChat:</b> текст фразы — номера карт и телефонов заменяются до отправки; снимки экрана с операциями, если вы их выбрали, — целиком, после распознавания удаляются. Суммы считает программа.</li>
+    <li><b>Что уходит в GigaChat:</b> текст фразы — номера карт и телефонов заменяются до отправки; снимки экрана с операциями распознаются на нашем сервере в России — в GigaChat уходит только текст без имён и номеров, снимки удаляются сразу. Суммы считает программа.</li>
     <li><b>Что видит партнёр:</b> покупку, общую сумму, сколько собрано вместе и свою часть. Метку «по плану» у второго — только после его первой отметки «отложил», без сумм.</li>
     <li><b>Где и сколько:</b> серверы в России, 12 месяцев с последнего входа.</li>
     <li><b>Удаление:</b> «Мои данные» → «Удалить все мои данные». Остаются только обезличенные записи о действиях.</li>
@@ -654,13 +673,18 @@ details.how div{font-size:14px;color:var(--ink2);padding-bottom:var(--s3)}
 
 <div class="push" id="push" role="alert" hidden></div>
 <div class="sheet" id="sh-push" hidden><div class="card">
-  <h3>Напоминать в день зарплаты</h3>
-  <p class="cap">Уведомления на телефоне работают, когда приложение стоит на главном экране.</p>
-  <p class="small"><b>1. Поставьте на главный экран.</b> iPhone, Safari: «Поделиться» → «На экран „Домой“». Android, Chrome: меню ⋮ → «Добавить на главный экран».</p>
-  <p class="small"><b>2. Разрешите уведомления</b> — телефон спросит один раз.</p>
-  <label class="small" style="display:flex;gap:8px;align-items:center;margin:0 0 var(--s3)"><input type="checkbox" id="push-stmt" checked> И раз в месяц — обновить выписку</label>
-  <p class="cap">Пишу только в день зарплаты и раз в месяц. Отключить — в «Моих данных».</p>
-  <button class="btn btn-main" data-act="pushAllow">Разрешить уведомления</button>
+  <h3>Где напоминать?</h3>
+  <p class="cap">В мессенджере ничего ставить не нужно — напишет бот. Там же можно записать трату и спросить «влезет ли».</p>
+  <button class="btn btn-main" data-act="chanPick" data-ch="max">В Max — траты и «влезет ли» прямо в чате</button>
+  <button class="btn btn-line" data-act="chanPick" data-ch="tg" style="margin-top:var(--s2)">В Telegram — только напоминания</button>
+  <label class="small" style="display:flex;gap:8px;align-items:center;margin:var(--s3) 0 0"><input type="checkbox" id="push-morning" checked> По утрам — сколько сегодня на себя</label>
+  <label class="small" style="display:flex;gap:8px;align-items:center;margin:6px 0 var(--s2)"><input type="checkbox" id="push-stmt" checked> Раз в месяц — обновить выписку</label>
+  <p class="cap">Откроется мессенджер → «Старт». Ссылка одноразовая: связывает бота с вашими покупками. Партнёр этот чат не видит. Отключить — в «Моих данных».</p>
+  <details style="margin:0 0 var(--s2)"><summary class="small" style="min-height:36px;cursor:pointer">Без мессенджера — уведомлением на телефоне</summary>
+    <p class="small"><b>1. Поставьте на главный экран.</b> iPhone, Safari: «Поделиться» → «На экран „Домой“». Android, Chrome: меню ⋮ → «Добавить на главный экран».</p>
+    <p class="small"><b>2. Разрешите уведомления</b> — телефон спросит один раз. Пишу только в день зарплаты.</p>
+    <button class="btn btn-line" data-act="pushAllow">Разрешить уведомления</button>
+  </details>
   <button class="btn btn-quiet" data-act="close">Не сейчас</button>
 </div></div>
 
@@ -700,7 +724,7 @@ const rub=n=>Math.round(n).toLocaleString('ru-RU')+' ₽';
 const fmtDate=d=>d.toLocaleDateString('ru-RU',{day:'numeric',month:'long'});
 const plural=(n,a,b,c)=>{n=Math.abs(n)%100;const m=n%10;return n>10&&n<20?c:m===1?a:m>=2&&m<=4?b:c};
 
-const fresh=()=>({screen:'consent',role:'owner',t0:Date.now(),tPhrase:null,tAnswer:null,hints:0,edits:0,
+const fresh=()=>({chat:[],channel:null,llm:0,morning:false,screen:'consent',role:'owner',t0:Date.now(),tPhrase:null,tAnswer:null,hints:0,edits:0,
   purchases:[],cur:null,draft:null,parsed:null,phrase:'',seg:null,inc:null,must:null,spends:[],fb:[],log:[],
   flags:{gigaFail:false,offline:false,rateLimit:false},deviceWarned:false,fieldsMode:'edit',clarify:null,ask:null,confirm:null});
 let S; try{S=Object.assign(fresh(),JSON.parse(localStorage.getItem(KEY))||{})}catch(e){S=fresh()}
@@ -816,6 +840,11 @@ function daily(){
   const td=iso(today()); const todays=S.spends.filter(s=>s.day===td); const spent=todays.reduce((a,b)=>a+b.v,0);
   return {per,left:per-spent,spent,reserve,todays,np,toPay,month};
 }
+// «Влезет ли?» (ТЗ 4.9): сегодня → до зарплаты → не влезет. Отложенное на покупки не трогаем.
+function afford(v,d){ const untilPay=d.np?Math.max(0,d.per*d.toPay-d.spent):null;
+  if(v<=d.left) return {fits:'today',after:d.left-v};
+  if(untilPay!=null&&v<=untilPay){ const rem=Math.max(1,d.toPay-1); return {fits:'untilPay',over:v-d.left,perDay:Math.floor((untilPay-v)/rem),untilPay}; }
+  return {fits:'no',short:v-(untilPay!=null?untilPay:Math.max(0,d.left)),untilPay}; }
 
 /* ---------- навигация ---------- */
 const TABBED=['purchases','purchase','income','today','data','source','stmtResult'];
@@ -835,6 +864,7 @@ function sheet(id){document.querySelectorAll('.sheet').forEach(e=>{if(e.id!=='ob
 function closeSheets(){document.querySelectorAll('.sheet').forEach(e=>{if(e.id!=='obs')e.hidden=true});}
 
 const RENDER={
+  chat: renderChat,
   phrase(){ S.tPhrase=S.tPhrase||Date.now(); $('ph-offline').hidden=!(S.flags.offline&&S.phrase); $('ph-limit').hidden=!(S.flags.rateLimit&&S.phrase); $('busy').hidden=true; },
   clarify: renderClarify,
   fields: renderFields,
@@ -1035,7 +1065,7 @@ function renderToday(){
   $('t-how-b').innerHTML=`Источник — ${src}. Приход ${rub(+S.inc)} в месяц − обязательные ${rub(+S.must)} − на покупки ${rub(d.reserve*30)} = ${rub(d.month)} на себя в месяц, ≈ ${rub(d.per)} в день.`+
     (d.np?` До следующей зарплаты ${d.np.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})} — ${d.toPay} ${plural(d.toPay,'день','дня','дней')}: на себя за это время ≈ ${rub(Math.max(0,d.per*d.toPay-d.spent))}.`:' Дни зарплаты не указаны — считаю по среднему дню месяца.')+` Сегодня потрачено ${rub(d.spent)}.`;
   $('t-stmt').textContent=S.stmt?'Разбор выписки и советы к цели':'Где сэкономить на покупку — разбор выписки';
-  const pa=payAmount(); $('t-push').innerHTML=!pa?'':S.push?`<div class="banner">🔔 Напомню ${pa.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}, в день зарплаты: отложить ≈ ${rub(pa.sum)} на покупки.${S.pushStmt&&S.stmt?' Раз в месяц — обновить выписку.':''}</div>`:`<div class="card priv"><p style="margin:0 0 var(--s2)"><b>Напомнить в день зарплаты?</b> ${pa.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})} пришлю: «отложить ≈ ${rub(pa.sum)} на ${active().length>1?'покупки':esc(active()[0].title.toLowerCase())}» — отметите одним касанием.</p><button class="btn btn-line" data-act="pushSetup">Напоминать</button></div>`;
+  const pa=payAmount(); $('t-push').innerHTML=!pa?'':S.channel?`<div class="banner">💬 Бот в ${CH[S.channel].name}: ${S.morning?'утром — сколько сегодня на себя, ':''}${pa.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})} — отложить ≈ ${rub(pa.sum)}. <button class="link" data-act="chatOpen">Открыть чат</button></div>`:S.push?`<div class="banner">🔔 Напомню ${pa.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})}, в день зарплаты: отложить ≈ ${rub(pa.sum)} на покупки.${S.pushStmt&&S.stmt?' Раз в месяц — обновить выписку.':''}</div>`:`<div class="card priv"><p style="margin:0 0 var(--s2)"><b>Напомнить в день зарплаты?</b> ${pa.date.toLocaleDateString('ru-RU',{day:'numeric',month:'long'})} пришлю: «отложить ≈ ${rub(pa.sum)} на ${active().length>1?'покупки':esc(active()[0].title.toLowerCase())}» — отметите одним касанием.</p><button class="btn btn-line" data-act="pushSetup">Напоминать</button></div>`;
   log('daily_left_shown',{left:d.left,per:d.per});
 }
 function addSpend(text,src){
@@ -1069,8 +1099,10 @@ function renderPartner(){
    В продукте файл разбирает сервер (CSV и PDF), описания маскируются до GigaChat, файл удаляется после разбора.
    В прототипе CSV разбирается прямо в браузере — файл никуда не уходит; PDF и демо — имитация. */
 const CATS=[['Продукты',/пят[её]роч|перекр[её]ст|магнит|лента|вкусвилл|ашан|продукт|супермаркет/i],['Доставка еды',/яндекс ?еда|самокат|деливери|delivery|кухня на районе/i],['Кафе и кофе',/кофе|кофейн|шоколадниц|кафе|ресторан|surf|cofix|бургер/i],['Такси',/такси|яндекс ?go|uber|ситимобил/i],['Маркетплейсы',/ozon|озон|wildberries|вайлдберриз|\bwb\b|маркет/i],['Подписки',/кинопоиск|okko|иви|ivi|яндекс ?плюс|vk ?музыка|литрес|подписк|steam/i],['Связь и интернет',/мтс|билайн|мегафон|теле2|ростелеком|интернет/i],['ЖКУ',/жку|квартплат|коммунал/i]];
-const OWN=/между своими|своих сч|копилк|накопительн|вклад/i, SALARY=/зарплат|заработн|зп\b|аванс/i;
-function catOf(desc,cat){ if(cat&&!/^(другое|прочее|переводы)$/i.test(cat)) return cat; for(const [n,r] of CATS) if(r.test(desc)) return n; return /перевод/i.test(desc)?'Переводы':'Другое'; }
+const OWN=/между своими|своих сч|перевод(?: по СБП)? себе|себе в |на свой сч|отправитель — вы|me2me/i, SAVE=/копилк|накопительн|вклад|брокерск/i,
+  SALARY=/зарплат|заработн|зп\b|аванс|пенси|стипенд/i, ORG=/ООО|\bИП\b|\bАО\b|ПАО|зачислени/, REFUND=/возврат|отмена|refund/i, PEOPLE=/перевод от|по номеру|с карты на карту|перевод для/i,
+  CARDPAY=/погашени\w* кредитн/i, CASH=/сняти\w* наличн|банкомат|\batm\b/i;
+function catOf(desc,cat){ if(CARDPAY.test(desc)) return 'Кредитка без разбивки'; if(CASH.test(desc)) return 'Наличные'; if(cat&&!/^(другое|прочее|переводы)$/i.test(cat)) return cat; for(const [n,r] of CATS) if(r.test(desc)) return n; return /перевод/i.test(desc)?'Людям':'Другое'; }
 function maskDesc(d){ let hit=0; d=d.replace(/(?:\d[ -]?){15,18}\d/g,()=>{hit++;return '[карта]'}).replace(/(?:\+7|8)[\s(-]*\d{3}[\s)-]*\d{3}[\s-]*\d{2}[\s-]*\d{2}/g,()=>{hit++;return '[телефон]'})
   .replace(/([Пп]еревод[^,;]*?)\s+(?:(?:для|кому|получатель:?)\s+)?([А-ЯЁ][а-яё]+(?:\s+[А-ЯЁ](?:\.|[а-яё]+))+\.?)/g,(m,a)=>{hit++;return a+' [человек]'}); return {d,hit}; }
 function rng(seed){return function(){seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;}}
@@ -1089,6 +1121,9 @@ function demoOps(days){ days=days||84; const r=rng(7), ops=[], t0=today(); const
     if(dom===16&&dd<40) add(dd,1200,'Возврат OZON');
     if(dom===18&&dd<30) add(dd,-950,'STEAM покупка 10 USD','Подписки');
     if(dom===9) add(dd,-3000,'Перевод по номеру +7 916 123-45-67 Иван И.');
+    if(dom===26) add(dd,20000,'Перевод по СБП себе из Т-Банка');
+    if(dom===15&&dd<40) add(dd,12000,'Перевод от Пётр П.');
+    if(dom===1) add(dd,-3000,'Пополнение копилки «Отпуск»');
   } return ops; }
 function parseCSV(text){
   const first=text.split(/\r?\n/)[0]||''; const delim=(first.split(';').length>=first.split(',').length)?';':',';
@@ -1108,8 +1143,10 @@ function analyze(ops){
   for(const o of ops){ const k=o.date+'|'+o.amount+'|'+o.desc; if(seen.has(k)){dups++;continue;} seen.add(k); const m=maskDesc(o.desc); masked+=m.hit; clean.push(Object.assign({},o,{desc:m.d})); }
   if(!clean.length) return {error:'empty'};
   const dates=clean.map(o=>o.date).sort(); const from=fromIso(dates[0]), to=fromIso(dates[dates.length-1]); const days=Math.max(1,Math.round((to-from)/DAY)+1), months=days/30.4;
-  const own=clean.filter(o=>OWN.test(o.desc)); const rest=clean.filter(o=>!OWN.test(o.desc));
-  const inc=rest.filter(o=>o.amount>0&&(SALARY.test(o.desc)||o.amount>=10000)); const refunds=rest.filter(o=>o.amount>0&&!inc.includes(o));
+  // типы (ТЗ 4.7, шаг 4): свой перевод → в копилку/из копилки → приход → возврат → от людей; трата — всё прочее со знаком «минус»
+  const own=clean.filter(o=>OWN.test(o.desc)); const saveOps=clean.filter(o=>!OWN.test(o.desc)&&SAVE.test(o.desc)); const rest=clean.filter(o=>!OWN.test(o.desc)&&!SAVE.test(o.desc));
+  const inc=rest.filter(o=>o.amount>0&&(SALARY.test(o.desc)||(o.amount>=10000&&ORG.test(o.desc)&&!PEOPLE.test(o.desc))));
+  const refunds=rest.filter(o=>o.amount>0&&!inc.includes(o)&&REFUND.test(o.desc)); const people=rest.filter(o=>o.amount>0&&!inc.includes(o)&&!refunds.includes(o));
   const dayCount={}; inc.forEach(o=>{const d=fromIso(o.date).getDate(); dayCount[d]=(dayCount[d]||0)+1;}); const payDays=Object.entries(dayCount).filter(([,n])=>n>=2||inc.length<3).map(([d])=>+d).sort((a,b)=>a-b);
   const med=a=>{const x=a.slice().sort((p,q)=>p-q);return x.length?x[Math.floor(x.length/2)]:0;};
   const incMonthly=payDays.length?Math.round(med(inc.filter(o=>payDays.includes(fromIso(o.date).getDate())).map(o=>o.amount))*payDays.length):Math.round(inc.reduce((a,o)=>a+o.amount,0)/months);
@@ -1137,7 +1174,7 @@ function analyze(ops){
   let after=0, total=0; disc.filter(o=>!/Продукты/.test(o.cat)).forEach(o=>{ total+=o.v; const d=fromIso(o.date).getDate(); if(payDays.some(p=>d>=p&&d<p+3)) after+=o.v; });
   const afterShare=total?Math.round(after/total*100):0, afterNorm=Math.round(payDays.length*3/30.4*100);
   const subs=recurring.filter(r=>r.sub&&!/steam/i.test(r.name));
-  return {from,to,days,months,count:clean.length,dups,masked,own:{count:own.length,sum:Math.round(own.reduce((a,o)=>a+Math.abs(o.amount),0))},refunds:{count:refunds.length,sum:Math.round(refunds.reduce((a,o)=>a+o.amount,0))},
+  return {from,to,days,months,count:clean.length,dups,masked,own:{count:own.length,sum:Math.round(own.reduce((a,o)=>a+Math.abs(o.amount),0))},refunds:{count:refunds.length,sum:Math.round(refunds.reduce((a,o)=>a+o.amount,0))},saved:{count:saveOps.filter(o=>o.amount<0).length,sum:Math.round(saveOps.filter(o=>o.amount<0).reduce((a,o)=>a-o.amount,0))},fromSaved:{count:saveOps.filter(o=>o.amount>0).length,sum:Math.round(saveOps.filter(o=>o.amount>0).reduce((a,o)=>a+o.amount,0))},people:{count:people.length,sum:Math.round(people.reduce((a,o)=>a+o.amount,0))},
     fx:clean.filter(o=>/usd|eur|\$|€/i.test(o.desc)).length,income:{monthly:incMonthly,days:payDays},recurring,mandatory,cats,leaks,
     peak:{day:WD[peakI],ratio:mean?Math.round(wdAvg[peakI]/mean*10)/10:0,top:peakTop,monthly:Math.round(wdSum[peakI]/months)},after:{share:afterShare,norm:afterNorm},subs,
     taxiPeak:Math.round(disc.filter(o=>o.cat==='Такси'&&fromIso(o.date).getDay()===peakI).reduce((a,o)=>a+o.v,0)/months)}; }
@@ -1179,7 +1216,7 @@ function renderStmt(){
   const recRow=r=>{ const st=S.recOk[r.key]; return `<div class="rec"><span>${esc(r.name)} · ${r.day}-го<br><b class="num">${rub(r.amount)}</b></span><span class="ctl"><button data-rec="${esc(r.key)}" data-v="1" aria-pressed="${st!==false}">Регулярный</button><button data-rec="${esc(r.key)}" data-v="0" aria-pressed="${st===false}">Нет</button></span></div>`; };
   if(!S.recAll){ $('sr-rec').innerHTML=(recAuto.length?`<p class="small" style="margin:0 0 var(--s2)">Считаю обязательными: ${recAuto.filter(r=>S.recOk[r.key]!==false).map(r=>`${esc(r.name)} ${rub(r.amount)}`).join(', ')}. <button class="link" data-act="recAll">Что-то лишнее?</button></p>`:'')+(recAsk.length?`<p class="cap" style="margin:var(--s2) 0">Переводы людям — это регулярный платёж?</p>`+recAsk.map(recRow).join(''):''); }
   else $('sr-rec').innerHTML=A.recurring.map(r=>{ const st=S.recOk[r.key]; return `<div class="rec"><span>${esc(r.name)} · ${r.day}-го<br><b class="num">${rub(r.amount)}</b></span><span class="ctl"><button data-rec="${esc(r.key)}" data-v="1" aria-pressed="${st!==false}">Регулярный</button><button data-rec="${esc(r.key)}" data-v="0" aria-pressed="${st===false}">Нет</button></span></div>`; }).join('')||'<p class="muted small">Регулярных платежей не нашёл.</p>';
-  $('sr-clean').textContent=[A.own.count?`Переводы между своими счетами (${A.own.count}) — не траты, в расчёт не беру.`:'',A.refunds.count?`Возвраты (${A.refunds.count}, ${rub(A.refunds.sum)}) уменьшили траты категорий.`:'',A.fx?`Операции в валюте (${A.fx}) — посчитаны по сумме в рублях из выписки.`:'',A.dups?`Повторы операций (${A.dups}) пропустил.`:'',A.masked?`Скрыто персональных данных в описаниях: ${A.masked}.`:''].filter(Boolean).join(' ');
+  $('sr-clean').textContent=[A.own.count?`Переводы между своими счетами (${A.own.count}) — не траты и не доход, в расчёт не беру.`:'',A.saved&&A.saved.count?`В копилку и на вклады (${A.saved.count}, ${rub(A.saved.sum)}) — это не траты, а отложенное.`:'',A.people&&A.people.count?`Поступления от людей (${A.people.count}, ${rub(A.people.sum)}) доходом не считаю — если это доход, скажите.`:'',A.refunds.count?`Возвраты (${A.refunds.count}, ${rub(A.refunds.sum)}) уменьшили траты категорий.`:'',A.fx?`Операции в валюте (${A.fx}) — посчитаны по сумме в рублях из выписки.`:'',A.dups?`Повторы операций (${A.dups}) пропустил.`:'',A.masked?`Скрыто персональных данных в описаниях: ${A.masked}.`:''].filter(Boolean).join(' ');
 }
 function mandatoryConfirmed(){ const A=S.stmt; return A.recurring.filter(r=>!(S.recOk&&S.recOk[r.key]===false)).reduce((a,r)=>a+r.amount,0); }
 function payAmount(){ const days=S.payDays&&S.payDays.length?S.payDays:null; if(!days||!active().length) return null; const d1=nextPay(days); if(!d1) return null;
@@ -1188,6 +1225,39 @@ function payAmount(){ const days=S.payDays&&S.payDays.length?S.payDays:null; if(
 function showPush(){ const pa=payAmount(); if(!pa) return false; const p=active()[0];
   $('push').innerHTML=`<div class="ph"><span class="ic">₽</span><span>Крупная покупка к дате · сейчас</span></div><div class="pt">Зарплата пришла — отложите ≈ ${rub(pa.sum)}</div><p class="pb">${active().length>1?'На ваши покупки':'На '+esc(p.title.toLowerCase())} до следующей зарплаты. Партнёр увидит только общий прогресс.</p><div class="row-btns"><button class="btn btn-main" data-act="pushSaved">Отложил</button><button class="btn btn-calm" data-act="pushLater">Вечером</button></div>`;
   $('push').hidden=false; log('push_payday_shown',{}); return true; }
+/* ---------- бот в Telegram или Max ---------- */
+const CH={tg:{name:'Telegram'},max:{name:'Max'}};
+const BCAP='текст — GigaChat, числа — расчёт программы';
+function llm(kind){ S.llm=(S.llm||0)+1; log('model_call',{kind,via:S.channel||'web'}); }
+function botSay(text,btns,cap){ S.chat.push({from:'bot',text,btns:btns||[],cap:cap||''}); }
+function meSay(text){ S.chat.push({from:'me',text,btns:[]}); log('bot_message_in',{via:S.channel}); }
+function ptitle(){ const a=active(); return a.length>1?'покупки':a.length?a[0].title.toLowerCase():'покупку'; }
+function renderChat(){ const ch=S.channel||'tg'; document.querySelector('.screen[data-s="chat"]').dataset.ch=ch; $('c-sub').textContent='бот · '+CH[ch].name;
+  $('c-body').innerHTML=S.chat.map(m=>`<div class="bub ${m.from}">${esc(m.text)}${m.cap?`<span class="bcap">${esc(m.cap)}</span>`:''}${m.btns.length?`<div class="ikb">${m.btns.map(([l,a])=>`<button data-act="${a}">${esc(l)}</button>`).join('')}</div>`:''}</div>`).join('');
+  const cb=$('c-body'); cb.scrollTop=cb.scrollHeight; }
+function chatStart(){ S.chat=[]; meSay('/start');
+  if(S.channel==='tg'){ botSay('Привет! Буду напоминать: утром — заглянуть, сколько можно на себя, в день зарплаты — отложить на покупку. В Telegram пишу без сумм: траты и «влезет ли» — в приложении, так ваши данные остаются в России.',[['Открыть приложение','chatOpenApp']]); return; }
+  botSay(`Привет! Буду писать сюда${S.morning?': утром — сколько сегодня на себя,':':'} в день зарплаты — сколько отложить на ${ptitle()}. Траты пишите прямо сюда: «кофе 300». Партнёр этот чат не видит.`,[['Открыть приложение','chatOpenApp']]); }
+function chatBrief(){ if(S.channel==='tg'){ botSay('Доброе утро! Посмотрите, сколько сегодня можно на себя и как идёт покупка.',[['Открыть приложение','chatOpenApp']],'в Telegram — без сумм'); log('bot_brief_sent',{via:'tg'}); return; }
+  if(S.inc==null){ botSay('Чтобы считать «сегодня на себя», впишите приходы и обязательные траты.',[['Вписать','chatOpenApp']]); return; }
+  const d=daily(), p=active()[0], c=p?calc(p):null;
+  botSay(`Доброе утро! Сегодня на себя ${rub(Math.max(0,d.left))}.`+(p?` На ${ptitle()} откладываем ≈ ${rub(d.reserve)} в день — отложено ${rub(p.saved||0)} из ${rub(c.mine)}, ${c.onPlan?'вы по плану':'чуть отстаём, догоним'}.`:'')+(d.np?` До зарплаты ${fmtDate(d.np)} — ${d.toPay} ${plural(d.toPay,'день','дня','дней')}.`:''),
+    [['Записать трату','chatHintSpend'],['Влезет ли покупка?','chatHintAfford']],BCAP); llm('brief'); log('bot_brief_sent',{}); }
+function chatAfford(v){ const d=daily(), a=afford(v,d), fits=a.fits; let t;
+  if(fits==='today') t=`Влезет. Сегодня на себя ${rub(d.left)}, после покупки останется ${rub(a.after)}. Отложенное на ${ptitle()} не трогаем.`;
+  else if(fits==='untilPay') t=`Сегодня это больше плана на ${rub(a.over)}, но до зарплаты ${fmtDate(d.np)} влезет: дальше ≈ ${rub(a.perDay)} в день вместо ${rub(d.per)}. Срок покупки не сдвигается.`;
+  else t=`До ${d.np?'зарплаты '+fmtDate(d.np):'конца месяца'} не влезет: не хватает ${rub(a.short)}. Можно дождаться зарплаты или взять из отложенного — тогда срок покупки сдвинется.`;
+  botSay(t,fits==='no'?[['Посмотреть в приложении','chatOpenApp']]:[['Купил — записать','chatBuy'],['Не буду','chatSkip']],BCAP); S.lastAsk=v; llm('reply'); log('afford_asked',{fits}); }
+function chatSendText(t){ t=(t||'').trim(); if(!t) return; meSay(t);
+  if(S.channel==='tg'){ botSay('Траты и «влезет ли» записываю в приложении — так ваши суммы остаются на серверах в России.',[['Открыть приложение','chatOpenApp']]); log('bot_money_redirected',{}); return; }
+  llm('parse');
+  if(/влез|хват|можно ли|потян|могу ли|купить/i.test(t)){ const n=numsIn(t).out; if(!n.length){ botSay('Сколько стоит? Напишите, например, «влезут кроссовки за 7000?»'); return; } chatAfford(n[0].v); return; }
+  if(addSpend(t,'bot')){ const d=daily(), last=S.spends[S.spends.length-1];
+    botSay(`Записал: ${last.what||'без подписи'} — ${rub(last.v)}. `+(d.left>=0?`Сегодня на себя осталось ${rub(d.left)}.`:`Сегодня вышли за план на ${rub(-d.left)} — ничего страшного, завтра пересчитаю. Отложенное не трогаем.`),[['Отменить','chatUndo']],BCAP); llm('reply'); return; }
+  botSay('Не нашёл сумму. Напишите, например, «такси 450» или «влезет ли ужин за 3000?».'); }
+function chatPayday(){ const pa=payAmount(); if(!pa){ botSay('Нужны покупка и дни зарплаты.'); return; }
+  if(S.channel==='tg'){ botSay('Сегодня день зарплаты — пора отложить на покупку.',[['Открыть и отметить','chatOpenApp'],['Вечером','chatLater']],'в Telegram — без сумм'); log('push_payday_sent',{via:'tg'}); return; }
+  botSay(`Зарплата пришла — отложите ≈ ${rub(pa.sum)} на ${ptitle()} до следующей зарплаты. Партнёр увидит только общий прогресс.`,[['Отложил','chatSaved'],['Вечером','chatLater']],BCAP); llm('payday'); log('push_payday_sent',{via:S.channel}); }
 function nextPay(daysArr){ const t=today(); for(let k=0;k<62;k++){ const d=addDays(t,k); if(k>0&&daysArr.includes(d.getDate())) return d; } return null; }
 function loadStatement(ops,src){ S.stmtSrc=src; S.recAll=false; const A=analyze(ops); if(A.error){ $('st-err').hidden=false; $('st-err').textContent=A.error==='empty'?'В файле нет операций. Проверьте период выгрузки или впишите деньги вручную.':'Не узнал формат файла.'; log('statement_error',{kind:A.error}); return; }
   S.stmt=A; S.tipsOn=autoPick(A); S.autoPicked=Object.keys(S.tipsOn).length>0; S.recOk={}; log('statement_parsed',{src,ops:A.count,days:A.days,rec:A.recurring.length,tips:tipsFor(A).length,auto:Object.keys(S.tipsOn).length}); go('stmtResult'); }
@@ -1195,7 +1265,7 @@ function autoPick(A){ const G=goalFor(), on={}; if(!G||!G.c.gap) return on; let 
 
 /* ---------- панель интервьюера ---------- */
 function renderObs(){ if($('obs').hidden) return; const a=S.tAnswer&&S.tPhrase?Math.round((S.tAnswer-S.tPhrase)/1000)+' с':'—'; const p=P();
-  $('o-kv').innerHTML=[['Дошёл до ответа',S.tAnswer?'да':'нет'],['Время до ответа',a],['Подсказок',S.hints],['Правок полей',S.edits],['Сегмент',S.seg||'—'],['Отправил партнёру',p&&p.partner!=='none'?'да':'нет'],['Партнёр внёс',p&&p.partnerShare?rub(p.partnerShare):'—'],['Трат записано',S.spends.length],['«Что не так»',S.fb.length]].map(([k,v])=>`<span>${k}</span><b>${v}</b>`).join('');
+  $('o-kv').innerHTML=[['Дошёл до ответа',S.tAnswer?'да':'нет'],['Время до ответа',a],['Подсказок',S.hints],['Правок полей',S.edits],['Сегмент',S.seg||'—'],['Отправил партнёру',p&&p.partner!=='none'?'да':'нет'],['Партнёр внёс',p&&p.partnerShare?rub(p.partnerShare):'—'],['Трат записано',S.spends.length],['Канал',S.channel?CH[S.channel].name:'—'],['Обращений к модели',S.llm||0],['«Что не так»',S.fb.length]].map(([k,v])=>`<span>${k}</span><b>${v}</b>`).join('');
   document.querySelectorAll('[data-flag]').forEach(i=>i.checked=!!S.flags[i.dataset.flag]);
   $('o-log').textContent=S.log.slice(-60).map(x=>`${x.t}s ${x.ev} ${JSON.stringify(Object.fromEntries(Object.entries(x).filter(([k])=>k!=='t'&&k!=='ev')))}`).join('\n');}
 function results(){ return ['Проверка на прототипе · '+new Date().toLocaleString('ru-RU'),'Фраза: '+(S.phrase||'—'),'Дошёл до ответа: '+(S.tAnswer?'да':'нет'),'Время до ответа, с: '+(S.tAnswer&&S.tPhrase?Math.round((S.tAnswer-S.tPhrase)/1000):'—'),'Подсказок: '+S.hints,'Правок полей: '+S.edits,'Сегмент: '+(S.seg||'—'),'Отправил партнёру: '+(S.log.some(x=>x.ev==='share_clicked')?'да':'нет'),'Трат записано: '+S.spends.length,'Что не так: '+(S.fb.join(' | ')||'—'),'','Журнал:',...S.log.map(x=>x.t+'s '+x.ev+' '+JSON.stringify(x))].join('\n');}
@@ -1239,9 +1309,15 @@ const STATES=[
  ['pLeft','Партнёр: второй удалил данные',[12],[21],()=>fx({role:'partner',ownerLeft:true,purchases:[demoP({partner:'accepted',partnerShare:15000,share:0,saved:0,partnerSaved:3000})]},'pHome')],
  ['purchase','Покупка: партнёр ещё не знает + вопрос о сегменте',[9,13],[],()=>fx({purchases:[demoP()]},'purchase')],
  ['pushOffer','«Сегодня»: предложение напоминать в день зарплаты',[21],[],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual'},'today')],
- ['pushSetup','Напоминания: на главный экран и разрешение',[21,17],[39],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual'},'today',()=>sheet('sh-push'))],
+ ['pushSetup','Напоминания: Telegram, Max или уведомление на телефоне',[21,23,17],[39,45],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual'},'today',()=>sheet('sh-push'))],
  ['pushOn','«Сегодня»: напоминание включено',[21],[],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual',push:true},'today')],
  ['pushPayday','Уведомление в день зарплаты: «Отложил» одним касанием',[21,9],[],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual',push:true},'purchase',()=>showPush())],
+ ['botStart','Бот: первое сообщение после «Старт»',[23],[45],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual',channel:'max',push:true,morning:true},'chat',()=>{chatStart();renderChat();})],
+ ['botBrief','Бот утром: «сегодня на себя» и кнопки',[23],[],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual',channel:'max',push:true,morning:true},'chat',()=>{chatStart();chatBrief();renderChat();})],
+ ['botSpend','Бот: трата сообщением «кофе 300»',[23],[],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual',channel:'max',push:true,morning:true},'chat',()=>{chatStart();chatBrief();chatSendText('кофе 300');renderChat();})],
+ ['botAfford','Бот: «влезет ли» — ответ по расчёту',[23],[],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual',channel:'max',push:true,morning:true},'chat',()=>{chatStart();chatBrief();chatSendText('Влезут кроссовки за 7000?');renderChat();})],
+ ['botPayday','Бот в день зарплаты: «Отложил» одним касанием',[23],[],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual',channel:'max',push:true,morning:true},'chat',()=>{chatStart();chatPayday();renderChat();})],
+ ['botTg','Telegram: напоминание без сумм, трата ведёт в приложение',[23],[],()=>fx({purchases:[demoP()],inc:80000,must:30000,payDays:[10,25],source:'manual',channel:'tg',push:true,morning:true},'chat',()=>{chatStart();chatBrief();chatSendText('кофе 300');renderChat();})],
  ['stmtShot','Выписка по снимкам экрана: мало дней',[22,19],[40,41,30],()=>fx({purchases:[demoP()],shots:3},'stmtResult',()=>{loadStatement(demoOps(39),'screenshot');})],
  ['purchaseSent','Покупка: приглашение не открыто 2 дня',[6,9],[8],()=>fx({purchases:[demoP({partner:'sent',sentAt:Date.now()-50*3600e3})]},'purchase')],
  ['purchaseAcc','Покупка: партнёр принял, можно отозвать',[8,9],[9],()=>fx({purchases:[ACC()]},'purchase')],
@@ -1260,7 +1336,7 @@ const STATES=[
  ['stmtIntro','Выписка: согласие и загрузка',[19],[34,35],()=>fx({purchases:[demoP()]},'stmtIntro')],
  ['stmtBusy','Выписка: «Разбираю выписку…»',[19],[],()=>fx({purchases:[demoP()]},'stmtIntro',()=>{$('st-busy').hidden=false;})],
  ['stmtFormat','Выписка: чужой формат или PDF',[19],[29],()=>fx({purchases:[demoP()]},'stmtIntro',()=>{$('st-err').hidden=false;$('st-err').textContent='Не узнал формат: в файле нет столбцов даты и суммы. Выгрузите операции из приложения банка в CSV или впишите деньги вручную.';})],
- ['stmtResult','Разбор выписки: «ага» — недостающее нашлось, шаги подобраны',[19,20],[31,32,33,35,36],()=>{ fx({purchases:[demoP()],recOk:{}},'consent'); const A=analyze(demoOps().concat(demoOps().slice(0,6))); S.stmt=A; S.tipsOn=autoPick(A); S.autoPicked=true; save(); go('stmtResult'); }],
+ ['stmtResult','Разбор выписки: «ага» — недостающее нашлось, шаги подобраны',[19,20,24],[31,32,33,35,36,42,43],()=>{ fx({purchases:[demoP()],recOk:{}},'consent'); const A=analyze(demoOps().concat(demoOps().slice(0,6))); S.stmt=A; S.tipsOn=autoPick(A); S.autoPicked=true; save(); go('stmtResult'); }],
  ['stmtManualPick','Разбор выписки: шаги сняты, выбор вручную',[20],[],()=>fx({purchases:[demoP()],stmt:analyze(demoOps()),tipsOn:{},recOk:{}},'stmtResult')],
  ['stmtPlan','Советы выбраны — покупка сходится',[20],[],()=>{ const A=analyze(demoOps()); const on={}; tipsFor(A).forEach(t=>on[t.id]=true); fx({purchases:[demoP()],stmt:A,tipsOn:on,recOk:{}},'stmtResult'); }],
  ['stmtShort','Выписка за 3 недели — мало данных',[19],[30],()=>fx({purchases:[demoP()],stmt:analyze(demoOps(20)),tipsOn:{},recOk:{}},'stmtResult')],
@@ -1419,6 +1495,17 @@ document.addEventListener('click',e=>{
     case 'pushDemo': { $('obs').hidden=true; if(!showPush()) b.textContent='Нужны покупка и дни зарплаты'; break; }
     case 'pushSaved': { const pa=payAmount(); $('push').hidden=true; if(pa){ const ps=active(), tot=ps.reduce((a,p)=>a+calc(p).perDay,0)||1; ps.forEach(p=>{ p.saved=(p.saved||0)+Math.round(pa.sum*calc(p).perDay/tot); }); S.cur=ps[0].id; log('saved_marked',{src:'push'}); go('purchase'); } break; }
     case 'pushLater': $('push').hidden=true; log('push_snoozed',{}); break;
+    case 'chanPick': S.channel=b.dataset.ch; S.push=true; S.morning=$('push-morning').checked; S.pushStmt=$('push-stmt').checked; log('channel_linked',{ch:S.channel,morning:S.morning}); closeSheets(); chatStart(); if(S.morning) chatBrief(); go('chat'); break;
+    case 'chatOpen': if(!S.chat.length){ chatStart(); if(S.morning) chatBrief(); } go('chat'); break;
+    case 'chatBack': case 'chatOpenApp': go(S.inc==null?'income':'today'); break;
+    case 'chatSend': { const i=$('c-in'); chatSendText(i.value); i.value=''; renderChat(); break; }
+    case 'chatHintSpend': $('c-in').value=''; $('c-in').placeholder='кофе 300'; $('c-in').focus(); break;
+    case 'chatHintAfford': $('c-in').value='Влезут кроссовки за 7000?'; $('c-in').focus(); break;
+    case 'chatBuy': { const v=S.lastAsk; if(v){ S.spends.push({what:'покупка',v,day:iso(today()),src:'bot'}); log('spend_added',{v,labeled:true,src:'bot'}); const d=daily(); botSay(`Записал ${rub(v)}. Сегодня на себя ${d.left>=0?'осталось '+rub(d.left):'за планом на '+rub(-d.left)}.`,[],BCAP); llm('reply'); S.lastAsk=null; } renderChat(); break; }
+    case 'chatSkip': botSay('Хорошо, ничего не записываю.'); S.lastAsk=null; renderChat(); break;
+    case 'chatUndo': { const i=S.spends.map(x=>x.src).lastIndexOf('bot'); if(i>=0){ S.spends.splice(i,1); log('spend_undone',{}); } botSay(`Убрал. Сегодня на себя ${rub(Math.max(0,daily().left))}.`); renderChat(); break; }
+    case 'chatSaved': { const pa=payAmount(); if(pa){ const ps=active(), tot=ps.reduce((a,p)=>a+calc(p).perDay,0)||1; ps.forEach(p=>{ p.saved=(p.saved||0)+Math.round(pa.sum*calc(p).perDay/tot); }); log('saved_marked',{src:'bot'}); const p=ps[0]; botSay(`Отметил +${rub(pa.sum)}. На ${ptitle()} отложено ${rub(p.saved)} из ${rub(p.share)}.`,[['Открыть покупку','chatOpenApp']],BCAP); llm('reply'); } renderChat(); break; }
+    case 'chatLater': botSay('Напомню в 20:00.'); log('push_snoozed',{via:S.channel}); renderChat(); break;
     case 'recAll': S.recAll=true; renderStmt(); break;
     case 'stmtDemo': log('statement_consent',{}); $('st-busy-t').textContent='Разбираю демо-выписку…'; $('st-busy').hidden=false; setTimeout(()=>{ $('st-busy').hidden=true; loadStatement(demoOps(),'demo'); },900); break;
     case 'stmtUse': { const A=S.stmt; S.inc=A.income.monthly||S.inc; S.must=mandatoryConfirmed(); S.payDays=A.income.days.length?A.income.days:null; S.source='statement'; log('statement_used',{}); go('today'); break; }
@@ -1441,7 +1528,7 @@ document.addEventListener('change',e=>{ if(e.target.id==='st-shot'&&e.target.fil
       const r=parseCSV(t); $('st-busy').hidden=true; e.target.value='';
       if(r.error){ $('st-err').hidden=false; $('st-err').textContent='Не узнал формат: в файле нет столбцов даты и суммы. Выгрузите операции из приложения банка в CSV или впишите деньги вручную.'; log('statement_error',{kind:'format'}); return; }
       loadStatement(r.ops,'csv'); }); return; }const f=e.target.dataset&&e.target.dataset.flag; if(f){S.flags[f]=e.target.checked; save(); log('flag',{f,on:e.target.checked});}});
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheets(); if(e.key==='Enter'&&e.target.id==='spend'){e.preventDefault();document.querySelector('[data-act="spend"]').click();} });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeSheets(); if(e.key==='Enter'&&e.target.id==='spend'){e.preventDefault();document.querySelector('[data-act="spend"]').click();} if(e.key==='Enter'&&e.target.id==='c-in'){e.preventDefault();document.querySelector('[data-act="chatSend"]').click();} });
 document.querySelectorAll('.sheet').forEach(s=>s.addEventListener('click',e=>{if(e.target===s){ if(s.id==='obs') s.hidden=true; else closeSheets(); }}));
 document.querySelectorAll('.sheet>.card').forEach(card=>{ let y0=null,dy=0;
   card.addEventListener('pointerdown',e=>{ if(card.scrollTop>0||e.target.closest('input,textarea,button,summary')) return; y0=e.clientY; dy=0; card.style.transition='none'; });
