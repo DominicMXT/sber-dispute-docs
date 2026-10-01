@@ -8,7 +8,7 @@ const c = L.findIndex(l => l.startsWith('const CATS=')), d = L.findIndex(l => l.
 let code = [...L.slice(a, b), ...L.slice(c, d + 1)].join('\n')
   .replace('const today=()=>{const d=new Date();d.setHours(0,0,0,0);return d};', 'const today=()=>new Date(2026,9,3);');
 global.window = {}; global.localStorage = { getItem() { return null }, setItem() {} }; global.document = { getElementById() { return null } };
-const p = new Function(code + ';return {today,addDays,iso,fromIso,parsePhrase,maskPII,calc,daily,nextPay,maskDesc,parseCSV,analyze,tipsFor,autoPick,demoOps,cleanUrl,setS:x=>{S=x},fresh};')();
+const p = new Function(code + ';return {today,addDays,iso,fromIso,parsePhrase,maskPII,calc,daily,afford,nextPay,maskDesc,parseCSV,analyze,tipsFor,autoPick,demoOps,cleanUrl,setS:x=>{S=x},fresh};')();
 const I = x => x ? p.iso(x) : null;
 
 // Б.1 фразы — ожидания пишутся руками (это спецификация для GigaChat), правила прототипа — для сравнения
@@ -57,6 +57,10 @@ const pd = (reserve, days) => { const d1 = p.nextPay(days); let d2 = null; for (
   const gap = Math.round((d2 - d1) / 864e5); return { pay: I(d1), next: I(d2), days: gap, reserve, sum: Math.round(reserve * gap / 100) * 100 }; };
 const push1 = pd(d1.reserve, [10, 25]), push2 = pd(d2.reserve, [10, 25]);
 
+// Б.8 «влезет ли» — на тех же данных, что первая строка Б.3
+p.setS(Object.assign(p.fresh(), { purchases: [act()], inc: 80000, must: 30000, payDays: [10, 25], spends: [{ day: '2026-10-03', v: 300 }, { day: '2026-10-03', v: 450 }] }));
+const dA = p.daily(); const afford = [300, 3000, 7000].map(x => Object.assign({ v: x, left: dA.left, per: dA.per, to_pay: dA.toPay }, p.afford(x, dA)));
+
 // Б.5 выписка: синтетика в формате CSV Т-Банка
 const ops = p.demoOps(84), fmt = s => s.split('-').reverse().join('.');
 const row = (o, st) => [fmt(o.date) + ' 12:00:00', fmt(o.date), '*1234', st || 'OK', String(o.amount).replace('.', ','), 'RUB', String(o.amount).replace('.', ','), 'RUB', o.cat || '', '"' + o.desc.replace(/"/g, '""') + '"'].join(';');
@@ -69,7 +73,7 @@ const goalFor = date => { const g = act({ date }); p.setS(Object.assign(p.fresh(
 const tips43 = (() => { const G = p.calc(act()); return p.tipsFor(A).map(t => ({ id: t.id, title: t.title, monthly: t.monthly, to_deadline: Math.round(t.monthly * G.days / 30.4) })); })();
 const statement = { rows_in_file: rows.length, operations: A.count, dups: A.dups, failed: 1, masked: A.masked, days: A.days, from: I(A.from), to: I(A.to),
   income: A.income.monthly, pay_days: A.income.days, recurring: A.recurring.map(r => ({ name: r.name, amount: r.amount, day: r.day })), mandatory: A.mandatory,
-  subs: A.subs.map(s => ({ name: s.name, amount: s.amount })), own: A.own, refunds: A.refunds, fx: A.fx, peak: A.peak, leaks: A.leaks.slice(0, 1),
+  subs: A.subs.map(s => ({ name: s.name, amount: s.amount })), own: A.own, saved: A.saved, from_saved: A.fromSaved, people: A.people, refunds: A.refunds, fx: A.fx, peak: A.peak, leaks: A.leaks.slice(0, 1),
   tips: tips43, goal43: goalFor('2026-11-15'), goal52: goalFor('2026-11-24'), masked_example: p.maskDesc('Перевод по номеру +7 916 000-00-00 Иван И.').d };
 
 const links = ['https://www.ozon.ru/product/kotel-gazovyy-navien-deluxe-s-24k-1234567890/?utm_source=share&sh=abc&from=app', 'https://www.wildberries.ru/catalog/12345678/detail.aspx?targetUrl=GP&ref=partner',
@@ -81,4 +85,4 @@ const took = { before, after, alt: I(p.addDays(p.today(), Math.ceil((25000 - 600
 const pr0 = p.calc(act({ sum: 41990, share: 41990 })).perDay, pr1 = p.calc(act({ sum: 43990, share: 43990 })).perDay;
 
 if (process.argv[2]) fs.writeFileSync(process.argv[2], csv, 'utf8');
-process.stdout.write(JSON.stringify({ today: '2026-10-03', phrases, calc, daily: [d1, d2], push: [push1, push2], statement, links, took, price: { before: pr0, after: pr1 } }));
+process.stdout.write(JSON.stringify({ today: '2026-10-03', phrases, calc, daily: [d1, d2], push: [push1, push2], statement, afford, links, took, price: { before: pr0, after: pr1 } }));
