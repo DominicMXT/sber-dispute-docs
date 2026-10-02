@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Finance Assistant — прототип «Туман» (ТЗ 1.2)</title>
+<link rel="stylesheet" href="https://cdn-app.sberdevices.ru/shared-static/0.0.0/styles/SBSansText.0.2.0.css">
+<link rel="stylesheet" href="https://cdn-app.sberdevices.ru/shared-static/0.0.0/styles/SBSansDisplay.0.2.0.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Golos+Text:wght@400;500;600&family=Literata:opsz,wght@7..72,500;7..72,600&family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F3F3F1; --card:#FFFFFF; --film:#E4E4E0; --ink:#1A1A19; --ink2:#5E5E5A; --line:#DADAD5; --ai:#6A6A66;
+  --accent:#1F4B5C; --on-accent:#FFFFFF; --fill:#2D7C93; --ok:#2D6A3E; --soft:#E9EEF0; --stage:#DDE3E6; --warm:#7A5A12;
+  --ease-out:cubic-bezier(.23,1,.32,1); --ease-in-out:cubic-bezier(.77,0,.175,1); --ease-drawer:cubic-bezier(.32,.72,0,1);
+  --hand:'Caveat','Segoe Script',cursive;
+  --f-text:'SB Sans Text',system-ui,-apple-system,'Segoe UI',sans-serif; --f-disp:'SB Sans Display','SB Sans Text',system-ui,sans-serif; --d-w:600; --d-ls:-.02em; --d-k:1;
+}
+:root[data-font="album"]{--f-text:'Golos Text',system-ui,sans-serif; --f-disp:'Literata',Georgia,serif; --d-ls:-.012em; --d-k:1.04}
+:root[data-font="even"]{--f-text:'Onest',system-ui,sans-serif; --f-disp:'Onest',system-ui,sans-serif; --d-ls:-.022em; --d-k:1}
+:root[data-font="bold"]{--f-text:'Onest',system-ui,sans-serif; --f-disp:'Unbounded','Onest',sans-serif; --d-ls:-.035em; --d-k:.8}
+:root[data-theme="dark"]{
+  --bg:#121415; --card:#1D2022; --film:#2A2E31; --ink:#F1F0EC; --ink2:#A8ABA9; --line:#33383B; --ai:#9A9D9B;
+  --accent:#8FD0E3; --on-accent:#06222B; --fill:#6FC0D6; --ok:#7FD39A; --soft:#1F2A2E; --stage:#0B0D0E; --warm:#E3C078;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--stage);color:var(--ink);font:400 1rem/1.45 var(--f-text);-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.num{font-variant-numeric:tabular-nums lining-nums;white-space:nowrap}
+.rub{font-weight:400;opacity:.72;margin-left:.06em} .mut .rub{opacity:1}
+.disp{font-family:var(--f-disp);font-weight:var(--d-w);letter-spacing:var(--d-ls);line-height:1.1}
+.mut{color:var(--ink2)} .sm{font-size:0.875rem} .xs{font-size:0.8125rem}
+p{margin:0 0 10px}
+
+.stage{min-height:100%;display:flex;gap:28px;justify-content:center;align-items:flex-start;padding:24px}
+.app{position:relative;width:390px;height:800px;flex:none;background:var(--bg);border-radius:28px;overflow:hidden;box-shadow:0 24px 60px -30px rgba(0,0,0,.45)}
+.panel{width:270px;flex:none;font-size:0.875rem;color:var(--ink2);max-height:800px;overflow-y:auto}
+.panel h2{font:600 0.9375rem/1.2 var(--f-text);color:var(--ink);margin:0 0 10px}
+.grp{margin-bottom:12px}.grp>span{display:block;margin-bottom:5px}
+.seg{display:flex;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:var(--card)}
+.seg button{flex:1;min-height:44px;padding:0 6px;border:0;background:transparent;font-weight:500;color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.pbtn{width:100%;min-height:44px;border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);font-weight:500;margin-bottom:6px;text-align:left;padding:0 12px}
+.fab{display:none}
+@media (max-width:699px){
+  .stage{padding:0;display:block}
+  .app{width:100%;height:100dvh;border-radius:0;box-shadow:none}
+  .panel{position:fixed;right:10px;top:10px;bottom:10px;z-index:80;width:min(290px,calc(100vw - 20px));background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;display:none;max-height:none}
+  .panel.open{display:block}
+  .fab{display:grid;place-items:center;position:fixed;right:22px;top:100px;z-index:81;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--ink);opacity:.92}
+}
+
+/* экран */
+.view{position:absolute;inset:0;overflow-y:auto;overflow-x:hidden;padding:18px 16px 150px;scrollbar-width:none}
+.view::-webkit-scrollbar{display:none}
+.view.notabs{padding-bottom:96px}
+.head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px;padding-right:0}
+.head h1{margin:0;font-size:calc(1.4375rem*var(--d-k))}
+.h1{font-size:calc(1.6875rem*var(--d-k));margin:6px 0 8px}
+.icon{flex:none;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center}
+.press{transition:transform 160ms var(--ease-out)} .press:active{transform:scale(.97)}
+.backb{border:0;background:transparent;min-height:44px;padding:0 8px 0 0;color:var(--ink2);font-weight:500}
+.vis{display:inline-block;font-size:0.8125rem;border-radius:10px;padding:1px 8px;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.vis.all{background:var(--soft);color:var(--accent)} .vis.me{border:1px dashed var(--line);color:var(--ink2)}
+
+.cardp{background:var(--card);border-radius:4px;padding:10px 10px 0;box-shadow:0 1px 2px rgba(0,0,0,.08),0 14px 30px -16px rgba(0,0,0,.3)}
+.photo{position:relative;aspect-ratio:1/1;overflow:hidden;background:var(--film)}
+.photo img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block}
+.photo .color{transition:clip-path 700ms var(--ease-in-out)}
+.photo .fogfb{filter:blur(8px) saturate(.5) brightness(1.1);transform:scale(1.1)}
+.edge{position:absolute;left:0;right:0;top:-34px;height:34px;background:linear-gradient(to top,rgba(255,255,255,.8),rgba(255,255,255,0));transition:transform 700ms var(--ease-in-out);pointer-events:none}
+.rule{position:absolute;left:0;right:0;top:0;height:1px;background:rgba(255,255,255,.9);transition:transform 700ms var(--ease-in-out)}
+.band{position:absolute;left:0;right:0;top:0;height:10px;background:var(--fill);opacity:0;transition:opacity 300ms var(--ease-out),transform 700ms var(--ease-in-out)}
+.bandlab{position:absolute;right:8px;top:0;font-size:0.8125rem;font-weight:600;color:#06222B;background:#CFEAF2;border-radius:11px;padding:2px 9px;opacity:0;transition:opacity 300ms var(--ease-out),transform 700ms var(--ease-in-out)}
+.band.show{opacity:.85}.bandlab.show{opacity:1}
+.swap{position:absolute;right:8px;bottom:8px;min-height:44px;padding:0 14px;border:0;border-radius:22px;background:rgba(20,22,24,.62);color:#fff;font-size:0.875rem;font-weight:500}
+.mile{position:absolute;left:8px;top:8px;font-size:0.8125rem;font-weight:600;color:#06222B;background:rgba(255,255,255,.86);border-radius:10px;padding:3px 9px}
+.mile.pop{animation:pop 380ms var(--ease-out)}
+@keyframes pop{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:none}}
+.cap{display:flex;justify-content:space-between;align-items:center;gap:8px;min-height:50px;padding:6px 2px 8px}
+.cap .hand{font:500 1.4375rem/1 var(--hand)}
+.stamp{font-size:0.8125rem;color:var(--ok);border:1px solid currentColor;border-radius:14px;padding:3px 9px;white-space:nowrap}
+.stamp.help{color:var(--warm)}
+.left{margin:14px 0 2px;font-size:calc(2.125rem*var(--d-k))}
+.left small{display:block;font:400 0.9375rem/1.3 var(--f-text);letter-spacing:0;color:var(--ink2);margin-bottom:2px}
+.filmlab{display:flex;justify-content:space-between;font-size:0.8125rem;color:var(--ink2);margin:12px 0 4px}
+.film{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;background:var(--film);padding:5px 4px;border-radius:4px}
+.fr{aspect-ratio:22/28;border-radius:2px;background:var(--card);position:relative;overflow:hidden}
+.fr::after{content:'';position:absolute;inset:0;background:var(--fill);clip-path:inset(0 var(--r,100%) 0 0);transition:clip-path 320ms var(--ease-out)}
+.fr:last-child{outline:2px solid var(--ink);outline-offset:-2px}
+.week{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:8px}
+.wd{text-align:center;font-size:0.8125rem;color:var(--ink2)}
+.wd i{display:block;height:22px;border-radius:4px;background:var(--film);margin-bottom:2px;position:relative}
+.wd.on i{background:var(--fill)} .wd.both i::after{content:'';position:absolute;right:3px;top:3px;width:7px;height:7px;border-radius:50%;background:var(--card)}
+.wd.now i{outline:2px solid var(--ink);outline-offset:1px}
+
+.sec{margin-top:20px;border-top:1px solid var(--line);padding-top:14px}
+.sec>h2,.lbl{font:500 0.8125rem/1.3 var(--f-text);color:var(--ink2);margin:0 0 6px}
+.big{font-size:calc(1.875rem*var(--d-k));margin:0}
+.rowl{display:flex;justify-content:space-between;align-items:center;gap:12px;min-height:48px;padding:6px 0;border-bottom:1px solid var(--line)}
+.rowl:last-child{border-bottom:0}
+.rowl>span:first-child{flex:1;min-width:0}
+.field{display:flex;gap:8px;align-items:center}
+.inp{flex:1;min-width:0;width:100%;min-height:48px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+textarea.inp{padding:12px 14px;min-height:96px;resize:none;line-height:1.4}
+.inp.miss{border-color:var(--warm);box-shadow:0 0 0 2px color-mix(in srgb,var(--warm) 25%,transparent)}
+.go{flex:none;min-height:48px;padding:0 16px;border:0;border-radius:12px;background:var(--ink);color:var(--bg);font-weight:600}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.chip{min-height:44px;padding:6px 14px;border:1px solid var(--line);border-radius:22px;background:var(--card);text-align:left;line-height:1.25}
+.link{border:0;background:transparent;color:var(--accent);padding:0;min-height:44px;font-weight:500;text-align:left}
+.ans{margin:10px 0 0;font-weight:500;min-height:1.45em}
+.note{background:var(--soft);border-radius:12px;padding:10px 12px;margin:10px 0}
+.ai{color:var(--ai);font-style:italic}
+.bottom{position:absolute;left:0;right:0;bottom:64px;padding:10px 16px 10px;background:linear-gradient(to top,var(--bg) 78%,transparent);z-index:5}
+.bottom.notabs{bottom:0;padding-bottom:calc(14px + env(safe-area-inset-bottom))}
+.main{display:block;width:100%;min-height:54px;border:0;border-radius:14px;background:var(--accent);color:var(--on-accent);font-weight:600;font-size:1.0625rem}
+.main[disabled]{opacity:.55;cursor:default}
+.sec2{display:block;width:100%;min-height:50px;border:1px solid var(--line);border-radius:14px;background:var(--card);font-weight:500;margin-top:8px}
+.tabs{position:absolute;left:0;right:0;bottom:0;height:64px;display:flex;background:var(--card);border-top:1px solid var(--line);z-index:6;padding-bottom:env(safe-area-inset-bottom)}
+.tabs button{flex:1;border:0;background:transparent;color:var(--ink2);font-weight:500;font-size:0.875rem}
+.tabs button[aria-current="page"]{color:var(--ink);box-shadow:inset 0 2px 0 var(--accent)}
+.fb{position:absolute;right:12px;bottom:calc(64px + 78px);z-index:4;border:0;background:transparent;color:var(--ink2);font-size:0.8125rem;min-height:44px;padding:0 6px;text-decoration:underline}
+.pl{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line);width:100%;border-left:0;border-right:0;border-top:0;background:transparent;text-align:left}
+.pl .mini{position:relative;width:64px;height:64px;flex:none;border-radius:4px;overflow:hidden;background:var(--film)}
+.pl .mini img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+
+/* лист */
+.back{position:absolute;inset:0;background:rgba(0,0,0,.4);opacity:0;pointer-events:none;transition:opacity 250ms var(--ease-out);z-index:30}
+.sheet{position:absolute;left:0;right:0;bottom:0;max-height:88%;overflow-y:auto;background:var(--bg);border-radius:20px 20px 0 0;padding:10px 16px 20px;transform:translateY(100%);transition:transform 380ms var(--ease-drawer);z-index:31}
+.open>.back{opacity:1;pointer-events:auto}.open>.sheet{transform:translateY(0)}
+.grab{width:40px;height:4px;border-radius:2px;background:var(--line);margin:0 auto 12px}
+.sheet h3{font-size:calc(1.3125rem*var(--d-k));margin:0 0 8px}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:10px}
+.thumbs button{position:relative;aspect-ratio:1;border:0;padding:0;border-radius:6px;overflow:hidden;background:var(--film)}
+.thumbs img{width:100%;height:100%;object-fit:cover;display:block}
+.filebtn{position:relative;display:flex;align-items:center;justify-content:center;min-height:50px;border:1px solid var(--line);border-radius:12px;background:var(--card);font-weight:500;overflow:hidden;margin-top:8px}
+.filebtn input{position:absolute;inset:0;opacity:0;cursor:pointer}
+.tip{display:flex;gap:10px;align-items:center;min-height:52px;padding:6px 0;border-bottom:1px solid var(--line)}
+.tip input{width:22px;height:22px;accent-color:var(--accent);flex:none}.tip span{flex:1}
+.scan{height:4px;border-radius:2px;background:var(--film);overflow:hidden;margin:14px 0}
+.scan i{display:block;height:100%;width:40%;background:var(--fill);animation:scan 900ms linear infinite}
+@keyframes scan{from{transform:translateX(-100%)}to{transform:translateX(250%)}}
+details{border-bottom:1px solid var(--line);padding:6px 0}
+summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weight:500}
+
+/* уведомление и чат */
+.push{position:absolute;left:10px;right:10px;top:10px;z-index:40;background:var(--card);border-radius:16px;padding:12px 14px;box-shadow:0 14px 34px -12px rgba(0,0,0,.45);animation:drop 420ms var(--ease-out)}
+@keyframes drop{from{opacity:0;transform:translateY(-16px)}to{opacity:1;transform:none}}
+.push .row{display:flex;gap:8px;margin-top:10px}
+.push .row button{flex:1;min-height:44px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:500}
+.chat{display:flex;flex-direction:column;gap:8px}
+.bub{max-width:86%;padding:9px 12px;border-radius:16px 16px 16px 4px;background:var(--card);align-self:flex-start;font-size:0.9375rem}
+.bub.me{align-self:flex-end;border-radius:16px 16px 4px 16px;background:var(--soft)}
+.bub small{display:block;font-size:0.8125rem;color:var(--ink2);margin-top:4px}
+.kb{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.kb button{min-height:44px;padding:0 12px;border-radius:10px;border:1px solid var(--line);background:var(--bg);font-weight:500;font-size:0.875rem}
+.chathead{display:flex;align-items:center;gap:10px;margin:-18px -16px 12px;padding:12px 16px;background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:-18px;z-index:3}
+.ava{width:36px;height:36px;border-radius:50%;background:var(--accent);color:var(--on-accent);display:grid;place-items:center;font-weight:700}
+
+/* сторис */
+.story{position:absolute;inset:0;z-index:50;background:#16323D;color:#fff;display:none}
+.story.on{display:block}
+.story .pic{position:absolute;inset:0}.story .pic img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.story .pic .color{transition:clip-path 1400ms var(--ease-in-out)}
+.story .shade{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,22,28,.72),rgba(10,22,28,.18) 42%,rgba(10,22,28,.8))}
+.segs{position:absolute;top:12px;left:12px;right:12px;display:flex;gap:4px;z-index:3}
+.segs i{flex:1;height:3px;border-radius:2px;background:rgba(255,255,255,.35);overflow:hidden}
+.segs i b{display:block;height:100%;background:#fff;transform:scaleX(0);transform-origin:left}
+.segs i.done b{transform:scaleX(1)} .segs i.run b{animation:seg 4600ms linear forwards}
+.story.paused .segs i.run b{animation-play-state:paused}
+@keyframes seg{to{transform:scaleX(1)}}
+.skip{position:absolute;top:26px;right:12px;z-index:4;min-height:44px;padding:0 16px;border:0;border-radius:22px;background:rgba(255,255,255,.18);color:#fff;font-weight:500}
+.stxt{position:absolute;left:20px;right:20px;top:86px;z-index:2}
+.stxt h2{margin:0 0 10px;font-size:calc(2.25rem*var(--d-k));color:#fff;text-wrap:balance}
+.stxt p{font-size:1.0625rem;line-height:1.4;max-width:30ch}
+.sbot{position:absolute;left:20px;right:20px;bottom:28px;z-index:4}
+.sbot .hint{font-size:0.8125rem;opacity:.8;text-align:center}
+.sbot .main{background:#fff;color:#16323D}
+.tapz{position:absolute;top:80px;bottom:120px;z-index:3;background:transparent;border:0}
+.tapz.l{left:0;width:36%}.tapz.r{right:0;width:64%}
+.enter{animation:enter 420ms var(--ease-out) both}
+@keyframes enter{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+@media (prefers-reduced-motion:reduce){
+  .photo .color,.edge,.rule,.band,.bandlab,.fr::after,.sheet,.back,.story .pic .color{transition-duration:1ms}
+  .enter,.push,.mile.pop{animation:none}.scan i{animation:none;width:100%}
+  .segs i.run b{animation:none;transform:scaleX(1)} .press:active{transform:none}
+}
+
+/* расстояние между буквами зависит от размера: мелкому тексту — чуть шире */
+.xs,.sm,.lbl,.vis,.wd,.filmlab,.stamp,.tabs button{letter-spacing:.01em}
+/* навигация и главная кнопка — полупрозрачный слой, содержимое прокручивается под ним */
+.tabs{background:color-mix(in srgb,var(--card) 80%,transparent);-webkit-backdrop-filter:blur(18px) saturate(160%);backdrop-filter:blur(18px) saturate(160%)}
+.bottom{background:color-mix(in srgb,var(--bg) 70%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+@media (prefers-reduced-transparency:reduce){.tabs{background:var(--card);-webkit-backdrop-filter:none;backdrop-filter:none}.bottom{background:var(--bg);-webkit-backdrop-filter:none;backdrop-filter:none}.swap{background:#141618}.mile{background:#fff}}
+/* больше контраста: плотные границы, чёткая линия тумана и подпись доли */
+.pctlab{display:none;position:absolute;left:8px;bottom:8px;font-size:.8125rem;font-weight:600;color:#06222B;background:#fff;border-radius:10px;padding:3px 9px}
+@media (prefers-contrast:more){
+  :root{--line:#6E6E69;--ink2:#1A1A19;--ai:#1A1A19} :root[data-theme="dark"]{--line:#B9BCBA;--ink2:#F1F0EC;--ai:#F1F0EC}
+  .rule{height:3px;background:#fff;box-shadow:0 0 0 1px #000} .pctlab{display:block} .vis.me{border-style:solid} .thin{background-color:rgba(255,255,255,.5)}
+  .inp,.chip,.sec2,.icon{border-width:2px}
+}
+/* отмечено, но ещё не подтверждено выпиской — лёгкая дымка со штриховкой */
+.thin{position:absolute;left:0;right:0;background-color:rgba(255,255,255,.3);background-image:repeating-linear-gradient(135deg,rgba(255,255,255,.28) 0 6px,transparent 6px 12px);pointer-events:none}
+.stamp small{display:block;font-size:.8125rem;opacity:.9}
+/* сообщение, которое исчезает само */
+.toast{position:absolute;left:16px;right:16px;bottom:146px;z-index:45;background:var(--ink);color:var(--bg);border-radius:12px;padding:11px 14px;font-size:.9375rem;opacity:0;transform:translateY(8px);transition:opacity 200ms var(--ease-out),transform 200ms var(--ease-out);pointer-events:none}
+.toast.on{opacity:1;transform:none}
+/* лист тянется за пальцем */
+.grabz{display:flex;justify-content:center;align-items:center;height:30px;margin:-10px -16px 2px;touch-action:none;cursor:grab}
+.grabz .grab{margin:0}
+.sheet.drag{transition:none}
+/* кнопка занята */
+.main[aria-busy="true"],.go[aria-busy="true"]{opacity:.75}
+.main[aria-busy="true"]::after{content:'';display:inline-block;width:14px;height:14px;margin-left:10px;border:2px solid currentColor;border-right-color:transparent;border-radius:50%;vertical-align:-2px;animation:spin 700ms linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.main[aria-busy="true"]::after{animation:none}.toast{transition-duration:1ms}}
+</style>
+</head>
+<body>
+<div class="stage">
+  <div class="app" id="app" data-who="oleg" data-day="today">
+    <div class="view" id="view"></div>
+    <div id="bottom"></div>
+    <nav class="tabs" id="tabs" aria-label="Разделы"></nav>
+    <div id="pushwrap"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    <div id="sheetwrap"><div class="back" id="back"></div><div class="sheet" id="sheet" role="dialog" aria-modal="true" aria-label="Лист"></div></div>
+    <div class="story" id="story" aria-label="Знакомство">
+      <div class="pic"><img class="fog" alt=""><img class="color" alt=""></div><div class="shade"></div>
+      <div class="segs" id="segs"></div><button class="skip" id="skip">Пропустить</button>
+      <div class="stxt" id="stxt"></div>
+      <button class="tapz l" id="sprev" aria-label="Назад"></button><button class="tapz r" id="snext" aria-label="Дальше"></button>
+      <div class="sbot" id="sbot"></div>
+    </div>
+  </div>
+
+  <aside class="panel" id="panel" aria-label="Пульт прототипа">
+    <h2>Пульт прототипа</h2>
+    <div class="grp"><span>С чего начать</span>
+      <button class="pbtn" data-sc="fresh">Первый вход: знакомство и согласие</button>
+      <button class="pbtn" data-sc="mid">Через три месяца: покупка в работе</button></div>
+    <div class="grp"><span>День</span><div class="seg"><button data-day="today">Сегодня</button><button data-day="tomorrow">Завтра</button></div></div>
+    <div class="grp"><span>Чей экран</span><div class="seg"><button data-who="oleg">Олег</button><button data-who="anya">Аня</button></div></div>
+    <div class="grp"><span>События</span>
+      <button class="pbtn" data-sc="payday">День зарплаты: уведомление</button>
+      <button class="pbtn" data-sc="partner">Партнёр отложил сегодня</button>
+      <button class="pbtn" data-sc="price">Цена по ссылке изменилась</button>
+      <button class="pbtn" data-sc="week">Воскресенье: итоги недели</button>
+      <button class="pbtn" data-sc="recon">Сверка с выпиской: расхождение</button>
+      <button class="pbtn" data-sc="done">Покупка собрана</button></div>
+    <div class="grp"><span>Сбои и отказы</span>
+      <button class="pbtn" data-sc="offline">Нет сети</button>
+      <button class="pbtn" data-sc="limit">Лимит запросов к модели</button>
+      <button class="pbtn" data-sc="format">Чужой формат выписки</button>
+      <button class="pbtn" data-sc="botoff">Бот отключён</button>
+      <button class="pbtn" data-sc="used">Приглашение уже использовано</button></div>
+    <div class="grp"><span>Шрифт</span><div class="seg"><button data-font="sber">Сбер</button><button data-font="album">Альбом</button><button data-font="even">Ровный</button><button data-font="bold">Смелый</button></div></div>
+    <div class="grp"><span>Тема</span><div class="seg"><button data-th="light">Светлая</button><button data-th="dark">Тёмная</button></div></div>
+  </aside>
+  <button class="fab" id="fab" aria-label="Пульт прототипа"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="7" cy="6" r="2.5" fill="var(--card)" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="14" r="2.5" fill="var(--card)" stroke="currentColor" stroke-width="2"/></svg></button>
+</div>
+
+<script>
+'use strict';
+/* Прототип «Туман». Деньги считает код по формулам ТЗ v1.1, разделы 4.2–4.9. Разбор фраз здесь — простое правило вместо GigaChat.
+   Всё, что на экране, строится из состояния текущего человека: чужих сумм в разметке нет. */
+const NB = ' ', DAY = 864e5, D0 = Date.UTC(2026, 9, 1);
+const MON = ['января','февраля','марта','апреля','мая','июня','июля','августа','сентября','октября','ноября','декабря'];
+/* Картинки: два своих рисунка (диван, море) и четыре фото CC0 из photos/ — подписи авторов не требуются (credits.json). */
+const ART = {sofa:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice"><rect width="400" height="500" fill="#2F6F6A"/> <rect y="372" width="400" height="128" fill="#C89A5C"/> <g stroke="#B18348" stroke-width="2"><path d="M0 404H400M0 440H400M0 474H400M90 372V404M250 404V440M150 440V474M320 372V404"/></g> <rect x="34" y="46" width="124" height="170" fill="#F4F1E8"/><rect x="44" y="56" width="104" height="150" fill="#F6E3A0"/> <path d="M96 56V206M44 131H148" stroke="#F4F1E8" stroke-width="6"/> <rect x="262" y="66" width="92" height="112" fill="#F1E6D3"/><circle cx="308" cy="118" r="26" fill="#D8572A"/><path d="M276 160l22-30 16 18 14-12 14 24z" fill="#234E63"/> <path d="M336 372V206" stroke="#2A2A28" stroke-width="5"/><path d="M306 206h60l-14-58h-32z" fill="#F3C54A"/> <rect x="30" y="322" width="42" height="50" rx="6" fill="#B5542F"/> <g fill="#3E8E4E"><ellipse cx="38" cy="290" rx="14" ry="38" transform="rotate(-22 38 290)"/><ellipse cx="62" cy="286" rx="14" ry="42" transform="rotate(16 62 286)"/><ellipse cx="50" cy="276" rx="12" ry="46"/></g> <ellipse cx="200" cy="448" rx="176" ry="36" fill="#A93B48"/><ellipse cx="200" cy="448" rx="140" ry="24" fill="none" stroke="#E7C9A0" stroke-width="3"/> <rect x="96" y="392" width="12" height="26" fill="#4E3418"/><rect x="292" y="392" width="12" height="26" fill="#4E3418"/> <rect x="76" y="246" width="248" height="100" rx="24" fill="#D29A16"/> <rect x="62" y="316" width="276" height="82" rx="20" fill="#E3B02A"/> <rect x="50" y="286" width="48" height="112" rx="20" fill="#C98F12"/><rect x="302" y="286" width="48" height="112" rx="20" fill="#C98F12"/> <path d="M200 322V396" stroke="#C98F12" stroke-width="3"/> <rect x="108" y="270" width="62" height="56" rx="10" fill="#1F5C8A" transform="rotate(-8 139 298)"/> <rect x="232" y="272" width="60" height="54" rx="10" fill="#F1ECE0" transform="rotate(7 262 299)"/></svg>', sea:'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice"><rect width="400" height="500" fill="#7CC4F2"/><circle cx="300" cy="96" r="44" fill="#FFD54A"/> <g fill="#fff" opacity=".9"><ellipse cx="96" cy="84" rx="54" ry="16"/><ellipse cx="136" cy="70" rx="38" ry="14"/></g> <rect y="236" width="400" height="140" fill="#1E88C8"/> <g stroke="#BFE6FA" stroke-width="4" fill="none" stroke-linecap="round"><path d="M20 272q20-12 40 0t40 0"/><path d="M190 296q20-12 40 0t40 0"/><path d="M80 334q20-12 40 0t40 0"/><path d="M280 262q16-10 32 0t32 0"/></g> <path d="M0 366q100-28 200 0t200 0V500H0z" fill="#F0D9A6"/> <path d="M150 470V330" stroke="#6A4A2A" stroke-width="6"/><path d="M66 336a84 70 0 0 1 168 0z" fill="#E4572E"/><path d="M122 336a28 70 0 0 1 56 0z" fill="#F6EEDC"/> <rect x="186" y="440" width="120" height="26" rx="6" fill="#2E8F7A" transform="rotate(-6 246 453)"/> <path d="M352 420q-8-90 6-170" stroke="#7A5530" stroke-width="12" fill="none"/> <g fill="#2F8F4E"><path d="M358 250q-70-34-110 8 62-14 110-8z"/><path d="M358 250q30-60 90-40-56 6-90 40z"/><path d="M358 250q-40-58-96-44 58 10 96 44z"/><path d="M358 250q50 6 60 60-26-44-60-60z"/></g></svg>'};
+const PHOTOS = [['sofa','Диван (рисунок)'],['sea','Море (рисунок)'],['flat-light','Квартира'],['laptop-light','Ноутбук'],['phone-dark','Телефон'],['rings','Кольца']];
+const OTHER = {oleg:'anya', anya:'oleg'}, NAME = {oleg:'Олег', anya:'Аня'};
+const $ = (s, r=document) => r.querySelector(s), $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const lsGet = k => { try { return localStorage.getItem(k); } catch(e) { return null; } };
+const lsSet = (k, v) => { try { localStorage.setItem(k, v); } catch(e) {} };
+const fmt = n => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, NB);
+const rub = n => fmt(n) + NB + '<span class="rub">₽</span>', rubT = n => fmt(n) + NB + '₽';
+const plural = (n, a, b, c) => { const d = n % 10, h = n % 100; return d === 1 && h !== 11 ? a : d >= 2 && d <= 4 && (h < 12 || h > 14) ? b : c; };
+const dStr = t => { const d = new Date(t); return d.getUTCDate() + NB + MON[d.getUTCMonth()]; };
+const daysW = n => n + NB + plural(n, 'день', 'дня', 'дней');
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const reduce = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ── состояние ── */
+let S, SNAP;
+function seed(mode){
+  const mid = mode === 'mid';
+  return {
+    mode, who:'oleg', off:0, tab:'buy', scr: mid ? 'purchase' : 'consent', cur: mid ? 'sofa' : null, sheet:null, draft:null, aff:null, flash:false,
+    flags:{offline:false, limit:false, format:false, used:false, push:false, partnerStep:false, priceUp:false, tg:false, mismatch:false, notProduct:false}, recon:null,
+    people:{
+      oleg:{consent:mid, income: mid ? {m:80000, mand:30000, pay:[10,25], src:'stmt'} : null, spent:[], stepped:false, stmt: mid ? null : null, asked:false, bot: mid ? 'max' : null, botOff:false, chat:[], email:false, remind:mid, week:[1,1,0]},
+      anya:{consent:mid, income: mid ? {m:72000, mand:29500, pay:[10,25], src:'manual'} : null, spent:[], stepped:false, stmt:null, asked:false, bot: mid ? 'max' : null, botOff:false, chat:[], email:false, remind:mid, week:[1,0,1]}
+    },   /* доход Ани условный: в демо-данных его нет; подобран так, чтобы «на себя» вышло 1 020 ₽ */
+    stmtTips:[true, true, false], stmtFound:false, kopilka:false, petr:null,
+    purchases: mid ? [{id:'sofa', name:'Диван в гостиную', cap:'Диван Осло', price:180000, dl:Date.UTC(2026,11,31), cr:Date.UTC(2026,6,1), photo:'sofa', link:'divan.example · цена на 1 октября — может измениться',
+      owner:'oleg', share:{oleg:90000, anya:75000}, saved:{oleg:46000, anya:39000}, conf:{oleg:41000, anya:0}, where:{oleg:'Копилка в банке', anya:'Вклад'}, invited:true, state:'active'}] : []
+  };
+}
+const now = () => D0 + S.off * DAY;
+const me = () => S.people[S.who];
+const P = id => S.purchases.find(p => p.id === (id || S.cur));
+
+/* ── расчёт (ТЗ 4.2–4.9) ── */
+const daysTo = p => Math.max(1, Math.round((p.dl - now()) / DAY));
+const gapOf = p => Math.max(0, p.price - (p.share.oleg || 0) - (p.share.anya || 0));
+const overOf = p => Math.max(0, (p.share.oleg || 0) + (p.share.anya || 0) - p.price);
+const leftOf = (p, w) => Math.max(0, (p.share[w] || 0) - (p.saved[w] || 0));
+const perDay = (p, w) => Math.ceil(leftOf(p, w) / Math.max(1, daysTo(p) - (S.people[w].stepped ? 1 : 0)));
+const confPct = (p, w) => p.share[w] ? Math.min(pctOf(p, w), ((p.conf || {})[w] || 0) / p.share[w]) : 0;
+const confOk = (p, w) => ((p.conf || {})[w] || 0) >= (p.saved[w] || 0) * 0.85 && (p.saved[w] || 0) > 0;
+const pctOf = (p, w) => p.share[w] ? Math.min(1, (p.saved[w] || 0) / p.share[w]) : 0;
+const onPlan = (p, w) => { const tot = Math.max(1, Math.round((p.dl - p.cr) / DAY)), el = Math.round((now() - p.cr) / DAY); return (p.saved[w] || 0) >= Math.floor((p.share[w] || 0) * el / tot) - 1; };
+const active = w => S.purchases.filter(p => p.state === 'active' && p.share[w] != null);
+const reserve = w => active(w).reduce((s, p) => s + perDayPlan(p, w), 0);
+const perDayPlan = (p, w) => Math.ceil(Math.max(0, (p.share[w] || 0) - (p.saved[w] || 0) + (S.people[w].stepped ? S.people[w].stepAmt || 0 : 0)) / daysTo(p)); // резерв дня не меняется от отметки внутри дня
+const selfDay = w => { const i = S.people[w].income; return i ? Math.floor((i.m - i.mand - reserve(w) * 30) / 30) : null; };
+const spentSum = w => S.people[w].spent.reduce((s, x) => s + x.v, 0);
+const leftToday = w => selfDay(w) - spentSum(w);
+function nextPay(w, from){ const i = S.people[w].income; if (!i) return null; let t = from + DAY; for (let k = 0; k < 40; k++, t += DAY) if (i.pay.includes(new Date(t).getUTCDate())) return t; return null; }
+const toPay = w => { const t = nextPay(w, now()); return t ? Math.round((t - now()) / DAY) : null; };
+const untilPay = w => selfDay(w) * toPay(w) - spentSum(w);
+function afford(w, v){
+  const l = leftToday(w), tp = toPay(w);
+  if (v <= l) return {k:'today', t:'Влезет. Останется ' + rubT(l - v)};
+  if (tp == null) return {k:'no', t:'Сегодня не влезет: не хватает ' + rubT(v - l)};
+  const u = untilPay(w);
+  if (v <= u) return {k:'pay', t:'Влезет до зарплаты. Дальше ' + rubT(Math.floor((u - v) / Math.max(1, tp - 1))) + ' в день'};
+  return {k:'no', t:'Не влезет: не хватает ' + rubT(v - u) + '. Зарплата ' + dStr(nextPay(w, now()))};
+}
+function paydaySum(w){ const d1 = nextPay(w, now()); if (!d1) return null; const d2 = nextPay(w, d1); return Math.round(reserve(w) * Math.round((d2 - d1) / DAY) / 100) * 100; }
+const TIPS = [['Доставка еды — вдвое реже', 4900], ['Маркетплейсы: пусть полежит в корзине сутки', 1500], ['Оставить одну видеоподписку', 399]];
+const tipTo = (m, p) => Math.round(m * daysTo(p) / 30.4);
+const foundSum = p => TIPS.reduce((s, t, i) => s + (S.stmtTips[i] ? tipTo(t[1], p) : 0), 0);
+const MILES = [[.25,'Четверть проявлена'],[.5,'Половина проявлена'],[.75,'Три четверти проявлены'],[1,'Проявлено целиком']];
+const mileOf = x => { let m = null; for (const a of MILES) if (x >= a[0] - 1e-9) m = a; return m; };
+
+/* ── разбор фразы: простое правило вместо GigaChat ── */
+function parseMoney(s){ const out = []; const re = /(\d[\d\s]*(?:[.,]\d+)?)\s*(тыс(?:яч[аи]?)?\.?|т\.?\s?р\.?|к\b|млн)?/gi; let m;
+  while ((m = re.exec(s))) { let v = parseFloat(m[1].replace(/\s/g, '').replace(',', '.')); if (!isFinite(v)) continue; const u = (m[2] || '').toLowerCase();
+    if (u.startsWith('млн')) v *= 1e6; else if (u) v *= 1000; out.push({v:Math.round(v), i:m.index, unit:!!u, raw:m[0]}); } return out; }
+function parseDate(s){ const m = s.match(/к\s+(\d{1,2})\s+(январ|феврал|март|апрел|ма[йя]|июн|июл|август|сентябр|октябр|ноябр|декабр)/i);
+  if (/нов(ому|ый)\s+год/i.test(s)) return Date.UTC(2026, 11, 31);
+  if (!m) return null; const mi = ['январ','феврал','март','апрел','ма','июн','июл','август','сентябр','октябр','ноябр','декабр'].findIndex(x => m[2].toLowerCase().startsWith(x));
+  let t = Date.UTC(2026, mi, +m[1]); if (t <= now()) t = Date.UTC(2027, mi, +m[1]); return t; }
+function parsePhrase(txt){
+  const s = txt.replace(/\b\d{16,19}\b/g, '[карта]').replace(/(\+7|8)\d{10}/g, '[телефон]');
+  const isLink = /^https?:\/\//i.test(s.trim()), dl = parseDate(s);
+  const clean = s.replace(/https?:\/\/\S+/i, '').replace(/к\s+\d{1,2}\s+[а-я]+/i, '');
+  const nums = parseMoney(clean).filter(n => n.v >= 100 || n.unit);
+  const shareM = clean.match(/(могу|внесу|мои|с меня|беру на себя)\s*(\d[\d\s]*)\s*(тыс\S*|к\b)?/i);
+  let share = shareM ? Math.round(parseFloat(shareM[2].replace(/\s/g, '')) * (shareM[3] ? 1000 : (parseFloat(shareM[2]) < 1000 ? 1000 : 1))) : null;
+  const url = isLink ? (s.match(/https?:\/\/\S+/i) || [''])[0] : '';
+  const two = /two|dve/i.test(url), fail = /fail|down/i.test(url), notp = /notproduct|blog/i.test(url);
+  let price = isLink ? (two || fail || notp ? null : 179990) : (nums[0] ? nums[0].v : null);
+  if (!isLink && price != null && price < 1000) price *= 1000;
+  if (/плачу сам|беру сам|оплачу целиком/i.test(s)) share = price;
+  if (isLink && share == null && nums[0]) share = nums[0].v < 1000 ? nums[0].v * 1000 : nums[0].v;
+  let name = isLink ? (fail ? decodeURIComponent(url.split('/').filter(Boolean).pop() || 'Товар').replace(/[-_]+/g, ' ') : two ? 'Телевизор 55"' : 'Диван Осло') : (clean.split(/\d/)[0] || '').replace(/[,.:—-]+$/, '').trim(); name = name ? name[0].toUpperCase() + name.slice(1) : '';
+  return {name, price, dl, share, link:isLink && !notp, twoPrices: two ? [54990, 49990] : null, linkFail: fail, notProduct: notp, text:s};
+}
+function parseIncome(s){ const n = parseMoney(s); const pay = (s.match(/(\d{1,2})\s*(?:и|,)\s*(\d{1,2})\s*числ/i) || []).slice(1).map(Number);
+  const mandM = s.match(/обязательн\S*\s*(\d[\d\s]*)\s*(тыс\S*|к\b)?/i);
+  const m = n[0] ? (n[0].v < 1000 ? n[0].v * 1000 : n[0].v) : null, mand = mandM ? Math.round(parseFloat(mandM[1].replace(/\s/g, '')) * (mandM[2] || parseFloat(mandM[1]) < 1000 ? 1000 : 1)) : 0;
+  return {m, mand, pay: pay.length ? pay : [10, 25], src:'manual'}; }
+const numIn = s => { const m = String(s).replace(/\s/g, '').match(/\d+/); return m ? +m[0] : 0; };
+
+/* ── туман ── */
+let OWN = null;
+const srcOf = k => k === 'own' && OWN ? OWN : ART[k] ? 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(ART[k]) : 'photos/' + k + '.jpg';
+const FOGS = {};
+function fogCopy(img){
+  const W = 40, H = 40, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d', {willReadFrequently:true}), k = Math.max(W / img.naturalWidth, H / img.naturalHeight), w = img.naturalWidth * k, h = img.naturalHeight * k;
+  x.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+  const d = x.getImageData(0, 0, W, H).data; let L = 0; for (let i = 0; i < d.length; i += 4) L += (0.2126 * d[i] + 0.7152 * d[i+1] + 0.0722 * d[i+2]) / 255; L /= d.length / 4;
+  const dark = L < 0.30; x.clearRect(0, 0, W, H);
+  if ('filter' in x) x.filter = `saturate(.5) brightness(${dark ? 1.28 : 1.1})`;
+  x.drawImage(img, (W - w) / 2, (H - h) / 2, w, h); x.filter = 'none'; x.fillStyle = `rgba(255,255,255,${dark ? .5 : .42})`; x.fillRect(0, 0, W, H);
+  return c.toDataURL('image/jpeg', .8);
+}
+function paintPhotos(){
+  $$('[data-pic]').forEach(ph => {
+    const k = ph.dataset.pic, src = srcOf(k), put = fog => { const f = $('.fog', ph); if (!f) return; f.src = fog || src; f.classList.toggle('fogfb', !fog); $('.color', ph).src = src; };
+    if (FOGS[k] !== undefined) return put(FOGS[k]);
+    const im = new Image(); im.onload = () => { try { FOGS[k] = fogCopy(im); } catch(e) { FOGS[k] = null; } paintPhotos(); }; im.src = src; FOGS[k] = FOGS[k]; put(null);
+  });
+  $$('.photo[data-pct]').forEach(ph => {
+    const p = +ph.dataset.pct, h = ph.clientHeight || 1, top = (1 - p) * 100, y = h * top / 100;
+    $('.color', ph).style.clipPath = `inset(${top.toFixed(3)}% 0 0 0)`;
+    const e = $('.edge', ph), r = $('.rule', ph); if (e) e.style.transform = r.style.transform = `translateY(${y.toFixed(1)}px)`;
+    const th = $('.thin', ph); if (th) { const c = +ph.dataset.conf || 0; th.style.top = top.toFixed(3) + '%'; th.style.height = Math.max(0, (p - c) * 100).toFixed(3) + '%'; }
+    const band = $('.band', ph), lab = $('.bandlab', ph);
+    if (band) { band.style.height = Math.max(10, h * (+ph.dataset.step || 0)).toFixed(1) + 'px'; band.style.transform = `translateY(${y.toFixed(1)}px)`; lab.style.transform = `translateY(${Math.max(34, y - 28).toFixed(1)}px)`;
+      if (S.flash) { band.classList.add('show'); lab.classList.add('show'); setTimeout(() => { band.classList.remove('show'); lab.classList.remove('show'); }, 2600); } }
+  });
+  $$('.mini[data-pct]').forEach(m => $('.color', m).style.clipPath = `inset(${((1 - +m.dataset.pct) * 100).toFixed(2)}% 0 0 0)`);
+  S.flash = false;
+}
+
+/* ── экраны ── */
+const vis = k => k === 'all' ? '<span class="vis all">видит партнёр</span>' : '<span class="vis me">видно только вам</span>';
+const backBtn = (to, t='Назад') => `<button class="backb" data-go="${to}">‹ ${t}</button>`;
+const TABSCR = ['list','purchase','today','source','data','stmtResult'];
+
+function scrConsent(){ return {notabs:true, html:`
+  <h1 class="h1 disp">Посчитаем, сойдётся ли покупка к сроку</h1><p class="mut">Регистрация не нужна.</p>
+  <div class="sec"><div class="rowl"><span>Партнёр не видит ваши деньги — только общую покупку.</span></div>
+  <div class="rowl"><span>Фраза уходит в GigaChat без номеров карт и телефонов. Суммы считает программа.</span></div>
+  <div class="rowl"><span>Всё удаляется одной кнопкой. Данные хранятся в России 12 месяцев с последнего входа.</span></div></div>
+  <button class="link" data-sheet="policy">Как мы обращаемся с данными</button>`, main:['Согласен, начать','consentOk']}; }
+
+function scrPhrase(){ const off = S.flags.offline, lim = S.flags.limit; return {notabs: !S.purchases.length, html:`
+  ${S.purchases.length ? backBtn('list', 'Покупки') : ''}
+  <h1 class="h1 disp">Что покупаете?</h1><p class="mut">Обычными словами, как написали бы партнёру, — или вставьте ссылку на товар.</p>
+  <form id="phrasef"><textarea class="inp" id="phrase" aria-label="Фраза о покупке" placeholder="Диван 180 тысяч к 31 декабря, я могу 90">${esc(S.draftText || '')}</textarea></form>
+  <p class="xs mut" style="margin-top:6px">Хватит суммы и срока — номера карт и имена не нужны. Можно надиктовать: микрофон на клавиатуре.</p>
+  ${off ? '<div class="note">Нет сети — фраза сохранена, посчитаю, когда появится.</div>' : ''}${S.flags.notProduct ? '<div class="note">Это не похоже на страницу товара — напишите, что покупаете и сколько стоит.</div>' : ''}${lim ? '<div class="note">Много запросов подряд — впишите поля сами.</div>' : ''}
+  <p class="lbl" style="margin-top:14px">Примеры</p><div class="chips">
+  ${['Диван 180 тысяч к 31 декабря, я могу 90','Отпуск 120 тысяч к 1 июня, я могу 70','Котёл 40 тысяч, я могу 25','https://divan.example/oslo к 31 декабря, я могу 90','https://shop.example/tv-two к 1 марта, я могу 30','https://shop.example/fail/Робот-пылесос к 1 декабря, я могу 20','https://blog.example/notproduct к 1 декабря'].map(e => `<button class="chip press sm" data-ex="${esc(e)}">${esc(e)}</button>`).join('')}</div>`,
+  main:[lim ? 'Вписать поля' : 'Посчитать', 'phraseGo']}; }
+
+function scrClarify(){ const d = S.draft, q = d.twoPrices ? ['На странице две цены — какую брать?', 'price', d.twoPrices.map(v => fmt(v))] : d.linkFail && d.price == null ? ['Страница товара не открылась. Сколько стоит?', 'price', ['40 000','100 000']] : d.price == null ? ['Сколько стоит?', 'price', ['40 000','100 000']] : d.dl == null ? ['К какой дате?', 'dl', ['к 15 ноября','к 31 декабря','к 1 июня']] : ['Сколько вносите вы?', 'share', ['половину','плачу сам']];
+  return {notabs:true, html:`${backBtn('phrase')}<p class="ai sm">Я понял так: ${esc(d.name || 'покупка')}${d.price ? ' · ' + rubT(d.price) : ''}${d.share ? ' · ваша часть ' + rubT(d.share) : ''}</p>
+  <h1 class="h1 disp">${q[0]}</h1><form id="clarf" class="field"><input class="inp" id="clar" data-f="${q[1]}" aria-label="${q[0]}"><button class="go press">Дальше</button></form>
+  <div class="chips">${q[2].map(c => `<button class="chip press" data-clar="${c}">${c}</button>`).join('')}</div>`}; }
+
+function scrFields(){ const d = S.draft || {}; const f = (id, lab, val, miss) => `<label class="lbl" for="f-${id}">${lab}</label><input class="inp${miss ? ' miss' : ''}" id="f-${id}" value="${esc(val)}" style="margin-bottom:10px">`;
+  return {notabs:true, html:`${backBtn(d.done ? 'answer' : 'phrase')}<h1 class="h1 disp">Проверьте поля</h1><p class="mut">${S.flags.limit ? 'Модель отдыхает — впишите сами. ' : ''}Фраза сохранена. Пустое подсвечено.</p>
+  <form id="fieldsf">${f('name','Что покупаете', d.name || '', !d.name)}${f('price','Сколько стоит, ₽', d.price ? fmt(d.price) : '', !d.price)}${f('dl','К какой дате', d.dl ? dStr(d.dl) : '', !d.dl)}${f('share','Сколько вносите вы, ₽', d.share != null ? fmt(d.share) : '', d.share == null)}</form>`, main:['Посчитать','fieldsGo']}; }
+
+function scrAnswer(){ const d = S.draft, days = Math.max(1, Math.round((d.dl - now()) / DAY)), gap = Math.max(0, d.price - d.share), per = Math.ceil(d.share / days), solo = gap === 0;
+  const d2 = days + 30;
+  return {notabs:true, html:`${backBtn('phrase')}
+  <p class="ai sm">Я понял так: ${esc(d.name)} · ${rubT(d.price)} · к ${dStr(d.dl)} · ваша часть ${rubT(d.share)} <button class="link" data-go="fields" style="min-height:0;font-style:normal">Поправить</button></p>
+  ${gap ? `<p class="lbl">Чтобы «${esc(d.name)}» сошлось к ${dStr(d.dl)}, найти ещё</p><p class="big disp num" data-out="new-gap">${rub(gap)}</p><p class="mut">осталось ${daysW(days)}</p>`
+        : `<p class="big disp">Сходится</p><p class="mut">к ${dStr(d.dl)} · осталось ${daysW(days)}</p>`}
+  <div class="sec"><div class="rowl"><span>Стоит</span><b class="num">${rubT(d.price)}</b></div><div class="rowl"><span>Вносите вы</span><b class="num">${rubT(d.share)}</b></div>
+  <div class="rowl"><span>Ваши ${rubT(d.share)} будут к сроку, если откладывать</span><b class="num"><span data-out="new-perday">${rubT(per)}</span> в день</b></div>
+  <div class="rowl"><span>Это в месяц</span><b class="num">≈ ${rubT(per * 30)}</b></div>${d.link ? '<p class="xs mut" style="margin-top:6px">Цена на 1 октября — может измениться.</p>' : ''}</div>
+  ${gap ? `<div class="sec"><h2>Что можно сделать</h2><button class="sec2 press" data-act="draftStmt">Найти недостающее в моих тратах</button>
+  <div class="rowl"><span>Если партнёр внесёт ${rubT(gap)} — сходится</span></div>
+  <div class="rowl"><span>Закрыть самим: ещё ${rubT(Math.ceil(gap / days))} в день</span></div>
+  <div class="rowl"><span>Сдвинуть срок на 30 дней: ${rubT(Math.ceil(d.price / d2))} в день</span></div></div>` : ''}
+  <p class="xs mut" style="margin-top:10px">Текст — GigaChat, числа — расчёт программы.</p>`,
+  main:[solo ? 'К моей покупке' : 'Отправить партнёру', solo ? 'commit' : 'toShare'], extra: solo ? '' : '<button class="sec2 press" data-act="commit">К моей покупке</button>'}; }
+
+function scrShare(){ const p = P(); const txt = `${p.cap || p.name} к ${dStr(p.dl)}, ${rubT(p.price)}. ${rubT(p.share[p.owner])} беру на себя. Посмотри, сможешь ли добавить, — там видно только покупку, а не мои деньги.`;
+  return {notabs:true, html:`${backBtn('purchase', 'К покупке')}<h1 class="h1 disp">Отправить партнёру</h1><div class="note" id="sharetxt">${txt}<br><span class="mut">fa.example/p/7Kq2…</span></div>
+  <button class="sec2 press" data-act="copyShare">Скопировать текст</button><button class="sec2 press" data-act="asPartner">Посмотреть глазами партнёра</button>
+  <p class="xs mut" style="margin-top:10px">Ссылка одноразовая: примет приглашение один человек.</p>`, main:['Отправить','shareSend']}; }
+
+function scrList(){ const w = S.who, ps = S.purchases.filter(p => p.share[w] != null || p.owner === w || p.invited);
+  return {html:`<div class="head"><h1 class="disp">Покупки</h1><button class="icon press" data-go="phrase" aria-label="Новая покупка"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
+  ${ps.map(p => `<button class="pl press" data-open="${p.id}"><span class="mini" data-pic="${p.photo}" data-pct="${pctOf(p, w)}"><img class="fog" alt=""><img class="color" alt=""></span>
+  <span><b>${esc(p.name)}</b><br><span class="mut sm">к ${dStr(p.dl)} · ${p.state === 'done' ? 'собрано' : p.share[w] == null ? 'ждёт вашей части' : 'осталось ' + rubT(leftOf(p, w))}</span></span></button>`).join('') || '<p class="mut">Покупок пока нет.</p>'}`, main:['Новая покупка','newPurchase']}; }
+
+function weekRow(w){ const wk = S.people[w].week.slice(), ow = S.people[OTHER[w]].week.slice(), todayI = 3 + S.off;
+  if (S.off) { wk[3] = 1; ow[3] = 1; }
+  wk[todayI] = S.people[w].stepped ? 1 : 0; ow[todayI] = (S.flags.partnerStep ? 1 : 0);
+  const done = wk.filter(Boolean).length;
+  return {done, html:`<div class="week" aria-label="Шаги этой недели">${['пн','вт','ср','чт','пт','сб','вс'].map((d, i) => `<div class="wd${wk[i] ? ' on' : ''}${wk[i] && ow[i] ? ' both' : ''}${i === todayI ? ' now' : ''}"><i></i>${d}</div>`).join('')}</div>`}; }
+
+function scrPurchase(){ const p = P(), w = S.who, o = OTHER[w];
+  if (!p) return scrList();
+  if (p.share[w] == null) return S.flags.used && w !== p.owner ? scrUsed() : scrInvite(p);
+  const pc = pctOf(p, w), ml = mileOf(pc), wk = weekRow(w), gap = gapOf(p), over = overOf(p), mine = perDay(p, w), plan = onPlan(p, w);
+  const oStat = p.gone === o ? 'вышел' : p.share[o] == null ? (p.invited ? 'приглашение отправлено' : 'ещё не знает') : !(p.saved[o] > 0) ? 'только начали' : onPlan(p, o) ? 'по плану' : 'нужна помощь';
+  const steps = Math.min(7, wk.done), ask = !me().asked && p.owner === w;
+  return {html:`<div class="head"><div>${S.purchases.length > 1 ? backBtn('list', 'Покупки') : ''}<h1 class="disp">${esc(p.name)}</h1><p class="mut" style="margin:2px 0 0">к ${dStr(p.dl)} · <span class="num" data-out="days">через ${daysW(daysTo(p))}</span></p></div>
+  <button class="icon press" data-sheet="change" aria-label="Изменить покупку"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="4" cy="10" r="1.6" fill="currentColor"/><circle cx="10" cy="10" r="1.6" fill="currentColor"/><circle cx="16" cy="10" r="1.6" fill="currentColor"/></svg></button></div>
+  ${S.flags.priceUp && p.link ? `<div class="note">Цена по ссылке изменилась: была ${rubT(p.price)}, стала ${rubT(p.price + 6000)}. <div class="kb"><button data-act="priceRecalc">Пересчитать</button><button data-act="priceKeep">Оставить</button></div></div>` : ''}
+  ${S.flags.partnerStep ? `<div class="note">${NAME[o]} сегодня ${o === 'anya' ? 'сделала' : 'сделал'} шаг. ${S.people[w].stepped ? 'Общий кадр этой недели — ваш.' : 'Отложите и вы — получится общий кадр.'}<div class="kb"><button data-act="cheer">Подбодрить</button></div></div>` : ''}
+  <div class="cardp"><div class="photo" data-pic="${p.photo}" data-pct="${pc}" data-conf="${confPct(p, w)}" data-step="${mine / Math.max(1, p.share[w])}" role="img" aria-label="Фото цели: чёткая часть — отложено, в тумане — впереди">
+    <img class="fog" alt=""><img class="color" alt=""><div class="thin"></div><div class="edge"></div><div class="rule"></div><div class="band"></div><div class="bandlab num">отложено</div><span class="pctlab num">отложено ${Math.round(pc * 100)}${NB}%</span>
+    ${ml ? `<span class="mile${S.flash ? ' pop' : ''}">${ml[1]}</span>` : ''}<button class="swap press" data-sheet="photo">Сменить фото</button></div>
+    <div class="cap"><span class="hand">${esc(p.cap || p.name)}</span><span class="stamp${oStat === 'нужна помощь' ? ' help' : ''}">${NAME[o]}: ${oStat}${oStat === 'по плану' || oStat === 'нужна помощь' ? `<small>${confOk(p, o) ? 'подтверждено выпиской' : 'по отметкам'}</small>` : ''}</span></div></div>
+  ${p.state === 'done' ? `<p class="left disp">Собрано</p><div class="note">Деньги лежат у вас. Собрать их в одном месте можно копилкой или сбором в своём банке — мы деньги не храним и не переводим.</div>`
+  : `<p class="left disp"><small>Вам осталось отложить ${vis('me')}</small><span class="num" data-out="my-left">${rub(leftOf(p, w))}</span></p>
+  <p class="mut" style="margin:0">${paydaySum(w) ? 'С зарплаты ' + dStr(nextPay(w, now())) + ' — отложить ≈ <span class="num">' + rub(paydaySum(w)) + '</span>. ' : ''}${plan ? 'Вы по плану' : 'Чтобы догнать план'}: это <span class="num" data-out="perday">${rub(mine)}</span> в день</p>
+  <p class="xs mut" style="margin:6px 0 0">${(p.saved[w] || 0) === 0 ? 'Отметок пока нет.' : ((p.conf || {})[w] || 0) >= p.saved[w] ? 'Все отметки подтверждены выпиской.' : ((p.conf || {})[w] || 0) > 0 ? 'Чётко — подтверждено выпиской: ' + rubT(p.conf[w]) + '. В лёгкой дымке — по вашим отметкам: ' + rubT(p.saved[w] - p.conf[w]) + '.' : 'Пока по вашим отметкам — в лёгкой дымке. Подтвердится, когда загрузите выписку.'}</p>`}
+  <div class="filmlab"><span>${Math.ceil(daysTo(p) / 7)} ${plural(Math.ceil(daysTo(p) / 7), 'неделя', 'недели', 'недель')} до покупки</span><span>эта неделя: ${steps} из 7</span></div>
+  <div class="film">${'<div class="fr"></div>'.repeat(13).replace('<div class="fr">', `<div class="fr" style="--r:${(100 - steps / 7 * 100).toFixed(1)}%">`)}</div>
+  ${wk.html}<p class="xs mut" style="margin-top:6px">День засчитан, когда вы отложили с зарплаты или отправили в покупку остаток дня. Кадр недели проявится при 5 днях из 7. Пропуск ничего не отнимает. Точка — день, который засчитан у обоих.</p>
+  <div class="sec"><h2>До полной суммы ${vis('all')}</h2>${over ? `<div class="rowl"><span>Вдвоём вносите на ${rubT(over)} больше цены.</span><button class="chip press" data-sheet="change">Уменьшить часть</button></div>`
+   : gap && !S.stmtFound ? `<div class="rowl"><span>Не хватает <b class="num" data-out="gap">${rubT(gap)}</b></span><button class="chip press" data-act="toStmt">Найти в своих тратах</button></div>`
+   : gap ? `<div class="rowl"><span><b>Сходится.</b> ${w === 'oleg' ? 'Недостающее нашлось в ваших тратах.' : 'Недостающее нашлось.'}</span>${w === 'oleg' ? '<button class="chip press" data-go="stmtResult">Советы</button>' : ''}</div>`
+   : `<div class="rowl"><span><b>Сходится</b> к ${dStr(p.dl)}</span></div>`}
+   <details><summary>Подробнее: цена, части, где лежат деньги</summary><div class="rowl"><span>Цена</span><b class="num">${rubT(p.price)}</b></div><div class="rowl"><span>Ваша часть · часть партнёра</span><b class="num">${rubT(p.share[w])} · ${p.share[o] != null ? rubT(p.share[o]) : '—'}</b></div>
+   <div class="rowl"><span>Где лежат ваши деньги ${vis('me')}<br><b>${(p.where || {})[w] || 'не указано'}</b></span><button class="chip press sm" data-sheet="where">${(p.where || {})[w] ? 'Изменить' : 'Указать'}</button></div>
+   ${p.link ? `<p class="xs mut" style="margin-top:6px">${p.link}</p>` : ''}</details>
+   ${p.owner === w && p.share[o] == null ? `<button class="sec2 press" data-go="share">${p.invited ? 'Напомнить партнёру' : 'Отправить партнёру'}</button>` : ''}</div>
+  ${ask ? `<div class="sec"><h2>Один вопрос, один раз</h2><p>Как вы решали последнюю крупную покупку?</p><div class="chips">${['Обсудили и скинулись','Купил(а) сам(а)','Взяли в рассрочку','Долго откладывали','Спорили'].map(a => `<button class="chip press sm" data-act="asked">${a}</button>`).join('')}<button class="chip press sm" data-act="asked">Пропустить</button></div></div>` : ''}`,
+  main: p.state === 'done' ? null : ['Я отложил(а)', 'saveSheet']}; }
+
+function scrInvite(p){ const o = p.owner; return {notabs:true, html:`<h1 class="h1 disp">${NAME[o]} зовёт вас в покупку</h1>
+  <div class="cardp"><div class="photo" data-pic="${p.photo}" data-pct="0"><img class="fog" alt=""><img class="color" alt=""><div class="edge"></div><div class="rule"></div></div><div class="cap"><span class="hand">${esc(p.cap || p.name)}</span></div></div>
+  <div class="sec"><div class="rowl"><span>${esc(p.name)} · к ${dStr(p.dl)}</span><b class="num">${rubT(p.price)}</b></div><div class="rowl"><span>${NAME[o]} берёт на себя</span><b class="num">${rubT(p.share[o])}</b></div></div>
+  <div class="sec"><h2>Что вы увидите</h2><p>Покупку, срок, цену, свою часть и свой туман. Про ${NAME[o] === 'Олег' ? 'Олега' : 'Аню'} — только «по плану» или «нужна помощь».</p>
+  <h2>Чего не увидит никто, кроме вас</h2><p>Ваши остатки, траты, доходы и выписку.</p></div>
+  <form id="acceptf" class="field"><input class="inp" id="accept" placeholder="я могу 75" aria-label="Сколько внесёте"><button class="go press">Принять</button></form>
+  <p class="xs mut" id="accnote" style="margin-top:6px">Напишите, сколько внесёте: «я могу 75» — это 75 000 ₽.</p>`}; }
+function scrUsed(){ return {notabs:true, html:`<h1 class="h1 disp">Приглашение уже использовано</h1><p>По этой ссылке покупку уже принял другой человек. Попросите прислать новую ссылку.</p><p class="mut sm">Владельцу покупки мы сообщили — он может отозвать приглашение.</p>`}; }
+
+function scrSource(){ return {html:`<h1 class="h1 disp">Сколько можно тратить на себя и не сорвать покупку?</h1>
+  <button class="sec2 press" data-go="income" style="text-align:left;padding:12px 14px;min-height:64px"><b>Вписать самому</b><br><span class="mut sm">готово за минуту</span></button>
+  <button class="sec2 press" data-go="stmtIntro" style="text-align:left;padding:12px 14px;min-height:64px"><b>Найти деньги на покупку в моих тратах</b><br><span class="mut sm">по выписке или снимкам экрана за 2–3 месяца</span></button>`}; }
+function scrIncome(){ return {notabs:true, html:`${backBtn('today')}<h1 class="h1 disp">Приходы и обязательные траты</h1><p class="mut">Одной фразой: сколько получаете, в какие дни и сколько уходит на обязательное. ${vis('me')}</p>
+  <form id="incomef"><textarea class="inp" id="income" aria-label="Приходы и обязательные траты">получаю 80 тысяч 10 и 25 числа, обязательные 30 тысяч</textarea></form>`, main:['Посчитать «Сегодня»','incomeGo']}; }
+
+function scrToday(){ const w = S.who, m = me(); if (!m.income) return scrSource();
+  const l = leftToday(w), tp = toPay(w), np = nextPay(w, now()), minus = l < 0, eom = 30 - new Date(now()).getUTCDate() + 1;
+  const first = active(w)[0];
+  return {html:`<div class="head"><h1 class="disp">Сегодня</h1><span class="mut sm">${dStr(now())}</span></div>
+  ${m.botOff ? `<div class="note">Бот отключён — <button class="link" data-sheet="remind" style="min-height:0">подключить снова</button></div>` : ''}
+  <p class="lbl">${minus ? 'Сегодня потрачено больше плана' : 'Можно ещё сегодня'} ${vis('me')}</p>
+  <p class="big disp num" data-out="left-today">${rub(l)}</p>
+  <p class="mut">${minus ? 'Завтра на себя ≈ ' + rubT(Math.floor(selfDay(w) + l / Math.max(1, eom))) + '. Отложенное на покупки не трогаем.' : 'до зарплаты ' + dStr(np) + ' на себя ≈ ' + rubT(untilPay(w)) + ' · ' + daysW(tp)}</p>
+  ${S.off ? '<p class="note sm">Пятница. По пятницам вы тратите в 1,6 раза больше обычного.</p>' : ''}
+  <form class="field" id="spendf"><input class="inp" id="spend" placeholder="потратил… кофе 300" aria-label="Трата фразой"><button class="go press">Записать</button></form>
+  <button class="link sm" data-sheet="shot">Или пришлите скриншот уведомления банка</button>
+  ${m.spent.length ? `<div class="sec"><h2>Траты за сегодня ${vis('me')}</h2>${m.spent.map((x, i) => `<div class="rowl"><span>${esc(x.t || 'без подписи')}</span><b class="num">${rubT(x.v)}</b><button class="link sm" data-undo="${i}" style="min-height:44px">Отменить</button></div>`).join('')}</div>` : ''}
+  <div class="sec"><h2>Влезет ли покупка ${vis('me')}</h2><form class="field" id="afff"><input class="inp" id="price" inputmode="numeric" placeholder="цена, ₽" aria-label="Цена покупки"><button class="go press">Проверить</button></form>
+  <div class="chips"><button class="chip press num" data-price="450">450 ₽</button><button class="chip press num" data-price="7000">7 000 ₽</button><button class="chip press num" data-price="15000">15 000 ₽</button></div>
+  <p class="ans" data-out="afford" aria-live="polite">${S.aff != null ? afford(w, S.aff).t : ''}</p>${S.aff != null && afford(w, S.aff).k !== 'no' ? `<div class="kb"><button data-act="affBuy">Купил — записать</button><button data-act="affNo">Не буду</button></div>` : ''}</div>
+  ${first && l > 0 && !m.sentRest ? `<div class="sec"><h2>Закрыть день ${vis('me')}</h2><div class="rowl"><span>Вечером остаток дня можно отправить в покупку — туман отступит сверх плана, день засчитается.</span><button class="chip press" data-act="rest">${rubT(l)} — в покупку</button></div></div>` : ''}
+  <div class="sec"><h2>Напоминания</h2>${m.bot && !m.botOff ? `<div class="rowl"><span>Пишем в ${m.bot === 'max' ? 'Max' : 'Telegram'}: утром и в день зарплаты</span><button class="chip press" data-go="bot">Открыть чат</button></div>`
+   : `<div class="rowl"><span>${np ? 'Зарплата ' + dStr(np) + ' — напомнить отложить ≈ ' + rubT(paydaySum(w)) + '?' : 'Напомнить отложить в день зарплаты?'}</span><button class="chip press" data-sheet="remind">Напоминать</button></div>`}</div>
+  <details><summary>Как я посчитал ${vis('me')}</summary><div class="sm">
+   <div class="rowl"><span>Приход в месяц</span><b class="num">${rubT(m.income.m)}</b></div><div class="rowl"><span>Обязательные</span><b class="num">− ${rubT(m.income.mand)}</b></div>
+   <div class="rowl"><span>На покупки: ${rubT(reserve(w))} в день × 30</span><b class="num">− ${rubT(reserve(w) * 30)}</b></div>
+   <div class="rowl"><span>На себя в день</span><b class="num">${rubT(selfDay(w))}</b></div><p class="xs mut">${m.income.src === 'stmt' ? 'По выписке с 1 июля по 30 сентября · обновить после зарплаты 10 октября.' : 'По вашей фразе.'} <button class="link sm" data-go="${m.income.src === 'stmt' ? 'stmtIntro' : 'income'}" style="min-height:0">Изменить</button></p></div></details>`}; }
+
+function scrStmtIntro(){ return {notabs:true, html:`${backBtn(S.purchases.length ? 'today' : 'answer')}<h1 class="h1 disp">Найдём деньги в ваших тратах</h1>
+  ${S.flags.format ? '<div class="note">Этот формат пока не читаю. Подойдёт CSV из приложения банка, PDF-выписка Сбербанка или снимки экрана. Можно <button class="link" data-go="income" style="min-height:0">вписать самому</button>.</div>' : ''}
+  <div class="sec"><h2>Что возьму</h2><p>Дату, сумму, описание и категорию каждой операции.</p><h2>Что скрою</h2><p>Номера карт, телефоны, имена в переводах.</p><h2>Что не храню</h2><p>Сам файл и снимки: удаляю сразу после разбора. Партнёр не увидит ничего.</p></div>
+  <div class="note sm"><b>Какую выписку:</b> свою, за 2–3 месяца. Выписку партнёра не загружайте: это его данные.</div>
+  <div class="note sm"><b>Про снимки экрана:</b> снимок распознаю на своём сервере в России; имена, номера карт и телефонов скрываю до GigaChat; сам снимок удаляю сразу после распознавания.</div>
+  <p class="xs mut">Нажимая кнопку ниже, вы соглашаетесь на разбор по этим правилам.</p>
+  <button class="sec2 press" data-act="stmtShots">Сфотографировать операции</button>`, main:['Выбрать файл выписки','stmtFile']}; }
+function scrStmtBusy(){ return {notabs:true, html:`<h1 class="h1 disp">Разбираю выписку</h1><div class="scan"><i></i></div><p class="mut">181 операция за три месяца. Файл уже удалён.</p>`}; }
+function scrStmtResult(){ const p = active('oleg')[0], gap = p ? gapOf(p) : 0, fs = p ? foundSum(p) : 0, dl = p ? dStr(p.dl) : '';
+  if (S.who !== 'oleg' || !S.people.oleg.stmt) return {html:`<h1 class="h1 disp">Выписка</h1><p>Здесь появится разбор вашей выписки. Он виден только вам.</p><button class="sec2 press" data-go="stmtIntro">Загрузить выписку</button>`};
+  return {html:`${backBtn('today', 'Сегодня')}<p class="xs mut">по выписке с 1 июля по 30 сентября · обновить после зарплаты 10 октября ${vis('me')}</p>
+  ${!p ? `<h1 class="h1 disp">В тратах можно освободить <span class="num">${rubT(TIPS.reduce((s, t, i) => s + (S.stmtTips[i] ? t[1] : 0), 0))}</span> в месяц</h1><button class="sec2 press" data-go="phrase">Добавить покупку</button>`
+   : gap ? (fs >= gap ? `<h1 class="h1 disp">Сходится — недостающие <span class="num">${rubT(gap)}</span> нашлись в ваших же тратах</h1><p class="mut">К ${dl} наберётся ≈ <b class="num" data-out="found">${rubT(fs)}</b> — на ${rubT(fs - gap)} больше нужного.</p>`
+     : `<h1 class="h1 disp">Не хватает ещё <span class="num">${rubT(gap - fs)}</span></h1><p class="mut">Советы дают <b class="num" data-out="found">${rubT(fs)}</b> к ${dl}. Можно сдвинуть срок в «Изменить покупку».</p>`)
+   : `<h1 class="h1 disp">Покупка сходится</h1><p class="mut">Советы ниже — запас: ≈ <b class="num" data-out="found">${rubT(fs)}</b> к ${dl}.</p>`}
+  <div class="sec"><h2>Советы</h2>${TIPS.map((t, i) => `<label class="tip"><input type="checkbox" data-tip="${i}" ${S.stmtTips[i] ? 'checked' : ''}><span>${t[0]}<br><span class="xs mut">${rubT(t[1])} в месяц</span></span><b class="num">${p ? rubT(tipTo(t[1], p)) : ''}</b></label>`).join('')}</div>
+  <div class="sec"><h2>Подписки</h2><div class="rowl"><span>Кинопоиск</span><b class="num">399 ₽</b></div><div class="rowl"><span>Иви</span><b class="num">299 ₽</b></div><div class="rowl"><span>Яндекс Плюс</span><b class="num">299 ₽</b></div><p class="xs mut">Всего 997 ₽ в месяц.</p></div>
+  <div class="sec"><h2>Что заметно</h2><p>По пятницам тратите в 1,6 раза больше обычного.</p><p>В первые три дня после зарплаты уходит 31 % трат месяца.</p></div>
+  <details><summary>Куда уходят деньги в месяц</summary><div class="sm">${[['Продукты','18 400'],['Доставка еды','9 800'],['Маркетплейсы','6 000'],['Кафе и кофе','5 200'],['Такси','3 100'],['Подписки','997']].map(r => `<div class="rowl"><span>${r[0]}</span><b class="num">${r[1].replace(' ', NB)} ₽</b></div>`).join('')}</div></details>
+  <div class="sec"><h2>Обязательные</h2><p>Считаю обязательными: ЖКУ, связь и интернет, кредит — 30 000 ₽ в месяц. <button class="link sm" data-sheet="feedback" style="min-height:0">Что-то лишнее?</button></p></div>
+  <div class="sec"><h2>Что не считал доходом и тратой</h2>
+   <div class="rowl"><span>Переводы между своими счетами: 20 000 ₽</span></div>
+   ${!p ? '' : S.recon ? `<div class="rowl" style="flex-wrap:wrap"><span>Отмечено ${rubT(S.recon.marked)}, а в копилку по выписке ушло ${rubT(S.recon.seen)}.</span><span class="kb" style="margin:0"><button data-act="reconFix">Поправить отметки</button><button data-act="reconKeep">Остальное лежит в другом месте</button></span></div>`
+     : `<div class="rowl"><span>В копилку и на вклады: ${rubT((p.conf || {}).oleg || 0)} — ${((p.conf || {}).oleg || 0) >= p.saved.oleg ? 'отметки подтверждены' : 'это подтверждённая часть отметок'}.</span></div>`}
+   <div class="rowl" style="flex-wrap:wrap"><span>От [человек]: 12 000 ₽ — ${S.petr ? S.petr : 'это доход?'}</span>${S.petr ? '' : '<span class="kb" style="margin:0"><button data-petr="вернули долг">Вернули долг</button><button data-petr="партнёр скинулся">Партнёр скинулся</button><button data-petr="это доход">Это доход</button></span>'}</div>
+   <p class="xs mut" style="margin-top:6px">Скрыто номеров карт, телефонов и имён: 14. Возвратов: 2. Дублей: 1.</p></div>`, main:['Считать «Сегодня» по выписке','stmtUse']}; }
+
+function scrData(){ const m = me(); return {html:`<div class="head"><h1 class="disp">Мои данные</h1></div><p class="mut sm">Всё на этой странице ${vis('me')}</p>
+  <div class="sec"><h2>Что храним</h2><div class="rowl"><span>Покупки, ваши части и отметки «отложил»</span></div><div class="rowl"><span>Приходы и обязательные</span><span class="mut sm">${m.income ? (m.income.src === 'stmt' ? 'из выписки' : 'вписаны') : 'нет'}</span></div>
+   <div class="rowl"><span>Сводка выписки (файла нет)</span>${S.who === 'oleg' && m.stmt ? '<button class="chip press sm" data-act="delStmt">Удалить</button>' : '<span class="mut sm">нет</span>'}</div></div>
+  <div class="sec"><h2>Напоминания</h2><div class="rowl"><span>${m.bot ? 'Бот в ' + (m.bot === 'max' ? 'Max' : 'Telegram') : 'Не подключены'}</span>${m.bot ? '<button class="chip press sm" data-act="botStop">Отключить</button>' : '<button class="chip press sm" data-sheet="remind">Подключить</button>'}</div></div>
+  <div class="sec"><h2>Не потерять данные</h2><div class="rowl"><span>На главный экран телефона</span><button class="chip press sm" data-sheet="install">Как</button></div>
+   <div class="rowl"><span>${m.email ? 'Почта привязана' : 'Данные живут на этом телефоне'}</span>${m.email ? '' : '<button class="chip press sm" data-sheet="email">Привязать почту</button>'}</div></div>
+  <div class="sec"><button class="link" data-sheet="policy">Как мы обращаемся с данными</button><br><button class="link" data-sheet="delAsk" style="color:var(--warm)">Удалить все мои данные</button></div>`}; }
+function scrDeleted(){ return {notabs:true, html:`<h1 class="h1 disp">Данные удалены</h1><p>Покупки, части, отметки, приходы, траты, сводка выписки и связь с ботом удалены. ${S.purchases.length ? 'У партнёра покупка осталась с пометкой «вышел».' : ''}</p>`, main:['Начать заново','restart']}; }
+
+function botHello(w){ const tg = me().bot === 'tg' || S.flags.tg; return tg
+  ? [{b:'Подключено. Пишу по утрам и в день зарплаты — без сумм: деньги показываю только в приложении. Партнёр этот чат не видит.', kb:[['Открыть приложение','go:today']]},
+     {b:'Доброе утро! Посмотрите, сколько сегодня можно на себя.', kb:[['Открыть приложение','go:today']]}]
+  : [{b:'Подключено. Утром пишу, сколько сегодня на себя, в день зарплаты — сколько отложить. Траты пишите прямо сюда: «кофе 300». Партнёр этот чат не видит.'},
+     {b:morningText(w), out:'bot-morning', sub:true, kb:[['Записать трату','hint:spend'],['Влезет ли покупка?','hint:aff']]}]; }
+function morningText(w){ const p = active(w)[0]; return 'Доброе утро! Сегодня на себя ' + rubT(selfDay(w)) + (p ? '. «' + p.name + '»: ' + (onPlan(p, w) ? 'вы по плану' : 'можно догнать') + (nextPay(w, now()) ? ', с зарплаты ' + dStr(nextPay(w, now())) + ' — отложить ≈ ' + rubT(paydaySum(w)) + '.' : '.') : '.'); }
+function scrBot(){ const w = S.who, m = me(), tg = m.bot === 'tg';
+  const msgs = botHello(w).concat(m.chat);
+  if (S.flags.push || S.off === 9) msgs.push(paydayMsg(w, tg));
+  return {notabs:true, html:`<div class="chathead">${backBtn('today', '')}<span class="ava">₽</span><span><b>Покупка к дате</b><br><span class="xs mut">бот в ${tg ? 'Telegram · без сумм' : 'Max'}</span></span>
+   <span style="flex:1"></span><div class="seg" style="width:120px"><button data-bot="max" aria-pressed="${!tg}">Max</button><button data-bot="tg" aria-pressed="${tg}">TG</button></div></div>
+  <div class="chat">${msgs.map(x => x.me ? `<div class="bub me">${esc(x.me)}</div>` : `<div class="bub"><span${x.out ? ` data-out="${x.out}"` : ''}>${x.b}</span>${x.sub ? '<small>текст — GigaChat, числа — расчёт программы</small>' : ''}${x.kb ? `<div class="kb">${x.kb.map(k => `<button data-kb="${k[1]}">${k[0]}</button>`).join('')}</div>` : ''}</div>`).join('')}</div>
+  <form class="field" id="botf" style="position:sticky;bottom:-80px;margin-top:14px;background:var(--bg);padding:8px 0"><input class="inp" id="botin" placeholder="${tg ? 'сообщение' : 'кофе 300 · влезет ли ужин за 3000?'}" aria-label="Сообщение боту"><button class="go press">›</button></form>`}; }
+const paydayMsg = (w, tg) => tg ? {b:'Зарплата пришла. Откройте приложение — там сумма, которую стоит отложить.', kb:[['Открыть приложение','go:purchase']]}
+  : {b:'Зарплата пришла — отложите ≈ ' + rubT(paydaySum(w)), out:'bot-payday', sub:true, kb:[['Отложил','payStep'],['Вечером','later']]};
+function botSay(text){ const w = S.who, m = me(), tg = m.bot === 'tg'; m.chat.push({me:text});
+  const v = numIn(text.replace(/\d{1,2}\s*числ/g, ''));
+  if (tg) m.chat.push({b:'В Telegram суммы не записываю. Трату и «влезет ли» — в приложении.', kb:[['Открыть приложение','go:today']]});
+  else if (!v) m.chat.push({b:'Не нашёл сумму. Напишите, например, «такси 450» или «влезет ли ужин за 3000?»'});
+  else if (/влез|можно ли|хватит/i.test(text)) { const a = afford(w, v); m.chat.push({b:a.t, sub:true, out:'afford', kb: a.k === 'no' ? null : [['Купил — записать','buy:' + v],['Не буду','later']]}); }
+  else { const t = text.replace(/[\d\s₽]+/g, ' ').trim(); m.spent.push({v, t}); m.chat.push({b:'Записал: ' + (t || 'трата') + ' — ' + rubT(v) + '. Сегодня на себя ' + (leftToday(w) < 0 ? 'потрачено больше плана на ' + rubT(-leftToday(w)) : 'осталось ' + rubT(leftToday(w))), sub:true, kb:[['Отменить','undoLast']]}); }
+}
+
+/* ── листы ── */
+const SH = {
+  policy: () => `<h3 class="disp">Как мы обращаемся с данными</h3><p>Аккаунт привязан к этому устройству: без телефона и почты.</p><p>Фразы разбирает GigaChat. До отправки номера карт и телефонов заменяются на метки.</p><p>Файл выписки и снимки удаляются сразу после разбора; хранится только сводка.</p><p>Партнёр видит покупку, срок, цену и свою часть. Ваши остатки, траты и доходы — нет.</p><p>Данные хранятся в России 12 месяцев с последнего входа. Удалить всё можно в «Моих данных».</p><button class="main press" data-close>Понятно</button>`,
+  save: () => { const p = P(), w = S.who, ps = paydaySum(w), v = Math.min(leftOf(p, w), ps || perDay(p, w)), rest = me().income && !me().sentRest ? leftToday(w) : 0; return `<h3 class="disp">Сколько отложили</h3><form id="savef" class="field"><input class="inp" id="saveamt" inputmode="numeric" value="${fmt(v)}" aria-label="Сумма"><button class="go press">Записать</button></form><div class="chips">${ps ? `<button class="chip press num" data-saveamt="${Math.min(leftOf(p, w), ps)}">с зарплаты ${rubT(Math.min(leftOf(p, w), ps))}</button>` : ''}${rest > 0 ? `<button class="chip press num" data-act="rest">остаток дня ${rubT(rest)}</button>` : ''}</div><p class="xs mut" style="margin-top:8px">Мы не переводим деньги: отметка — для вашего плана. Партнёр увидит только «по плану».</p>`; },
+  change: () => `<h3 class="disp">Изменить покупку</h3><button class="sec2 press" data-input="share">Поменять свою часть</button><button class="sec2 press" data-input="dl">Перенести срок</button><button class="sec2 press" data-input="took">Пришлось взять из отложенного</button><button class="sec2 press" data-sheet="cancelAsk" style="color:var(--warm)">Отменить покупку</button><p class="xs mut" style="margin-top:8px">Партнёр увидит новый статус без причин и без ваших сумм.</p>`,
+  input: k => { const t = {share:['Ваша часть, ₽','например, 80 000'], dl:['Новый срок','например, к 31 января'], took:['Сколько взяли из отложенного, ₽','например, 3 000']}[k]; return `<h3 class="disp">${t[0]}</h3><form id="inputf" data-k="${k}" class="field"><input class="inp" id="inputv" placeholder="${t[1]}" aria-label="${t[0]}"><button class="go press">Готово</button></form>${k === 'took' ? '<p class="xs mut" style="margin-top:8px">Бывает. Пересчитаю план и предложу срок без упрёков.</p>' : ''}`; },
+  cancelAsk: () => `<h3 class="disp">Отменить покупку?</h3><p>Покупка уйдёт в архив у вас и у партнёра. Отметки сохранятся.</p><button class="main press" data-act="cancelBuy">Отменить покупку</button><button class="sec2 press" data-close>Оставить</button>`,
+  delAsk: () => `<h3 class="disp">Удалить все данные?</h3><p>Покупки, части, отложенное, приходы, траты, сводка выписки и связь с ботом исчезнут. Вернуть нельзя.</p><button class="main press" data-act="delAll">Удалить всё</button><button class="sec2 press" data-close>Оставить</button>`,
+  remind: () => `<h3 class="disp">Где напоминать?</h3><button class="sec2 press" data-act="linkMax" style="text-align:left;padding:10px 14px;min-height:64px"><b>В Max</b><br><span class="mut sm">траты и «влезет ли» прямо в чате</span></button><button class="sec2 press" data-act="linkTg" style="text-align:left;padding:10px 14px;min-height:64px"><b>В Telegram</b><br><span class="mut sm">только напоминания, без сумм</span></button>
+   <label class="tip"><input type="checkbox" checked><span>По утрам — сколько сегодня на себя</span></label><label class="tip"><input type="checkbox" checked><span>Раз в месяц — обновить выписку</span></label>
+   <p class="xs mut" style="margin-top:8px">Откроется мессенджер → «Старт». Ссылка одноразовая, действует сутки. Партнёр этот чат не видит.</p>
+   <details><summary>Без мессенджера — уведомлением на телефоне</summary><p class="sm">1. Добавьте приложение на главный экран. 2. Разрешите уведомления.</p><button class="sec2 press" data-act="linkPush">Разрешить уведомления</button></details>`,
+  install: () => `<h3 class="disp">На главный экран</h3><p>iPhone: «Поделиться» → «На экран Домой».</p><p>Android: меню браузера → «Добавить на главный экран».</p><p class="mut sm">Так приложение открывается одним касанием и может присылать уведомления.</p><button class="main press" data-close>Понятно</button>`,
+  email: () => S.emailStep ? `<h3 class="disp">Код из письма</h3><p class="mut sm">Отправили код на почту. Введите четыре цифры.</p><form id="codef" class="field"><input class="inp" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Код из письма"><button class="go press">Готово</button></form>`
+    : `<h3 class="disp">Сохранить по почте</h3><p>Сейчас данные живут на этом телефоне. Привяжите почту — и они не пропадут при смене устройства.</p><form id="emailf" class="field"><input class="inp" type="email" placeholder="почта" aria-label="Почта"><button class="go press">Код</button></form>`,
+  shot: () => `<h3 class="disp">Трата скриншотом</h3><p>Пришлите скриншот уведомления банка — распознаю сумму на своём сервере в России и попрошу подтвердить.</p><button class="sec2 press" data-act="shotDemo">Взять пример: «Покупка 1 250 ₽, Пятёрочка»</button>`,
+  feedback: () => `<h3 class="disp">Что не так?</h3><form id="fbf"><textarea class="inp" aria-label="Что не так" placeholder="Напишите в двух словах"></textarea><button class="main press" style="margin-top:10px">Отправить</button></form>`,
+  feedbackOk: () => `<h3 class="disp">Спасибо, отправлено</h3><p>Читаем каждый отзыв. Ответим в течение суток, если оставите контакт.</p><button class="main press" data-close>Закрыть</button>`,
+  photo: () => `<h3 class="disp">Фото цели</h3><label class="filebtn">Снять или выбрать своё<input type="file" accept="image/*" id="file" aria-label="Своё фото цели"></label><p class="xs mut" style="margin:8px 0 0">Своё фото уменьшается и остаётся на этом устройстве. Партнёр увидит его в общей покупке. Ниже — рисунки и свободные фото для показа.</p><div class="thumbs">${PHOTOS.map(p => `<button data-photo="${p[0]}" aria-label="${p[1]}"><img loading="lazy" src="${srcOf(p[0])}" alt=""></button>`).join('')}</div>`,
+  weeksum: () => { const p = active(S.who)[0], wk = weekRow(S.who); return `<h3 class="disp">Итоги недели</h3><p class="big disp">${wk.done} ${plural(wk.done, 'шаг', 'шага', 'шагов')} из 7</p><p>${wk.done >= 5 ? 'Кадр недели проявлен.' : 'До кадра недели не хватило ' + (5 - wk.done) + '. Следующая неделя начинается с чистого кадра — ничего не сгорело.'}</p>${p ? `<p class="mut">До «${esc(p.name)}» — ${daysW(daysTo(p))}.</p>` : ''}${wk.html}<p class="xs mut" style="margin-top:10px">В карточке для друзей нет сумм и процентов.</p><button class="main press" data-act="shareWeek">Поделиться карточкой</button>`; },
+  where: () => `<h3 class="disp">Где будут лежать деньги?</h3><p class="mut sm">Отдельное место помогает не потратить отложенное. Партнёр этого не видит.</p>${['Копилка в банке','Вклад','Отдельный счёт','Наличные','На карте, вместе с остальными'].map(x => `<button class="sec2 press" data-where="${x}">${x}</button>`).join('')}`
+};
+let toastT = null;
+function toast(t){ const el = $('#toast'); el.textContent = t; el.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 3200); }
+function drawEmail(){ $('#sheet').innerHTML = '<div class="grabz" aria-hidden="true"><div class="grab"></div></div>' + SH.email(); const i = $('#sheet input'); if (i) i.focus({preventScroll:true}); }
+function openSheet(k, arg){ S.sheet = k; $('#sheet').innerHTML = '<div class="grabz" aria-hidden="true"><div class="grab"></div></div>' + SH[k](arg); $('#sheet').style.transform = ''; $('#sheetwrap').classList.add('open'); const i = $('#sheet input:not([type=checkbox]):not([type=file])'); if (i && !reduce()) setTimeout(() => i.focus({preventScroll:true}), 400); }
+function closeSheet(){ S.sheet = null; $('#sheet').style.transform = ''; $('#sheetwrap').classList.remove('open'); }
+/* лист тянется за пальцем 1:1; при отпускании решает скорость и пройденный путь, вверх — с растущим сопротивлением */
+(() => { const sh = $('#sheet'); let y0 = 0, dy = 0, drag = false, hist = [];
+  sh.addEventListener('pointerdown', e => { if (!e.target.closest('.grabz') || drag) return; drag = true; y0 = e.clientY; dy = 0; hist = [[e.timeStamp, 0]]; sh.classList.add('drag'); sh.setPointerCapture(e.pointerId); });
+  sh.addEventListener('pointermove', e => { if (!drag) return; dy = e.clientY - y0; hist.push([e.timeStamp, dy]); if (hist.length > 5) hist.shift();
+    const y = dy >= 0 ? dy : -(Math.abs(dy) * 60 * .55) / (60 + .55 * Math.abs(dy)); sh.style.transform = `translateY(${y.toFixed(1)}px)`; });
+  const end = () => { if (!drag) return; drag = false; sh.classList.remove('drag'); const a = hist[0], b = hist[hist.length - 1], v = b[0] > a[0] ? (b[1] - a[1]) / (b[0] - a[0]) : 0;
+    if (dy + v * 180 > sh.offsetHeight * .35) closeSheet(); else sh.style.transform = ''; };
+  sh.addEventListener('pointerup', end); sh.addEventListener('pointercancel', end); })();
+
+/* ── отрисовка ── */
+const SCR = {consent:scrConsent, phrase:scrPhrase, clarify:scrClarify, fields:scrFields, answer:scrAnswer, share:scrShare, list:scrList, purchase:scrPurchase, source:scrSource, income:scrIncome, today:scrToday, stmtIntro:scrStmtIntro, stmtBusy:scrStmtBusy, stmtResult:scrStmtResult, data:scrData, deleted:scrDeleted, bot:scrBot};
+function render(keepScroll){
+  const app = $('#app'), v = $('#view'), top = v.scrollTop;
+  app.dataset.who = S.who; app.dataset.day = S.off ? 'tomorrow' : 'today';
+  if (!me().consent && !['consent','deleted'].includes(S.scr)) S.scr = 'consent';
+  const r = SCR[S.scr](), tabs = !r.notabs;
+  v.className = 'view' + (tabs ? '' : ' notabs'); v.innerHTML = r.html + (S.scr === 'consent' ? '' : `<p style="margin:18px 0 0"><button class="link xs mut" data-sheet="feedback" style="color:var(--ink2)">Что не так?</button></p>`);
+  $('#bottom').innerHTML = r.main ? `<div class="bottom${tabs ? '' : ' notabs'}"><button class="main press" data-main="${r.main[1]}" ${r.main[2] ? 'disabled' : ''}>${r.main[0]}</button>${r.extra || ''}</div>` : '';
+  const t = $('#tabs'); t.hidden = !tabs; t.style.display = tabs ? 'flex' : 'none';
+  t.innerHTML = [['buy','Покупки'],['today','Сегодня'],['data','Мои данные']].map(x => `<button data-tab="${x[0]}" ${S.tab === x[0] ? 'aria-current="page"' : ''}>${x[1]}</button>`).join('');
+  $('#pushwrap').innerHTML = S.flags.push && S.scr !== 'bot' ? `<div class="push" role="alert"><b>Зарплата пришла — отложите ≈ <span class="num">${rubT(paydaySum(S.who) || 0)}</span></b><div class="sm mut">${active(S.who)[0] ? 'На «' + esc(active(S.who)[0].name) + '» до следующей зарплаты. ' : ''}Партнёр увидит только общий прогресс.</div><div class="row"><button data-act="pushStep">Отложил</button><button data-act="pushLater">Вечером</button></div></div>` : '';
+  v.scrollTop = keepScroll ? top : 0;
+  paintPhotos();
+  $$('#panel [data-who]').forEach(x => x.setAttribute('aria-pressed', x.dataset.who === S.who));
+  $$('#panel [data-day]').forEach(x => x.setAttribute('aria-pressed', (x.dataset.day === 'tomorrow') === !!S.off));
+}
+function go(scr, keep){ S.scr = scr; if (scr === 'list' || scr === 'purchase') S.tab = 'buy'; if (['today','source','income','bot','stmtIntro','stmtResult'].includes(scr)) S.tab = 'today'; if (scr === 'data') S.tab = 'data'; closeSheet(); render(keep); }
+
+/* ── действия ── */
+function step(amount){ const p = P() || active(S.who)[0]; if (!p) return; const w = S.who, v = Math.min(leftOf(p, w), Math.round(amount)); if (!(v > 0)) return;
+  const before = mileOf(pctOf(p, w)); me().stepAmt = (me().stepAmt || 0) + v; p.saved[w] += v; if (S.off) (p.tom = p.tom || {})[w] = ((p.tom || {})[w] || 0) + v; me().stepped = true; S.flash = true;
+  if (S.purchases.every(q => q.state !== 'active' || (leftOf(q, 'oleg') === 0 && (q.share.anya == null || leftOf(q, 'anya') === 0))) && gapOf(p) === 0) p.state = 'done';
+  if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate(10);
+  const first = !me().email && !me().emailAsked; me().emailAsked = true;
+  go('purchase'); const after = mileOf(pctOf(p, w));
+  if (after && (!before || after[0] > before[0])) setTimeout(() => toast(after[1] + '. Туман отступил ещё на шаг.'), 900);
+  else if (first && S.mode === 'fresh') setTimeout(() => openSheet('email'), 900);
+}
+function commitDraft(){ const d = S.draft, id = 'p' + (S.purchases.length + 1), ph = /отпуск|море|пляж/i.test(d.name) ? 'sea' : /кварти|ремонт/i.test(d.name) ? 'flat-light' : /ноут|компьют/i.test(d.name) ? 'laptop-light' : /телефон|смартфон/i.test(d.name) ? 'phone-dark' : /кольц|свадьб/i.test(d.name) ? 'rings' : 'sofa';
+  S.purchases.push({id, name:d.name, cap:d.name, price:d.price, dl:d.dl, cr:now(), photo:ph, link:d.link ? 'divan.example · цена на 1 октября — может измениться' : null, owner:S.who, share:{[S.who]:d.share, [OTHER[S.who]]:null}, saved:{[S.who]:0, [OTHER[S.who]]:0}, conf:{oleg:0, anya:0}, where:{}, invited:false, state:'active'});
+  S.cur = id; S.draft = null; S.draftText = ''; }
+function draftNext(){ const d = S.draft;
+  if (d.notProduct) { S.flags.notProduct = true; S.draft = null; return go('phrase'); }
+  if (d.twoPrices || (d.linkFail && d.price == null)) return go('clarify');
+  const miss = ['price','dl','share'].filter(k => d[k] == null).length + (d.name ? 0 : 1);
+  if (S.flags.limit || miss >= 2) return go('fields'); if (miss === 1) return go(d.name ? 'clarify' : 'fields'); d.done = true; go('answer'); }
+function setDay(off){
+  if (off !== S.off) for (const w of ['oleg','anya']) { const m = S.people[w];
+    if (off) { for (const p of S.purchases) if (p.state === 'active' && p.share[w] != null) { const a = m.stepped ? 0 : perDayPlan(p, w); (p.auto = p.auto || {})[w] = a; p.saved[w] += a; }
+      m.keep = {spent:m.spent, stepped:m.stepped, stepAmt:m.stepAmt, sentRest:m.sentRest}; m.spent = []; m.stepped = false; m.stepAmt = 0; m.sentRest = false; }
+    else { for (const p of S.purchases) { for (const k of ['auto','tom']) if (p[k] && p[k][w]) { p.saved[w] -= p[k][w]; p[k][w] = 0; } }
+      if (m.keep) { Object.assign(m, m.keep); m.keep = null; } } }
+  S.off = off; S.aff = null; S.flags.push = false; S.flags.partnerStep = false; render(); }
+function snap(){}
+function scenario(k){ $('#panel').classList.remove('open'); const w = S.who;
+  if (k === 'fresh' || k === 'mid') { S = seed(k); snap(); render(); if (k === 'fresh') story(0); return; }
+  if (!S.purchases.length) { S = seed('mid'); snap(); }
+  const p = S.purchases[0]; S.cur = p.id;
+  if (k === 'payday') { S.flags.push = true; go('purchase'); }
+  else if (k === 'partner') { S.flags.partnerStep = true; go('purchase'); }
+  else if (k === 'price') { S.flags.priceUp = true; go('purchase'); }
+  else if (k === 'week') { go('purchase'); openSheet('weeksum'); }
+  else if (k === 'recon') { S.who = 'oleg'; S.flags.mismatch = true; runStmt(true); }
+  else if (k === 'done') { p.saved.oleg = p.share.oleg; p.saved.anya = p.share.anya; p.share.anya += gapOf(p); p.saved.anya = p.share.anya; p.state = 'done'; go('purchase'); }
+  else if (k === 'offline') { S.flags.offline = true; S.flags.limit = false; go('phrase'); }
+  else if (k === 'limit') { S.flags.limit = true; S.flags.offline = false; go('phrase'); }
+  else if (k === 'format') { S.flags.format = true; go('stmtIntro'); }
+  else if (k === 'botoff') { me().botOff = true; go('today'); }
+  else if (k === 'used') { S.who = 'anya'; p.share.anya = null; S.flags.used = true; go('purchase'); }
+}
+function runStmt(instant){ const fin = () => { S.people.oleg.stmt = {from:'1 июля', to:'30 сентября'}; S.people.oleg.income = {m:80000, mand:30000, pay:[10,25], src:'stmt'}; S.stmtFound = true;
+    for (const q of active('oleg')) { q.conf = q.conf || {}; if (S.flags.mismatch && q.saved.oleg > 3000) { q.conf.oleg = q.saved.oleg - 3000; S.recon = {marked:q.saved.oleg, seen:q.conf.oleg, id:q.id}; } else q.conf.oleg = q.saved.oleg; }
+    S.flags.mismatch = false; go('stmtResult'); };
+  if (S.who !== 'oleg') return toast('В показе выписка есть только у Олега');
+  if (instant || reduce()) return fin(); go('stmtBusy'); setTimeout(fin, 1500); }
+
+const ACT = {
+  consentOk(){ me().consent = true; go(S.purchases.some(p => p.share[S.who] != null || p.invited) ? 'purchase' : 'phrase'); },
+  phraseGo(){ const t = ($('#phrase').value || '').trim() || 'Диван 180 тысяч к 31 декабря, я могу 90'; S.draftText = t; S.flags.notProduct = false; if (S.flags.offline) return render(true); S.draft = parsePhrase(t); draftNext(); },
+  fieldsGo(){ const d = S.draft || (S.draft = {}); d.name = $('#f-name').value.trim(); d.price = numIn($('#f-price').value) || null; d.dl = parseDate('к ' + $('#f-dl').value.replace(/^к\s+/, '')) || d.dl; d.share = $('#f-share').value.trim() ? numIn($('#f-share').value) : null;
+    if (!d.name || !d.price || !d.dl || d.share == null) return render(true); if (d.share > d.price) d.share = d.price; S.flags.limit = false; d.done = true; go('answer'); },
+  commit(){ commitDraft(); go('purchase'); openSheet('where'); }, toShare(){ commitDraft(); go('share'); openSheet('where'); },
+  draftStmt(){ commitDraft(); go('stmtIntro'); },
+  shareSend(){ const p = P(), t = $('#sharetxt').innerText; p.invited = true; if (navigator.share) navigator.share({text:t}).catch(() => {}); go('purchase'); toast('Приглашение отправлено'); },
+  copyShare(){ const t = $('#sharetxt').innerText; if (navigator.clipboard) navigator.clipboard.writeText(t).catch(() => {}); P().invited = true; toast('Текст скопирован'); },
+  asPartner(){ P().invited = true; S.who = OTHER[S.who]; if (!me().consent) me().consent = true; go('purchase'); },
+  newPurchase(){ S.draftText = ''; go('phrase'); }, saveSheet(){ openSheet('save'); },
+  toStmt(){ if (S.who === 'oleg' && S.people.oleg.stmt) go('stmtResult'); else go('stmtIntro'); },
+  stmtFile(){ if (S.flags.format) { S.flags.format = false; } runStmt(false); }, stmtShots(){ runStmt(false); },
+  stmtUse(){ go('today'); }, incomeGo(){ me().income = parseIncome($('#income').value); go('today'); },
+  asked(){ me().asked = true; render(true); }, restart(){ scenario('fresh'); },
+  reconFix(){ const q = P(S.recon.id); q.saved.oleg = S.recon.seen; S.recon = null; render(true); toast('Отметки поправлены по выписке'); },
+  reconKeep(){ S.recon = null; render(true); toast('Оставили как есть. Эта часть останется в лёгкой дымке'); },
+  delStmt(){ S.people.oleg.stmt = null; S.people.oleg.income.src = 'manual'; S.stmtFound = false; render(true); },
+  botStop(){ me().bot = null; me().chat = []; render(true); },
+  linkMax(){ me().bot = 'max'; me().botOff = false; go('bot'); }, linkTg(){ me().bot = 'tg'; me().botOff = false; go('bot'); },
+  linkPush(){ me().remind = true; closeSheet(); toast('Напомним уведомлением в день зарплаты'); },
+  delAll(){ const w = S.who; S.purchases.forEach(p => { p.gone = w; p.share[w] = null; p.saved[w] = 0; }); S.purchases = S.purchases.filter(p => p.share[OTHER[w]] != null);
+    S.people[w] = seed('fresh').people[w]; S.people[w].consent = true; go('deleted'); S.people[w].consent = false; },
+  cancelBuy(){ P().state = 'cancelled'; S.purchases = S.purchases.filter(p => p.state !== 'cancelled'); S.cur = S.purchases[0] ? S.purchases[0].id : null; go(S.purchases.length ? 'list' : 'phrase'); },
+  priceRecalc(){ const p = P(); p.price += 6000; S.flags.priceUp = false; render(true); }, priceKeep(){ S.flags.priceUp = false; render(true); },
+  cheer(){ toast('Отправили «Так держать!» — без сумм'); },
+  pushStep(){ S.flags.push = false; step(paydaySum(S.who) || 0); }, pushLater(){ S.flags.push = false; render(true); toast('Напомним в 20:00'); },
+  affBuy(){ me().spent.push({v:S.aff, t:'покупка'}); S.aff = null; render(true); }, affNo(){ S.aff = null; render(true); },
+  rest(){ const l = leftToday(S.who); me().spent.push({v:l, t:'в покупку'}); me().sentRest = true; const p = active(S.who)[0]; S.cur = p.id; step(l); },
+  shotDemo(){ me().spent.push({v:1250, t:'Пятёрочка'}); closeSheet(); render(true); },
+  shareWeek(){ const t = 'Неделя с «Покупкой к дате»: ' + weekRow(S.who).done + ' шагов из 7.'; if (navigator.share) navigator.share({text:t}).catch(() => {}); toast('Карточка готова — без сумм'); }
+};
+
+/* ── сторис ── */
+const SLIDES = [
+  {p:0,   h:'На что вы копите вдвоём?', t:'Поставьте фото своей цели: диван, море, машина. Пока оно в тумане.'},
+  {p:.3,  h:'Одна фраза — и ответ', t:'«Диван 180 тысяч к 31 декабря, я могу 90». Сразу видно, сходится ли и сколько откладывать в день.'},
+  {p:.55, h:'Туман отступает, когда вы откладываете', t:'Чёткая часть — уже отложено. Дымка — то, что впереди.'},
+  {p:.55, h:'Утром — сколько можно потратить', t:'И ответ на «влезет ли покупка» — в приложении или в Max.'},
+  {p:1,   h:'Вдвоём, но без чужих денег', t:'Партнёр видит покупку и свой туман. Ваши суммы — нет.', last:true}
+];
+let si = 0, st = null;
+function story(i){ si = Math.max(0, Math.min(SLIDES.length - 1, i)); const s = SLIDES[si], el = $('#story'); el.classList.add('on'); el.classList.remove('paused'); el.querySelector('.pic').dataset.pic = 'sofa';
+  $('#segs').innerHTML = SLIDES.map((_, k) => `<i class="${k < si ? 'done' : k === si ? (reduce() ? 'done' : 'run') : ''}"><b></b></i>`).join('');
+  $('#stxt').innerHTML = `<h2 class="disp enter">${s.h}</h2><p class="enter" style="animation-delay:60ms">${s.t}</p>`;
+  $('#sbot').innerHTML = s.last ? '<button class="main" id="start">Начать</button>' : `<p class="hint">${reduce() ? 'Касание справа — дальше' : 'Касание справа — дальше, удержание — пауза'}</p>`;
+  paintPhotos(); requestAnimationFrame(() => { $('.pic .color', el).style.clipPath = `inset(${((1 - s.p) * 100).toFixed(1)}% 0 0 0)`; });
+  clearTimeout(st); if (!reduce() && !s.last) st = setTimeout(() => story(si + 1), 4600); }
+function endStory(){ clearTimeout(st); $('#story').classList.remove('on'); $('#stxt').innerHTML = ''; }
+
+/* ── события ── */
+document.addEventListener('click', e => {
+  if (e.target.id === 'back') return closeSheet();
+  const b = e.target.closest('button'); if (!b) return; const d = b.dataset;
+  if (d.main) { const BUSY = {phraseGo:'Считаю', fieldsGo:'Считаю', incomeGo:'Считаю', shareSend:'Отправляю', stmtFile:'Загружаю'}, k = d.main;
+    if (BUSY[k] && !reduce() && !S.flags.offline) { if (b.disabled) return; b.disabled = true; b.setAttribute('aria-busy', 'true'); b.textContent = BUSY[k]; setTimeout(ACT[k], 550); } else ACT[k](); }
+  else if (d.act) ACT[d.act]();
+  else if (d.go) go(d.go);
+  else if (d.tab) { S.tab = d.tab; go(d.tab === 'buy' ? (S.purchases.length > 1 ? 'list' : S.purchases.length ? 'purchase' : 'phrase') : d.tab); }
+  else if (d.sheet) openSheet(d.sheet);
+  else if (d.close !== undefined) closeSheet();
+  else if (d.open) { S.cur = d.open; go('purchase'); }
+  else if (d.ex) { $('#phrase').value = d.ex; }
+  else if (d.clar) { $('#clar').value = d.clar; $('#clarf').requestSubmit(); }
+  else if (d.price) { S.aff = +d.price; render(true); }
+  else if (d.undo) { me().spent.splice(+d.undo, 1); render(true); }
+  else if (d.saveamt) { closeSheet(); step(+d.saveamt); }
+  else if (d.input) openSheet('input', d.input);
+  else if (d.where) { const q = P(); (q.where = q.where || {})[S.who] = d.where; closeSheet(); render(true); toast(/карте/.test(d.where) ? 'Деньги на карте расходятся. Копилка в своём банке надёжнее' : 'Записали: ' + d.where.toLowerCase()); }
+  else if (d.petr) { S.petr = d.petr; if (d.petr === 'это доход') S.people.oleg.income.m += 4000; render(true); }
+  else if (d.photo) { P().photo = d.photo; const n = PHOTOS.find(x => x[0] === d.photo); if (d.photo !== 'sofa') P().cap = n[1].replace(' (рисунок)', ''); closeSheet(); render(true); }
+  else if (d.bot) { me().bot = d.bot; me().chat = []; render(); }
+  else if (d.kb) { const [k, a] = d.kb.split(':'); const m = me();
+    if (k === 'go') go(a); else if (k === 'hint') { $('#botin').value = a === 'spend' ? 'кофе 300' : 'влезут кроссовки за 7000?'; $('#botin').focus(); }
+    else if (k === 'buy') { m.spent.push({v:+a, t:'покупка'}); m.chat.push({b:'Записал. Сегодня на себя ' + (leftToday(S.who) < 0 ? 'потрачено больше плана' : 'осталось ' + rubT(leftToday(S.who))) + '.'}); render(true); }
+    else if (k === 'undoLast') { m.spent.pop(); m.chat.push({b:'Отменил. Сегодня на себя осталось ' + rubT(leftToday(S.who)) + '.'}); render(true); }
+    else if (k === 'payStep') { S.flags.push = false; S.cur = active(S.who)[0].id; step(paydaySum(S.who)); }
+    else if (k === 'later') { m.chat.push({b:'Хорошо. Напомню в 20:00.'}); render(true); } }
+  else if (d.sc) scenario(d.sc);
+  else if (d.who) { S.who = d.who; S.aff = null; closeSheet(); $('#sheet').innerHTML = ''; $('#toast').classList.remove('on'); $('#toast').textContent = ''; if (!me().consent) me().consent = S.mode === 'mid'; go(S.tab === 'today' ? 'today' : S.tab === 'data' ? 'data' : 'purchase'); }
+  else if (d.day) setDay(d.day === 'tomorrow' ? 1 : 0);
+  else if (d.th) setTheme(d.th); else if (d.font) setFont(d.font);
+  else if (b.id === 'fab') $('#panel').classList.toggle('open');
+  else if (b.id === 'skip' || b.id === 'start') endStory();
+  else if (b.id === 'snext') { if (si < SLIDES.length - 1) story(si + 1); } else if (b.id === 'sprev') story(si - 1);
+});
+document.addEventListener('submit', e => { e.preventDefault(); const id = e.target.id, w = S.who;
+  if (id === 'phrasef') ACT.phraseGo();
+  else if (id === 'clarf') { const d = S.draft, f = $('#clar').dataset.f, v = $('#clar').value.trim(); if (!v) return;
+    if (f === 'dl') d.dl = parseDate(/^к\s/i.test(v) ? v : 'к ' + v); else if (f === 'price') { d.price = numIn(v) < 1000 ? numIn(v) * 1000 : numIn(v); d.twoPrices = null; d.linkFail = false; }
+    else d.share = /сам/i.test(v) ? d.price : /полов/i.test(v) ? Math.round(d.price / 2) : (numIn(v) < 1000 ? numIn(v) * 1000 : numIn(v)); if (d[f] != null) draftNext(); }
+  else if (id === 'fieldsf') ACT.fieldsGo();
+  else if (id === 'acceptf') { const p = P(); let v = numIn($('#accept').value); if (!v) return; if (v < 1000) v *= 1000; const need = p.price - p.share[p.owner];
+    if (v > need) { $('#accnote').textContent = 'Вдвоём выйдет больше цены. Достаточно ' + rubT(need) + ' — внести столько?'; $('#accept').value = fmt(need); return; }
+    p.share[w] = v; p.saved[w] = 0; S.flags.used = false; go('purchase'); openSheet('where'); }
+  else if (id === 'spendf') { const t = $('#spend').value, v = numIn(t); if (v) { me().spent.push({v, t:t.replace(/[\d\s₽]+/g, ' ').replace(/потратил\S*/i, '').trim()}); render(true); } }
+  else if (id === 'afff') { const v = numIn($('#price').value); if (v) { S.aff = v; render(true); } }
+  else if (id === 'savef') { const v = numIn($('#saveamt').value); closeSheet(); step(v); }
+  else if (id === 'inputf') { const k = e.target.dataset.k, v = $('#inputv').value, p = P(); if (!v.trim()) return;
+    if (k === 'share') p.share[w] = Math.min(p.price, numIn(v) < 1000 ? numIn(v) * 1000 : numIn(v)); else if (k === 'dl') p.dl = parseDate(/^к\s/i.test(v) ? v : 'к ' + v) || p.dl;
+    else { const took = Math.min(numIn(v), p.saved[w]); const prev = perDay(p, w); p.saved[w] -= took; const nd = now() + Math.ceil(leftOf(p, w) / Math.max(1, prev)) * DAY; closeSheet(); render(true);
+      return toast('Взяли ' + rubT(took) + '. Чтобы остаться на ' + rubT(prev) + ' в день, срок — ' + dStr(nd)); }
+    closeSheet(); render(true); }
+  else if (id === 'incomef') ACT.incomeGo();
+  else if (id === 'botf') { const t = $('#botin').value.trim(); if (t) { botSay(t); render(true); $('#view').scrollTop = 1e6; } }
+  else if (id === 'fbf') openSheet('feedbackOk');
+  else if (id === 'emailf') { if (!e.target.querySelector('input').value.includes('@')) return; S.emailStep = true; drawEmail(); }
+  else if (id === 'codef') { if (!/^\d{4}$/.test(e.target.querySelector('input').value)) return; S.emailStep = false; me().email = true; closeSheet(); render(true); toast('Почта привязана'); }
+});
+document.addEventListener('change', e => { const t = e.target;
+  if (t.dataset.tip != null) { S.stmtTips[+t.dataset.tip] = t.checked; render(true); }
+  else if (t.id === 'file') { const f = t.files && t.files[0]; if (!f) return; const r = new FileReader();
+    r.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, 1000 / Math.max(im.width, im.height)), c = document.createElement('canvas'); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k);
+      c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); OWN = c.toDataURL('image/jpeg', .85); delete FOGS.own; P().photo = 'own'; P().cap = 'Наша цель'; closeSheet(); render(true); }; im.src = r.result; }; r.readAsDataURL(f); } });
+const hold = on => () => { const el = $('#story'); if (!el.classList.contains('on') || reduce() || SLIDES[si].last) return; el.classList.toggle('paused', on); clearTimeout(st); if (!on) st = setTimeout(() => story(si + 1), 1600); };
+$('#snext').addEventListener('pointerdown', hold(true)); $('#snext').addEventListener('pointerup', hold(false)); $('#snext').addEventListener('pointercancel', hold(false));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { if ($('#story').classList.contains('on')) endStory(); else closeSheet(); }
+  if ($('#story').classList.contains('on')) { if (e.key === 'ArrowRight') story(si + 1); if (e.key === 'ArrowLeft') story(si - 1); } });
+addEventListener('resize', () => paintPhotos());
+function setTheme(t){ document.documentElement.dataset.theme = t; lsSet('fogp-theme', t); $$('#panel [data-th]').forEach(x => x.setAttribute('aria-pressed', x.dataset.th === t)); }
+function setFont(f){ document.documentElement.dataset.font = f; lsSet('fogp-font2', f); $$('#panel [data-font]').forEach(x => x.setAttribute('aria-pressed', x.dataset.font === f)); }
+
+/* ── крючки для проверки ── */
+window.demo = {
+  scenario, go, state: () => S, sheet: openSheet,
+  replayIntro: () => story(0), skipIntro: endStory, today: () => setDay(0), tomorrow: () => setDay(1),
+  who: w => { S.who = w; S.aff = null; closeSheet(); $('#sheet').innerHTML = ''; $('#toast').classList.remove('on'); $('#toast').textContent = ''; render(true); }, theme: setTheme, font: setFont,
+  spend: v => { me().spent.push({v:v || 300, t:'кофе'}); go('today', true); },
+  afford: v => { if (!me().spent.length && !S.off) me().spent.push({v:300, t:'кофе'}); S.aff = v || 7000; go('today', true); },
+  save: () => { S.cur = active(S.who)[0].id; step(perDay(P(), S.who)); },
+  statement: () => runStmt(true),
+  newPurchase: () => { S.draft = parsePhrase('Отпуск 120 тысяч к 1 июня, я могу 70'); S.draft.done = true; go('answer'); }
+};
+
+/* ── запуск ── */
+setTheme(lsGet('fogp-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+setFont(lsGet('fogp-font2') || 'sber');
+S = seed('mid'); snap(); render();
+/* Состояния по ?s=<код>: сценарии пульта (fresh, mid, payday, partner, price, week, recon, done, offline, limit, format, botoff, used),
+   экраны (consent, phrase, answer, share, list, purchase, today, source, income, stmtIntro, stmtResult, data, deleted, bot),
+   листы (where, weeksum, save, change, remind, policy, install, email, shot, feedback, photo), примеры ссылок (linkTwo, linkFail, linkNot),
+   и то же для партнёра с приставкой anya- (например ?s=anya-purchase). */
+(() => { const q = new URLSearchParams(location.search).get('s'); if (!q) return;
+  let k = q; if (k.startsWith('anya-')) { k = k.slice(5); S.who = 'anya'; }
+  const SC = ['fresh','mid','payday','partner','price','week','recon','done','offline','limit','format','botoff','used'];
+  const LINK = {linkTwo:'https://shop.example/tv-two к 1 марта, я могу 30', linkFail:'https://shop.example/fail/Робот-пылесос к 1 декабря, я могу 20', linkNot:'https://blog.example/notproduct к 1 декабря'};
+  if (SC.includes(k)) scenario(k);
+  else if (SCR[k]) { if (k === 'answer') demo.newPurchase(); else if (k === 'stmtResult') { runStmt(true); } else go(k); }
+  else if (SH[k]) { go(k === 'weeksum' || k === 'where' || k === 'save' || k === 'change' || k === 'photo' ? 'purchase' : k === 'remind' || k === 'shot' ? 'today' : k === 'install' || k === 'email' || k === 'policy' ? 'data' : 'purchase'); openSheet(k); }
+  else if (LINK[k]) { S.draftText = LINK[k]; S.draft = parsePhrase(LINK[k]); draftNext(); }
+  if (k !== 'fresh') endStory(); })();
+if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => paintPhotos());
+</script>
+</body>
+</html>
