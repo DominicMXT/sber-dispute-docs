@@ -1,0 +1,122 @@
+<title>Отчёты Sber500 · Finance Assistant</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=PT+Mono&display=swap">
+<style>
+/* Layout: узкая колонка; неделя → карточки; в карточке строки «поле · значение · копировать» в порядке формы платформы */
+:root{
+  --bg:#f3f5f3; --surface:#ffffff; --fg:#17201c; --muted:#5d6a64; --line:#d9e0dc;
+  --accent:#0d6b57; --accent-soft:#e1efe9; --metric:#7a4f0e; --metric-soft:#f6ecd9; --ok:#1d7a3a;
+  --f-body:"Golos Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"PT Mono",ui-monospace,"Cascadia Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#111614; --surface:#1a211e; --fg:#e4ebe7; --muted:#9aa8a1; --line:#2d3833;
+  --accent:#5cc7a8; --accent-soft:#1d332b; --metric:#e3b46a; --metric-soft:#382c17; --ok:#6fd08e; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#111614; --surface:#1a211e; --fg:#e4ebe7; --muted:#9aa8a1; --line:#2d3833;
+  --accent:#5cc7a8; --accent-soft:#1d332b; --metric:#e3b46a; --metric-soft:#382c17; --ok:#6fd08e; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font:15px/1.5 var(--f-body);padding:0 16px}
+.wrap{max-width:860px;margin:0 auto;padding-block:28px 64px;display:grid;gap:28px}
+h1{font-size:1.6rem;line-height:1.2;margin:0;text-wrap:balance;font-weight:600}
+.lead{color:var(--muted);margin:6px 0 0;max-width:62ch}
+.rules{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:14px 18px}
+.rules ul{margin:0;padding-left:18px;display:grid;gap:4px}
+.rules strong{font-weight:600}
+nav.weeks{display:flex;flex-wrap:wrap;gap:10px;position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding-block:8px;z-index:2}
+nav.weeks a{display:grid;padding:8px 14px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);text-decoration:none;font-weight:600;font-variant-numeric:tabular-nums}
+nav.weeks a small{font-weight:400;color:var(--muted);font-size:.8rem}
+nav.weeks a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.week{display:grid;gap:14px;scroll-margin-top:80px}
+.wh{border-bottom:2px solid var(--fg);padding-bottom:6px}
+.wh h2{margin:0;font-size:1.35rem;font-variant-numeric:tabular-nums}
+.wh p{margin:2px 0 0;color:var(--muted)}
+.sub{margin:10px 0 0;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px 18px;display:grid;gap:10px;scroll-margin-top:80px}
+.card.metric{border-color:var(--metric)}
+.card header{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.no{font-family:var(--f-mono);color:var(--muted)}
+.chip{font-size:.78rem;padding:2px 9px;border-radius:99px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.metric .chip{background:var(--metric-soft);color:var(--metric)}
+.done{margin-left:auto;font-size:.85rem;color:var(--muted);display:flex;gap:6px;align-items:center;cursor:pointer}
+.card.is-done{opacity:.6}
+.card.is-done .done{color:var(--ok);font-weight:600}
+.card h3{margin:0;font-size:1.05rem;font-weight:600;text-wrap:balance}
+.rows{display:grid;border-top:1px solid var(--line)}
+.row{display:grid;grid-template-columns:170px minmax(0,1fr) auto;gap:12px;align-items:start;padding-block:9px;border-bottom:1px solid var(--line)}
+.lab{color:var(--muted);font-size:.88rem;padding-top:1px}
+.cell{min-width:0}
+.val{white-space:pre-wrap;overflow-wrap:anywhere;font-variant-numeric:tabular-nums}
+.val.empty{color:var(--muted);font-style:italic}
+.hint{margin:3px 0 0;font-size:.8rem;color:var(--muted)}
+.grp{padding:10px 0 2px;font-size:.75rem;letter-spacing:.06em;text-transform:uppercase;color:var(--metric);font-weight:600}
+button.cp{font:inherit;font-size:.85rem;font-weight:500;padding:5px 12px;border-radius:7px;border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;white-space:nowrap;transition:background-color .15s ease,color .15s ease}
+button.cp:active{transform:scale(.97)}
+button.cp.ok{background:var(--accent);color:var(--surface)}
+@media (hover:hover) and (pointer:fine){button.cp:hover{background:var(--accent-soft)} button.cp.ok:hover{background:var(--accent)}}
+.card footer{display:flex;justify-content:flex-end}
+button.all{border-style:dashed}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--fg);color:var(--bg);padding:8px 16px;border-radius:8px;font-size:.9rem;opacity:0;transition:opacity .2s ease;pointer-events:none}
+.toast.on{opacity:1}
+@media (max-width:620px){
+  .row{grid-template-columns:minmax(0,1fr) auto}
+  .lab{grid-column:1 / -1}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>Отчёты на платформу Sber500 × Disrupt</h1>
+    <p class="lead">Finance Assistant · недели 21–27.09 и 28.09–04.10. Поля идут в порядке формы «Добавить результат»: нажмите «Копировать» и вставьте значение в такое же поле на платформе.</p>
+  </header>
+
+  <div class="rules">
+    <ul>
+      <li><strong>Одна неделя — один отчёт «Метрики».</strong> Если за неделю отчёт уже есть, «Открыть результат» ведёт к нему — правьте его, новый не создавайте. Отменённый отчёт тоже занимает неделю.</li>
+      <li>«Тип», «Отчётная неделя» и «Согласованный срок» выбираются в форме кнопкой, списком и календарём. Текст для них дан для сверки.</li>
+      <li>«Готовность MVP, %» — 63: серверная часть готова у 39 из 61 требования первого релиза, интерфейс в работе. Команде подтвердить.</li>
+      <li>Карточки 13 «Продукт открыт» и 14 «Кастдев до 20» не выполнены, их здесь нет. Если они уже заведены — перенесите срок.</li>
+    </ul>
+  </div>
+
+  <nav class="weeks" aria-label="Недели">{{NAV}}</nav>
+
+  {{BODY}}
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite">Скопировано</div>
+
+<script>
+(function(){
+  var toast=document.getElementById('toast'), tm;
+  function show(msg){toast.textContent=msg;toast.classList.add('on');clearTimeout(tm);tm=setTimeout(function(){toast.classList.remove('on')},1400)}
+  function fallback(text){
+    var ta=document.createElement('textarea');ta.value=text;ta.setAttribute('readonly','');
+    ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();
+    var ok=false;try{ok=document.execCommand('copy')}catch(e){}
+    document.body.removeChild(ta);return ok;
+  }
+  function mark(btn){
+    var old=btn.dataset.label||btn.textContent;btn.dataset.label=old;
+    btn.textContent='Скопировано';btn.classList.add('ok');
+    setTimeout(function(){btn.textContent=old;btn.classList.remove('ok')},1300);
+  }
+  document.addEventListener('click',function(e){
+    var btn=e.target.closest('button.cp');if(!btn)return;
+    var text=btn.getAttribute('data-v');
+    var done=function(){mark(btn);show('Скопировано')};
+    var fail=function(){if(fallback(text)){done()}else{show('Не скопировалось — выделите текст вручную')}};
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(text).then(done,fail)}else{fail()}
+  });
+  var KEY='fa-reports-done';
+  var state={};try{state=JSON.parse(localStorage.getItem(KEY)||'{}')}catch(e){}
+  document.querySelectorAll('.done input').forEach(function(cb){
+    var card=cb.closest('.card'),k=cb.getAttribute('data-k');
+    if(state[k]){cb.checked=true;card.classList.add('is-done')}
+    cb.addEventListener('change',function(){
+      card.classList.toggle('is-done',cb.checked);state[k]=cb.checked;
+      try{localStorage.setItem(KEY,JSON.stringify(state))}catch(e){}
+    });
+  });
+})();
+</script>
