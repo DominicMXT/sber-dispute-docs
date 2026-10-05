@@ -8,7 +8,7 @@ for (const vp of [{ width: 320, height: 568 }, { width: 812, height: 375 }, { wi
   await p.click('#skip').catch(() => {}); await p.waitForTimeout(200);
   const clickT = async t => { const el = p.locator('button', { hasText: t }).first(); await el.click(); await p.waitForTimeout(800); };
   await clickT('Согласен'); await clickT('Создать свою цель');
-  await p.fill('#phrase', 'Ноутбук 150 тысяч к 1 марта'); await clickT('Посчитать'); await clickT('всю сумму'); await clickT('Сохранить цель'); await clickT('Пока сам');
+  await p.fill('#phrase', 'Ноутбук 150 тысяч к 1 марта'); await clickT('Посчитать'); await clickT('всю сумму'); await clickT('Сохранить цель'); const sh = await p.evaluate(() => S.sheet); console.log('  sheet after save:', sh); await clickT('Войти через VK ID'); await clickT('Пока сам');
   const r = await p.evaluate(() => { const bar = $('#bottom .bottom') || $('#view .bottom.p-flow'), q = x => x && Math.round(x.getBoundingClientRect().height);
     const left = [...document.querySelectorAll('#view .left .num, #view [data-v3-money]')][0], lb = left && left.getBoundingClientRect();
     return { scr: S.scr, flow: !!$('#view .bottom.p-flow'), btns: bar ? bar.querySelectorAll('button').length : 0, barH: q(bar), H: innerHeight, sumVisible: lb ? lb.bottom <= innerHeight - (bar && !bar.classList.contains('p-flow') ? bar.getBoundingClientRect().height + 64 : 64) : null,

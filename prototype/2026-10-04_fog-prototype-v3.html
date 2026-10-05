@@ -425,6 +425,14 @@ form.field>.inp{flex:1 1 8em;min-width:0}
 .main.p-danger{background:transparent;color:var(--warm);border:2px solid var(--warm)}
 .p-leg{display:flex;align-items:center;gap:6px;margin:4px 0 0}.p-leg .vis{margin-left:0}
 
+/* v3 · login */
+
+/* зелёный Сбера темнее фирменного #21A038 (3,41:1): белый текст 5,13:1 по WCAG AA; в продукте кнопку рисует SDK Сбер ID */
+.l-sber{background:#107F2C !important;color:#fff !important}
+:root[data-theme="dark"] /* зелёный Сбера темнее фирменного #21A038 (3,41:1): белый текст 5,13:1 по WCAG AA; в продукте кнопку рисует SDK Сбер ID */
+.l-sber{background:#107F2C !important;color:#fff !important}
+#sheet .l-btn{text-align:left;padding:0 16px}
+
 </style>
 </head>
 <body>
@@ -2154,6 +2162,41 @@ render = function(){ const r = pRender0.apply(this, arguments);
   } catch(e) { console.warn('polish:', e); }
   return r; };
 addEventListener('resize', () => { try { pLayout(); } catch(e) {} });
+
+/* v3 · login */
+/* v3 · login — вход через Сбер ID, VK ID, Яндекс ID, Max */
+const L_PROV = {sber:'Сбер ID', vk:'VK ID', ya:'Яндекс ID', max:'Max'};
+const lAuthed = () => { const m = me(); return !m || S.mode !== 'fresh' || !!m.auth; };
+SH.login = () => `<h3 class="disp">Войдите, чтобы цель не пропала</h3><p class="mut sm">Сохраним только номер входа, без имени и телефона.</p>
+  <button class="main press l-sber" data-act="loginSber">Войти по Сбер ID</button>
+  <button class="sec2 press l-btn" data-act="loginVk">Войти через VK ID</button>
+  <button class="sec2 press l-btn" data-act="loginYa">Войти с Яндекс ID</button>
+  <button class="sec2 press l-btn" data-act="loginMax">Войти через Max</button>
+  <button class="link" data-close>Не сейчас</button>`;
+let lAfter = null;
+function lLogin(k){ const m = me(); m.auth = k; m.email = true; closeSheet();
+  try { v3log('login_linked'); } catch(e) {}
+  const next = lAfter; lAfter = null;
+  if (next) next(); else render(true);
+  setTimeout(() => toast('Вход через ' + L_PROV[k] + '. ' + (next ? 'Цель сохранена.' : 'Данные не пропадут.')), 60); }
+ACT.loginSber = () => lLogin('sber'); ACT.loginVk = () => lLogin('vk'); ACT.loginYa = () => lLogin('ya'); ACT.loginMax = () => lLogin('max');
+/* 1. «Сохранить цель» — только после входа */
+const lSave0 = ACT.v3save;
+ACT.v3save = function(){ if (lAuthed()) return lSave0.apply(this, arguments);
+  const args = arguments, self = this; lAfter = () => lSave0.apply(self, args);
+  $$('[aria-busy="true"]').forEach(b => { b.disabled = false; b.removeAttribute('aria-busy'); if (b.dataset.hLabel) b.textContent = b.dataset.hLabel; });
+  openSheet('login'); };
+/* 2. лист почты → вход; «Мои данные» — строка входа */
+const lOpen0 = openSheet;
+openSheet = function(k, arg){ if (k === 'email') { if (me() && me().auth) return; k = 'login'; } return lOpen0.call(this, k, arg); };
+const lData0 = SCR.data;
+SCR.data = function(){ const r = lData0.apply(this, arguments), m = me(); if (!r || !r.html || !m) return r;
+  r.html = r.html.replace(/<span>(?:Почта привязана|Только на этом телефоне)<\/span>(?:<button class="chip press sm" data-sheet="email">Привязать почту<\/button>)?/,
+    m.auth ? '<span>Вход: ' + L_PROV[m.auth] + '</span>' : S.mode !== 'fresh' ? '<span>Вход: Сбер ID</span>' : '<span>Только на этом телефоне</span><button class="chip press sm" data-sheet="login">Войти</button>');
+  return r; };
+
+/* коды доски и карты: ?s=email и ?s=login — лист входа на «Моих данных» */
+V3_SCEN.email = V3_SCEN.login = () => { go('data'); lOpen0('login'); };
 
 /* v3 · compat */
 const cpFog0 = fogCopy;

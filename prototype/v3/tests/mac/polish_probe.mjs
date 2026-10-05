@@ -55,7 +55,7 @@ await p2.close();
 /* вёрстка: 320×568 нижняя зона в потоке; 200 % текста — поле не сжато */
 const p3 = await pg({ width: 320, height: 568 }, '?clean&s=purchase');
 r = await p3.evaluate(() => { me().income = null; go('purchase'); return 0; }); r = await p3.evaluate(() => ({ btns: document.querySelectorAll('#bottom .bottom button, #view .bottom.p-flow button').length, flow: !!document.querySelector('#view .bottom.p-flow'), scr: S.scr, hs: document.documentElement.scrollWidth > innerWidth }));
-ok('320×568: нижняя зона на экране цели — в потоке, без гор. прокрутки', r.flow && !r.hs, JSON.stringify(r));
+ok('320×568: демо-цель (одна кнопка) — без гор. прокрутки; две кнопки своей цели — own_goal_layout.mjs', !r.hs && (r.btns > 1 ? r.flow : true), JSON.stringify(r));
 await p3.close();
 const p4 = await pg({ width: 375, height: 812 }, '?clean&s=today');
 await p4.evaluate(() => { document.documentElement.style.fontSize = '200%'; render(); });
@@ -65,7 +65,7 @@ await p4.close();
 const p5 = await pg({ width: 375, height: 812 }, '?clean&s=purchase');
 r = await p5.evaluate(() => { openSheet('email'); return { close: !!document.querySelector('#sheet [data-close]') }; });
 await p5.keyboard.press('Escape'); const esc = await p5.evaluate(() => !$('#sheetwrap').classList.contains('open'));
-ok('лист почты: «Не сейчас» есть, Escape закрывает', r.close && esc, JSON.stringify({ r, esc }));
+ok('лист почты → лист входа: «Не сейчас» есть, Escape закрывает', r.close && esc, JSON.stringify({ r, esc }));
 r = await p5.evaluate(() => { const ls = [...document.querySelectorAll('#view button.link')].map(x => Math.round(x.getBoundingClientRect().height)); return ls; });
 ok('кнопки-ссылки ≥ 44 px', r.every(h => h >= 44 || h === 0), JSON.stringify(r));
 await p5.close();
