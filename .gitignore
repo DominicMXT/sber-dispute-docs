@@ -67,3 +67,5 @@ prototype/v3/tests/mac/*.png
 *.pfx
 secrets.json
 credentials.json
+prototype/2026-10-05_coverage-v3.md
+letters/
