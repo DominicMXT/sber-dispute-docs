@@ -45,3 +45,25 @@ design.zip
 # Данные админки «Пульс продукта» и архив разовых скриптов сессий — рабочие материалы (04.10.2026)
 pulse/
 scripts-archive/
+
+# Прототип v3: тестовые сборки модулей, временные копии и профили браузеров, зависимости проверки под Mac
+prototype/v3/_test_*.html
+prototype/*_mt*.html
+prototype/*_ft*.html
+prototype/v3/tests/**/cdpp-*/
+prototype/v3/tests/**/prof/
+prototype/v3/tests/**/qa4p-*/
+prototype/v3/tests/**/node_modules/
+prototype/v3/tests/**/package-lock.json
+prototype/v3/tests/mac/mac_*.txt
+prototype/v3/tests/mac/*.png
+
+# Секреты — никогда в публичный репозиторий (проверка secret-guard 05.10)
+.env
+.env.*
+*.pem
+*.key
+*.p12
+*.pfx
+secrets.json
+credentials.json

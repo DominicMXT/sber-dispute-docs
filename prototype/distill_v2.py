@@ -70,6 +70,12 @@ R = [
  ("<div class=\"note\">Деньги лежат у вас. Собрать их в одном месте можно копилкой или сбором в своём банке — мы деньги не храним и не переводим.</div>",
   "<div class=\"note\">Деньги у вас. Собрать их можно копилкой или сбором в своём банке. Мы деньги не храним.</div>"),
  ("<p class=\"lbl\">Чтобы «${esc(d.name)}» сошлось к ${dStr(d.dl)}, найти ещё</p>", "<p class=\"lbl\">Не хватает к ${dStr(d.dl)}</p>"),
+ # шрифт по DESIGN.md (решение владельца 04.10): Onest по умолчанию, SB Sans — после подтверждения лицензии
+ ('<link rel="stylesheet" href="https://cdn-app.sberdevices.ru/shared-static/0.0.0/styles/SBSansText.0.2.0.css">', ''),
+ ('<link rel="stylesheet" href="https://cdn-app.sberdevices.ru/shared-static/0.0.0/styles/SBSansDisplay.0.2.0.css">', ''),
+ ("--f-text:'SB Sans Text',system-ui,-apple-system,'Segoe UI',sans-serif", "--f-text:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif"),
+ ("--f-disp:'SB Sans Display','SB Sans Text',system-ui,sans-serif", "--f-disp:'Onest',system-ui,sans-serif"),
+ ('data-font="sber">Сбер</button>', 'data-font="sber">Onest</button>'),
  # служебные строки
  ("<title>", "<title>v2 · "),
 ]

@@ -1,0 +1,18 @@
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const W = s => (s.match(/[A-Za-zА-Яа-яЁё0-9]+/g) || []).length;
+const sents = s => s.split(/[.!?\n…]+/).map(x => x.replace(/\s+/g, ' ').trim()).filter(Boolean);
+const fold = () => { const v = $('#view'); v.scrollTop = 0; const r = v.getBoundingClientRect(), b = $('#bottom .bottom'), lim = b ? b.getBoundingClientRect().top : r.bottom, tw = document.createTreeWalker(v, NodeFilter.SHOW_TEXT); let s = '', n;
+  while ((n = tw.nextNode())) { if (!n.textContent.trim() || n.parentElement.closest('[data-sheet="feedback"]') || (n.parentElement.closest('details:not([open])') && !n.parentElement.closest('summary'))) continue; const rg = document.createRange(); rg.selectNodeContents(n); const q = rg.getBoundingClientRect();
+    if (q.height && q.bottom > r.top && q.top < lim) s += ' ' + n.textContent; } return s; };
+const out = {};
+const run = async (name, f) => { f(); await sleep(60); const t = $('#view').innerText.replace('Что не так?', ''); out[name] = {fold: W(fold()), total: W(t), long: sents(t).filter(x => W(x) > 15)}; };
+await run('example', () => V3_SCEN.example());
+await run('together', () => V3_SCEN.together());
+await run('groupShare', () => V3_SCEN.groupShare());
+await run('groupInvite', () => V3_SCEN.groupInvite());
+await run('group2', () => V3_SCEN.group2());
+await run('group3', () => { S.who = 'oleg'; V3_SCEN.group3(); });
+await run('solo', () => V3_SCEN.solo());
+await run('freshGoal', () => { V3_SCEN.example(); ACT.v3own(); $('#phrase').value = 'Ноутбук 90 тысяч к 1 марта, плачу сам'; ACT.phraseGo(); ACT.v3save(); ACT.v3alone(); });
+out.app = $('#app').getBoundingClientRect().width + 'x' + $('#app').getBoundingClientRect().height;
+return out;

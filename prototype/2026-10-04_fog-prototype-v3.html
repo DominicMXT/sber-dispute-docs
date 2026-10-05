@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>v2 · Finance Assistant — прототип «Туман» (ТЗ 1.2)</title>
+<title>v3 · Finance Assistant — прототип «Туман» (ТЗ 1.2)</title>
 
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -11,7 +11,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Golos+Text:wght@400;500;600&family=Literata:opsz,wght@7..72,500;7..72,600&family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#F3F3F1; --card:#FFFFFF; --film:#E4E4E0; --ink:#1A1A19; --ink2:#5E5E5A; --line:#DADAD5; --ai:#6A6A66;
+  --bg:#F3F3F1; --card:#FFFFFF; --film:#E4E4E0; --ink:#1A1A19; --ink2:#5E5E5A; --line:#DADAD5; --input:#82827C; --ai:#5E5E5A;
   --accent:#1F4B5C; --on-accent:#FFFFFF; --fill:#2D7C93; --ok:#2D6A3E; --soft:#E9EEF0; --stage:#DDE3E6; --warm:#7A5A12;
   --ease-out:cubic-bezier(.23,1,.32,1); --ease-in-out:cubic-bezier(.77,0,.175,1); --ease-drawer:cubic-bezier(.32,.72,0,1);
   --hand:'Caveat','Segoe Script',cursive;
@@ -21,8 +21,8 @@
 :root[data-font="even"]{--f-text:'Onest',system-ui,sans-serif; --f-disp:'Onest',system-ui,sans-serif; --d-ls:-.022em; --d-k:1}
 :root[data-font="bold"]{--f-text:'Onest',system-ui,sans-serif; --f-disp:'Unbounded','Onest',sans-serif; --d-ls:-.035em; --d-k:.8}
 :root[data-theme="dark"]{
-  --bg:#121415; --card:#1D2022; --film:#2A2E31; --ink:#F1F0EC; --ink2:#A8ABA9; --line:#33383B; --ai:#9A9D9B;
-  --accent:#8FD0E3; --on-accent:#06222B; --fill:#6FC0D6; --ok:#7FD39A; --soft:#1F2A2E; --stage:#0B0D0E; --warm:#E3C078;
+  --bg:#121415; --card:#1D2022; --film:#2A2E31; --ink:#F1F0EC; --ink2:#CBCFD2; --line:#53595C; --input:#7C8386; --ai:#CBCFD2;
+  --accent:#9AC8D6; --on-accent:#06222B; --fill:#5398AA; --ok:#8BC69D; --soft:#1F2A2E; --stage:#0B0D0E; --warm:#E3C078;
 }
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -200,7 +200,7 @@ summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weig
 /* больше контраста: плотные границы, чёткая линия тумана и подпись доли */
 .pctlab{display:none;position:absolute;left:8px;bottom:8px;font-size:.8125rem;font-weight:600;color:#06222B;background:#fff;border-radius:10px;padding:3px 9px}
 @media (prefers-contrast:more){
-  :root{--line:#6E6E69;--ink2:#1A1A19;--ai:#1A1A19} :root[data-theme="dark"]{--line:#B9BCBA;--ink2:#F1F0EC;--ai:#F1F0EC}
+  :root{--line:#6E6E69;--input:#6E6E69;--ink2:#1A1A19;--ai:#1A1A19} :root[data-theme="dark"]{--line:#B9BCBA;--input:#B9BCBA;--ink2:#F1F0EC;--ai:#F1F0EC}
   .rule{height:3px;background:#fff;box-shadow:0 0 0 1px #000} .pctlab{display:block} .vis.me{border-style:solid} .thin{background-color:rgba(255,255,255,.5)}
   .inp,.chip,.sec2,.icon{border-width:2px}
 }
@@ -220,6 +220,144 @@ summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weig
 @keyframes spin{to{transform:rotate(360deg)}}
 @media (prefers-reduced-motion:reduce){.main[aria-busy="true"]::after{animation:none}.toast{transition-duration:1ms}}
 .askrow{width:100%;justify-content:space-between;background:none;border:0;border-top:1px solid var(--line);padding:14px 0;font:inherit;color:inherit;text-align:left;cursor:pointer}
+/* v3 · flow_group */
+
+.v3-tag{display:inline-block;font-size:.8125rem;font-weight:600;letter-spacing:.01em;color:var(--accent);background:var(--soft);border-radius:10px;padding:2px 9px;margin:0 0 6px}
+.v3-tag.v3-exbadge{font-size:.9375rem;padding:4px 12px;border:1.5px dashed currentColor;border-radius:12px}
+.v3-example .cardp{outline:1.5px dashed var(--ink2);outline-offset:4px;box-shadow:none}
+.v3-exnote{margin:12px 0 0;font-weight:500}
+.v3-row{display:flex;gap:14px;align-items:center;flex-wrap:wrap;margin-top:8px}
+.v3-pair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:18px 0 10px}
+.v3-pair .sec2{margin-top:0;min-height:54px;font-weight:600}
+.v3-big{font-size:calc(1.5rem*var(--d-k));margin:0 0 8px}
+.v3-tl{position:relative;padding-top:20px;margin-top:6px}
+.v3-time{position:relative;height:6px;border-radius:3px;background:var(--film)}
+.v3-time i{position:absolute;top:-4px;width:2px;height:14px;margin-left:-1px;border-radius:1px;background:var(--ink2)}
+.v3-tnow{position:absolute;top:0;white-space:nowrap}
+.v3-timelab{display:flex;justify-content:space-between;margin:4px 0 6px}
+.v3-steps{display:grid;grid-template-columns:repeat(10,1fr);gap:3px;margin:2px 0 6px}
+.v3-steps i{height:10px;border-radius:2px;background:var(--film)} .v3-steps i.on{background:var(--fill)}
+.v3-members{margin:10px 0 4px}
+.v3-member,.v3-gonerow{display:flex;align-items:center;gap:10px;min-height:52px;padding:6px 0;border-bottom:1px solid var(--line)}
+.v3-member>span:nth-child(2),.v3-gonerow>span:nth-child(2){flex:1;min-width:0}
+.v3-gonerow{color:var(--ink2)}
+.v3-ava{width:32px;height:32px;flex:none;border-radius:50%;display:grid;place-items:center;background:var(--soft);color:var(--accent);font-weight:600}
+.v3-st{font-size:.8125rem;letter-spacing:.01em;color:var(--ok);border:1px solid currentColor;border-radius:14px;padding:3px 9px;white-space:nowrap}
+.v3-st.wait,.stamp.wait,.stamp.v3-plain{color:var(--ink2)}
+.v3-stampw{display:inline-flex;align-items:center;white-space:nowrap}
+.v3-legend .vis{margin-left:0}
+.v3-invite .photo{aspect-ratio:2/1}
+.v3-invite .sec p{margin:2px 0 10px}
+.v3-invite .sec p .vis{margin-left:2px}
+.v3-pad{height:60px}
+
+/* v3 · motivation */
+
+.v3-wk{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;margin:6px 0 6px}
+.v3-day{height:14px;border-radius:3px;background:var(--film)}
+.v3-day.on{background:var(--fill)}
+.v3-day.v3-now{outline:2px solid var(--ink);outline-offset:1px}
+.v3-wkline{margin:8px 0 0}
+.v3-pair .sec2 small{display:block;font-weight:400;font-size:.875rem;letter-spacing:0;color:var(--ink2);margin-top:2px}
+.v3-pair .sec2 small .num{color:var(--ink);font-weight:600}
+.v3-prop{margin:10px 0}
+.v3-sliplink{display:block;min-height:44px;margin:4px 0 0}
+.v3-shelf{display:flex;gap:10px;overflow-x:auto;margin:6px 0 8px;scrollbar-width:none}
+.v3-shelf figure{margin:0;width:84px;flex:none}
+.v3-shelf .mini{position:relative;display:block;width:84px;height:84px;border-radius:4px;overflow:hidden;background:var(--film)}
+.v3-shelf .mini img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.v3-shelf figcaption{font-size:.8125rem;letter-spacing:.01em;line-height:1.3;color:var(--ink2);margin-top:4px}
+.push .v3-bank{margin-top:4px}
+
+/* v3 · distill */
+.ico{flex:none;width:48px;min-height:48px;display:grid;place-items:center;border:0;border-radius:12px;background:var(--film);color:var(--ink)}
+.go2{background:transparent;color:var(--ink);box-shadow:inset 0 0 0 1.5px var(--ink)}
+[data-out="left-today"]{font-size:calc(2.5rem*var(--d-k))}
+/* v3 · fixes */
+.v3-pair{grid-template-columns:repeat(auto-fit,minmax(min(100%,9.5rem),1fr))}
+.v3-theme .seg{flex-wrap:wrap}.v3-theme .seg button{flex:1 1 6rem}
+.rowl,.cap,label.tip{flex-wrap:wrap}
+.chip{max-width:100%;overflow-wrap:anywhere}
+button.link[style*="min-height:0"]{min-height:24px!important;padding-block:2px}
+.vis{width:26px;height:26px;border-radius:13px}.vis svg{transform:scale(1.15)}
+.fx-leg{display:inline-flex;align-items:center;gap:6px;margin-top:4px}.fx-leg .vis{margin-left:0}
+/* v3 · theme */
+
+/* фото цели в тёмной теме — темнее сама картинка */
+:root[data-theme="dark"] .photo img.color,:root[data-theme="dark"] .mini img.color,:root[data-theme="dark"] .story .pic img.color{filter:brightness(.88)}
+/* туман в тёмной теме: вуаль из цвета поверхности; запасной вариант (пока копия не готова) — тоже темнее, а не светлее */
+:root[data-theme="dark"] .photo .fogfb{filter:blur(8px) saturate(.5) brightness(.55)}
+:root[data-theme="dark"] .edge{background:linear-gradient(to top,color-mix(in srgb,var(--card) 80%,transparent),transparent)}
+:root[data-theme="dark"] .rule{background:color-mix(in srgb,var(--ink) 70%,transparent)}
+:root[data-theme="dark"] .thin{background-color:color-mix(in srgb,var(--card) 30%,transparent);background-image:repeating-linear-gradient(135deg,color-mix(in srgb,var(--card) 34%,transparent) 0 6px,transparent 6px 12px)}
+@media (prefers-contrast:more){:root[data-theme="dark"] .thin{background-color:color-mix(in srgb,var(--card) 50%,transparent)}}
+/* уровни поверхностей: страница → карточка/лист → рамка */
+:root[data-theme="dark"] .sheet{background:var(--card);box-shadow:inset 0 1px 0 var(--line)}
+:root[data-theme="dark"] .cardp{box-shadow:0 0 0 1px var(--line),0 14px 30px -16px rgba(0,0,0,.6)}
+/* ярче всего на экране — только главная кнопка .main */
+:root[data-theme="dark"] .go:not(.go2){background:var(--film);color:var(--ink);box-shadow:inset 0 0 0 1px var(--input)}
+/* вторичная .go2 (distill) — тот же контур без заливки: белый контур 1,5 px был заметнее основной «Записать» */
+:root[data-theme="dark"] .go2{box-shadow:inset 0 0 0 1px var(--input)}
+:root[data-theme="dark"] .seg button[aria-pressed="true"]{background:var(--film);color:var(--ink);box-shadow:inset 0 0 0 2px var(--ink2)}
+:root[data-theme="dark"] .toast{background:var(--card);color:var(--ink);box-shadow:0 0 0 1px var(--line),0 12px 28px -12px rgba(0,0,0,.6)}
+/* плавная смена темы — только пока на <html> висит .theme-anim (ставит JS на 250 мс), при загрузке перехода нет */
+@media (prefers-reduced-motion:no-preference){
+  :root{--th-t:background-color 200ms var(--ease-out),color 200ms var(--ease-out),border-color 200ms var(--ease-out)}
+  .theme-anim body,.theme-anim .app,.theme-anim .cardp,.theme-anim .bottom,.theme-anim .tabs,.theme-anim .tabs button,.theme-anim .panel,
+  .theme-anim .seg,.theme-anim .seg button,.theme-anim .sec,.theme-anim .rowl,.theme-anim .mut,.theme-anim .chip,.theme-anim .bub,
+  .theme-anim .go,.theme-anim .inp{transition:var(--th-t)}
+  .theme-anim .sheet{transition:transform 380ms var(--ease-drawer),var(--th-t)}
+  .theme-anim .press{transition:transform 160ms var(--ease-out),var(--th-t)}
+  .theme-anim .toast{transition:opacity 200ms var(--ease-out),transform 200ms var(--ease-out),var(--th-t)}
+}
+.v3-theme .seg button{line-height:1.2;padding:4px 6px}
+
+/* v3 · anim */
+
+/* строка 1 — ответ Э-05 */
+.v3-line{animation:v3-line 240ms var(--ease-out) both;animation-delay:var(--v3-d,0ms)}
+@keyframes v3-line{from{opacity:0;transform:translateY(6px)}}
+.v3-pop,.v3-line.v3-pop{animation:pop 380ms var(--ease-out) both;animation-delay:var(--v3-d,0ms)}
+/* строка 2 — смена суммы */
+.v3-ib{display:inline-block}
+.v3-mout{animation:v3-mout 160ms var(--ease-out) forwards}
+@keyframes v3-mout{to{opacity:0;transform:translateY(-6px)}}
+.v3-min{animation:v3-min 200ms var(--ease-out) both}
+@keyframes v3-min{from{opacity:0;transform:translateY(6px)}}
+/* строка 3 — пример → своя цель */
+.view.v3-ghost{pointer-events:none;z-index:1;transform-origin:50% 30%;animation:v3-ghost 200ms var(--ease-out) forwards}
+@keyframes v3-ghost{to{opacity:0;transform:scale(.98)}}
+.view.v3-ex-in{animation:v3-ex-in 280ms var(--ease-out) both}
+@keyframes v3-ex-in{from{opacity:0;transform:translateY(12px)}}
+/* строка 5 — новый участник */
+.v3-member.v3-join{animation:v3-join 240ms var(--ease-out) both}
+@keyframes v3-join{from{opacity:0;transform:scale(.96)}}
+/* строка 6 — ячейка дня */
+.wd.on i.v3-filling{background:var(--film)}
+.v3-fillbar{position:absolute;inset:0;border-radius:inherit;background:var(--fill);animation:v3-fill 320ms var(--ease-out) both}
+.v3-day.v3-fill{animation:v3-fill 320ms var(--ease-out) both}
+@keyframes v3-fill{from{clip-path:inset(100% 0 0 0)}to{clip-path:inset(0)}}
+/* строка 7 — проявление экрана */
+.view.v3-vin{animation:v3-vin 120ms var(--ease-out)}
+@keyframes v3-vin{from{opacity:.6}}
+@keyframes v3-fade{from{opacity:0}}
+@keyframes v3-fade-out{to{opacity:0}}
+
+@media (prefers-reduced-motion:reduce){
+  .v3-line,.v3-pop,.v3-line.v3-pop,.v3-member.v3-join,.v3-min,.view.v3-ex-in{animation:v3-fade 120ms var(--ease-out) both;animation-delay:0ms}
+  .v3-mout{animation:none}
+  .view.v3-ghost{animation:v3-fade-out 120ms var(--ease-out) forwards}
+  .v3-fillbar{display:none} .wd.on i.v3-filling{background:var(--fill)} .v3-day.v3-fill{animation:none}
+  .view.v3-vin{animation:none}
+}
+
+/* v3 · palette */
+.v3-tag,.vis.all{color:var(--ink2)}
+.v3-ava{color:var(--ink)}
+.inp{border:1.5px solid var(--input)}
+@media (prefers-contrast:more){.inp{border-width:2px}}
+/* v3 · pult */
+html.v3-clean #fab,html.v3-clean #panel{display:none!important}
 </style>
 </head>
 <body>
@@ -243,7 +381,7 @@ summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weig
   <aside class="panel" id="panel" aria-label="Пульт прототипа">
     <h2>Пульт прототипа</h2>
     <div class="grp"><span>С чего начать</span>
-      <button class="pbtn" data-sc="fresh">Первый вход: знакомство и согласие</button>
+      <button class="pbtn" data-sc="fresh">Первый вход: знакомство, согласие и пример</button>
       <button class="pbtn" data-sc="mid">Через три месяца: покупка в работе</button></div>
     <div class="grp"><span>День</span><div class="seg"><button data-day="today">Сегодня</button><button data-day="tomorrow">Завтра</button></div></div>
     <div class="grp"><span>Чей экран</span><div class="seg"><button data-who="oleg">Олег</button><button data-who="anya">Аня</button></div></div>
@@ -260,8 +398,24 @@ summary{min-height:44px;display:flex;align-items:center;cursor:pointer;font-weig
       <button class="pbtn" data-sc="format">Чужой формат выписки</button>
       <button class="pbtn" data-sc="botoff">Бот отключён</button>
       <button class="pbtn" data-sc="used">Приглашение уже использовано</button></div>
+    <div class="grp"><span>Р2: вход и общая цель</span>
+      <button class="pbtn" data-sc="example">Пример цели после согласия</button>
+      <button class="pbtn" data-sc="solo">Своя цель одного человека</button>
+      <button class="pbtn" data-sc="together">«Копить вместе с кем-то?»</button>
+      <button class="pbtn" data-sc="groupInvite">Приглашение в общую цель</button>
+      <button class="pbtn" data-sc="group2">Общая цель на двоих</button>
+      <button class="pbtn" data-sc="group2step">На двоих: второй сделал шаг</button>
+      <button class="pbtn" data-sc="group3">Общая цель на четверых</button></div>
+    <div class="grp"><span>Р2: мотивация</span>
+      <button class="pbtn" data-sc="dayprice">«Влезет ли» с ценой в днях цели</button>
+      <button class="pbtn" data-sc="slip">Взяли из отложенного</button>
+      <button class="pbtn" data-sc="slipPropose">Предложение нового срока (глазами Ани)</button>
+      <button class="pbtn" data-sc="weeks">Счёт недель по плану</button>
+      <button class="pbtn" data-sc="weeksum3">Итоги недели в общей цели</button>
+      <button class="pbtn" data-sc="nextgoal">Собрано — следующая цель</button>
+      <button class="pbtn" data-sc="themeSet">Выбор темы в «Моих данных»</button></div>
     <div class="grp"><span>Шрифт</span><div class="seg"><button data-font="sber">Onest</button><button data-font="album">Альбом</button><button data-font="even">Ровный</button><button data-font="bold">Смелый</button></div></div>
-    <div class="grp"><span>Тема</span><div class="seg"><button data-th="light">Светлая</button><button data-th="dark">Тёмная</button></div></div>
+    <div class="grp"><span>Тема</span><div class="seg"><button data-th="system">Система</button><button data-th="light">Светлая</button><button data-th="dark">Тёмная</button></div></div>
   </aside>
   <button class="fab" id="fab" aria-label="Пульт прототипа"><svg width="20" height="20" viewBox="0 0 20 20" aria-hidden="true"><path d="M3 6h14M3 14h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="7" cy="6" r="2.5" fill="var(--card)" stroke="currentColor" stroke-width="2"/><circle cx="13" cy="14" r="2.5" fill="var(--card)" stroke="currentColor" stroke-width="2"/></svg></button>
 </div>
@@ -309,18 +463,18 @@ const P = id => S.purchases.find(p => p.id === (id || S.cur));
 
 /* ── расчёт (ТЗ 4.2–4.9) ── */
 const daysTo = p => Math.max(1, Math.round((p.dl - now()) / DAY));
-const gapOf = p => Math.max(0, p.price - (p.share.oleg || 0) - (p.share.anya || 0));
-const overOf = p => Math.max(0, (p.share.oleg || 0) + (p.share.anya || 0) - p.price);
+const gapOf = p => Math.max(0, p.price - v3people(p).reduce((s, m) => s + (p.share[m] || 0), 0));
+const overOf = p => Math.max(0, v3people(p).reduce((s, m) => s + (p.share[m] || 0), 0) - p.price);
 const leftOf = (p, w) => Math.max(0, (p.share[w] || 0) - (p.saved[w] || 0));
 const perDay = (p, w) => Math.ceil(leftOf(p, w) / Math.max(1, daysTo(p) - (S.people[w].stepped ? 1 : 0)));
 const confPct = (p, w) => p.share[w] ? Math.min(pctOf(p, w), ((p.conf || {})[w] || 0) / p.share[w]) : 0;
 const confOk = (p, w) => ((p.conf || {})[w] || 0) >= (p.saved[w] || 0) * 0.85 && (p.saved[w] || 0) > 0;
 const pctOf = (p, w) => p.share[w] ? Math.min(1, (p.saved[w] || 0) / p.share[w]) : 0;
-const onPlan = (p, w) => { const tot = Math.max(1, Math.round((p.dl - p.cr) / DAY)), el = Math.round((now() - p.cr) / DAY); return (p.saved[w] || 0) >= Math.floor((p.share[w] || 0) * el / tot) - 1; };
+const onPlan = (p, w) => { const c0 = v3from(p, w), tot = Math.max(1, Math.round((p.dl - c0) / DAY)), el = Math.max(0, Math.round((now() - c0) / DAY)); return (p.saved[w] || 0) >= Math.floor((p.share[w] || 0) * el / tot) - 1; };
 const active = w => S.purchases.filter(p => p.state === 'active' && p.share[w] != null);
 const reserve = w => active(w).reduce((s, p) => s + perDayPlan(p, w), 0);
 const perDayPlan = (p, w) => Math.ceil(Math.max(0, (p.share[w] || 0) - (p.saved[w] || 0) + (S.people[w].stepped ? S.people[w].stepAmt || 0 : 0)) / daysTo(p)); // резерв дня не меняется от отметки внутри дня
-const selfDay = w => { const i = S.people[w].income; return i ? Math.floor((i.m - i.mand - reserve(w) * 30) / 30) : null; };
+const selfDay = w => { const i = S.people[w].income; return i ? Math.floor((i.m - i.mand - reserve(w) * 30 - v3buf(w)) / 30) : null; };
 const spentSum = w => S.people[w].spent.reduce((s, x) => s + x.v, 0);
 const leftToday = w => selfDay(w) - spentSum(w);
 function nextPay(w, from){ const i = S.people[w].income; if (!i) return null; let t = from + DAY; for (let k = 0; k < 40; k++, t += DAY) if (i.pay.includes(new Date(t).getUTCDate())) return t; return null; }
@@ -352,9 +506,9 @@ function parseDate(s){ const m = s.match(/к\s+(\d{1,2})\s+(январ|февр�
 function parsePhrase(txt){
   const s = txt.replace(/\b\d{16,19}\b/g, '[карта]').replace(/(\+7|8)\d{10}/g, '[телефон]');
   const isLink = /^https?:\/\//i.test(s.trim()), dl = parseDate(s);
-  const clean = s.replace(/https?:\/\/\S+/i, '').replace(/к\s+\d{1,2}\s+[а-я]+/i, '');
+  const clean = s.replace(/https?:\/\/\S+/i, '').replace(/(^|\s)к\s+\d{1,2}\s+(?:январ|феврал|март|апрел|ма[йя]|июн|июл|август|сентябр|октябр|ноябр|декабр)[а-я]*/i, '$1');
   const nums = parseMoney(clean).filter(n => n.v >= 100 || n.unit);
-  const shareM = clean.match(/(могу|внесу|мои|с меня|беру на себя)\s*(\d[\d\s]*)\s*(тыс\S*|к\b)?/i);
+  const shareM = clean.match(/(могу|внесу|мои|с меня|беру на себя|откладываю|отложу)\s*(\d[\d\s]*)\s*(тыс\S*|к\b)?/i);
   let share = shareM ? Math.round(parseFloat(shareM[2].replace(/\s/g, '')) * (shareM[3] ? 1000 : (parseFloat(shareM[2]) < 1000 ? 1000 : 1))) : null;
   const url = isLink ? (s.match(/https?:\/\/\S+/i) || [''])[0] : '';
   const two = /two|dve/i.test(url), fail = /fail|down/i.test(url), notp = /notproduct|blog/i.test(url);
@@ -458,7 +612,7 @@ function scrShare(){ const p = P(); const txt = `${p.cap || p.name} к ${dStr(p.
 function scrList(){ const w = S.who, ps = S.purchases.filter(p => p.share[w] != null || p.owner === w || p.invited);
   return {html:`<div class="head"><h1 class="disp">Покупки</h1><button class="icon press" data-go="phrase" aria-label="Новая покупка"><svg width="20" height="20" viewBox="0 0 20 20"><path d="M10 3v14M3 10h14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg></button></div>
   ${ps.map(p => `<button class="pl press" data-open="${p.id}"><span class="mini" data-pic="${p.photo}" data-pct="${pctOf(p, w)}"><img class="fog" alt=""><img class="color" alt=""></span>
-  <span><b>${esc(p.name)}</b><br><span class="mut sm">к ${dStr(p.dl)} · ${p.state === 'done' ? 'собрано' : p.share[w] == null ? 'ждёт вашей части' : 'осталось ' + rubT(leftOf(p, w))}</span></span></button>`).join('') || '<p class="mut">Покупок пока нет.</p>'}`, main:['Новая покупка','newPurchase']}; }
+  <span><b>${esc(p.name)}</b><br><span class="mut sm">к ${fxDl(p.dl)} · ${p.state === 'done' ? 'собрано' : p.share[w] == null ? 'ждёт вашей части' : 'осталось ' + rubT(leftOf(p, w))}</span></span></button>`).join('') || '<p class="mut">Покупок пока нет.</p>'}`, main:['Новая покупка','newPurchase']}; }
 
 function weekRow(w){ const wk = S.people[w].week.slice(), ow = S.people[OTHER[w]].week.slice(), todayI = 3 + S.off;
   if (S.off) { wk[3] = 1; ow[3] = 1; }
@@ -472,7 +626,7 @@ function scrPurchase(){ const p = P(), w = S.who, o = OTHER[w];
   const pc = pctOf(p, w), ml = mileOf(pc), wk = weekRow(w), gap = gapOf(p), over = overOf(p), mine = perDay(p, w), plan = onPlan(p, w);
   const oStat = p.gone === o ? 'вышел' : p.share[o] == null ? (p.invited ? 'приглашение отправлено' : 'ещё не знает') : !(p.saved[o] > 0) ? 'только начали' : onPlan(p, o) ? 'по плану' : 'нужна помощь';
   const steps = Math.min(7, wk.done), ask = !me().asked && p.owner === w;
-  return {html:`<div class="head"><div>${S.purchases.length > 1 ? backBtn('list', 'Покупки') : ''}<h1 class="disp">${esc(p.name)}</h1><p class="mut" style="margin:2px 0 0">к ${dStr(p.dl)} · <span class="num" data-out="days">через ${daysW(daysTo(p))}</span></p></div>
+  return {html:`<div class="head"><div>${S.purchases.length > 1 ? backBtn('list', 'Покупки') : ''}<h1 class="disp">${esc(p.name)}</h1><p class="mut" style="margin:2px 0 0">к ${fxDl(p.dl)} · ${p.state === 'done' ? 'собрано' : `<span class="num" data-out="days">через ${daysW(daysTo(p))}</span>`}</p></div>
   <button class="icon press" data-sheet="change" aria-label="Изменить покупку"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="4" cy="10" r="1.6" fill="currentColor"/><circle cx="10" cy="10" r="1.6" fill="currentColor"/><circle cx="16" cy="10" r="1.6" fill="currentColor"/></svg></button></div>
   ${S.flags.priceUp && p.link ? `<div class="note">Цена по ссылке изменилась: была ${rubT(p.price)}, стала ${rubT(p.price + 6000)}. <div class="kb"><button data-act="priceRecalc">Пересчитать</button><button data-act="priceKeep">Оставить</button></div></div>` : ''}
   ${S.flags.partnerStep ? `<div class="note">${NAME[o]} сегодня ${o === 'anya' ? 'сделала' : 'сделал'} шаг. ${S.people[w].stepped ? 'Общий кадр этой недели — ваш.' : 'Отложите и вы — получится общий кадр.'}<div class="kb"><button data-act="cheer">Подбодрить</button></div></div>` : ''}
@@ -481,12 +635,12 @@ function scrPurchase(){ const p = P(), w = S.who, o = OTHER[w];
     ${ml ? `<span class="mile${S.flash ? ' pop' : ''}">${ml[1]}</span>` : ''}<button class="swap press" data-sheet="photo">Сменить фото</button></div>
     <div class="cap"><span class="hand">${esc(p.cap || p.name)}</span><span class="stamp${oStat === 'нужна помощь' ? ' help' : ''}">${NAME[o]}: ${oStat}${oStat === 'по плану' || oStat === 'нужна помощь' ? `<small>${confOk(p, o) ? 'подтверждено выпиской' : 'по отметкам'}</small>` : ''}</span></div></div>
   ${p.state === 'done' ? `<p class="left disp">Собрано</p><div class="note">Деньги у вас. Собрать их можно копилкой или сбором в своём банке. Мы деньги не храним.</div>`
-  : `<p class="left disp"><small>Вам осталось отложить ${vis('me')}</small><span class="num" data-out="my-left">${rub(leftOf(p, w))}</span></p>
-  <p class="mut" style="margin:0">${paydaySum(w) ? 'С зарплаты ' + dStr(nextPay(w, now())) + ' ≈ <span class="num">' + rub(paydaySum(w)) + '</span> · ' : ''}${plan ? 'по плану' : 'догнать план'}: <span class="num" data-out="perday">${rub(mine)}</span> в день</p>
+  : `<p class="left disp"><small>Осталось отложить ${vis('me')}</small><span class="num" data-out="my-left">${rub(leftOf(p, w))}</span></p>
+  <p class="mut" style="margin:0">${paydaySum(w) ? 'С зарплаты ≈ <span class="num">' + rub(paydaySum(w)) + '</span> · ' : ''}${plan ? 'по плану' : 'догнать план'}: <span class="num" data-out="perday">${rub(mine)}</span> в день</p>
   <p class="xs mut" style="margin:6px 0 0">${(p.saved[w] || 0) === 0 ? 'Отметок пока нет' : ((p.conf || {})[w] || 0) >= p.saved[w] ? 'Всё подтверждено выпиской' : 'Подтверждено ' + rubT((p.conf || {})[w] || 0) + ' из ' + rubT(p.saved[w])} <button class="link sm" data-sheet="how" style="min-height:0" aria-label="Как читать фото и неделю">Как это работает?</button></p>`}
-  <div class="filmlab"><span>Неделя: ${steps} из 7</span><span>ещё ${Math.ceil(daysTo(p) / 7)} ${plural(Math.ceil(daysTo(p) / 7), 'неделя', 'недели', 'недель')}</span></div>
+  ${p.state === 'done' ? '' : `<div class="filmlab"><span>Неделя: ${steps} из 7</span><span>ещё ${Math.ceil(daysTo(p) / 7)} ${plural(Math.ceil(daysTo(p) / 7), 'неделя', 'недели', 'недель')}</span></div>
   <div class="film">${'<div class="fr"></div>'.repeat(13).replace('<div class="fr">', `<div class="fr" style="--r:${(100 - steps / 7 * 100).toFixed(1)}%">`)}</div>
-  ${wk.html}
+  ${wk.html}`}
   <div class="sec"><h2>До полной суммы ${vis('all')}</h2>${over ? `<div class="rowl"><span>Вдвоём вносите на ${rubT(over)} больше цены.</span><button class="chip press" data-sheet="change">Уменьшить часть</button></div>`
    : gap && !S.stmtFound ? `<div class="rowl"><span>Не хватает <b class="num" data-out="gap">${rubT(gap)}</b></span><button class="chip press" data-act="toStmt">Найти в своих тратах</button></div>`
    : gap ? `<div class="rowl"><span><b>Сходится.</b> ${w === 'oleg' ? 'Недостающее нашлось в ваших тратах.' : 'Недостающее нашлось.'}</span>${w === 'oleg' ? '<button class="chip press" data-go="stmtResult">Советы</button>' : ''}</div>`
@@ -518,19 +672,17 @@ function scrToday(){ const w = S.who, m = me(); if (!m.income) return scrSource(
   const first = active(w)[0];
   return {html:`<div class="head"><h1 class="disp">Сегодня</h1><span class="mut sm">${dStr(now())}</span></div>
   ${m.botOff ? `<div class="note">Бот отключён — <button class="link" data-sheet="remind" style="min-height:0">подключить снова</button></div>` : ''}
-  <p class="lbl">${minus ? 'Сегодня потрачено больше плана' : 'Можно ещё сегодня'} ${vis('me')}</p>
+  <p class="lbl">${minus ? 'Сегодня потрачено больше плана' : 'Ещё можно на себя'} ${vis('me')}</p>
   <p class="big disp num" data-out="left-today">${rub(l)}</p>
-  <p class="mut">${minus ? 'Завтра на себя ≈ ' + rubT(Math.floor(selfDay(w) + l / Math.max(1, eom))) + '. Отложенное на покупки не трогаем.' : 'до зарплаты ' + dStr(np) + ' на себя ≈ ' + rubT(untilPay(w)) + ' · ' + daysW(tp)}</p>
+  <p class="mut">${minus ? 'Завтра на себя ≈ ' + rubT(Math.floor(selfDay(w) + l / Math.max(1, eom))) + '. Отложенное на покупки не трогаем.' : '≈ ' + rubT(untilPay(w)) + ' до зарплаты'}</p>
   ${S.off ? '<p class="note sm">Пятница. По пятницам вы тратите в 1,6 раза больше обычного.</p>' : ''}
-  <form class="field" id="spendf"><input class="inp" id="spend" placeholder="потратил… кофе 300" aria-label="Трата фразой"><button class="go press">Записать</button></form>
-  <button class="link sm" data-sheet="shot">или скриншот уведомления</button>
+  <form class="field" id="spendf"><input class="inp" id="spend" placeholder="потратил… кофе 300" aria-label="Трата фразой"><button type="button" class="ico press" data-sheet="shot" aria-label="Скриншот уведомления" title="Скриншот уведомления">${V3_CAM}</button><button class="go press">Записать</button></form>
   ${m.spent.length ? `<div class="sec"><h2>Траты за сегодня ${vis('me')}</h2>${m.spent.map((x, i) => `<div class="rowl"><span>${esc(x.t || 'без подписи')}</span><b class="num">${rubT(x.v)}</b><button class="link sm" data-undo="${i}" style="min-height:44px">Отменить</button></div>`).join('')}</div>` : ''}
-  <div class="sec"><h2>Влезет ли покупка ${vis('me')}</h2><form class="field" id="afff"><input class="inp" id="price" inputmode="numeric" placeholder="цена, ₽" aria-label="Цена покупки"><button class="go press">Проверить</button></form>
-  <div class="chips"><button class="chip press num" data-price="450">450 ₽</button><button class="chip press num" data-price="7000">7 000 ₽</button><button class="chip press num" data-price="15000">15 000 ₽</button></div>
-  <p class="ans" data-out="afford" aria-live="polite">${S.aff != null ? afford(w, S.aff).t : ''}</p>${S.aff != null && afford(w, S.aff).k !== 'no' ? `<div class="kb"><button data-act="affBuy">Купил — записать</button><button data-act="affNo">Не буду</button></div>` : ''}</div>
-  ${first && l > 0 && !m.sentRest ? `<div class="sec"><h2>Закрыть день ${vis('me')}</h2><div class="rowl"><span>Остаток — в покупку, день засчитается</span><button class="chip press" data-act="rest">${rubT(l)} — в покупку</button></div></div>` : ''}
-  <div class="sec"><h2>Напоминания</h2>${m.bot && !m.botOff ? `<div class="rowl"><span>Пишем в ${m.bot === 'max' ? 'Max' : 'Telegram'}: утром и в день зарплаты</span><button class="chip press" data-go="bot">Открыть чат</button></div>`
-   : `<div class="rowl"><span>${np ? 'Зарплата ' + dStr(np) + ' — напомнить отложить ≈ ' + rubT(paydaySum(w)) + '?' : 'Напомнить отложить в день зарплаты?'}</span><button class="chip press" data-sheet="remind">Напоминать</button></div>`}</div>
+  <div class="sec"><h2>Влезет ли? ${vis('me')}</h2><form class="field" id="afff"><input class="inp" id="price" inputmode="numeric" placeholder="например, 7 000 ₽" aria-label="Цена покупки"><button class="go go2 press">Проверить</button></form>
+  
+  <p class="ans" data-out="afford" aria-live="polite">${S.aff != null ? afford(w, S.aff).t : ''}</p>${S.aff != null && afford(w, S.aff).k !== 'no' ? `<div class="kb"><button data-act="affBuy">Купил</button><button data-act="affNo">Не буду</button></div>` : ''}</div>
+  ${first && l > 0 && !m.sentRest ? `<div class="sec"><h2>Закрыть день ${vis('me')}</h2><button class="chip press" data-act="rest">${rubT(l)} в покупку</button></div>` : ''}
+  
   <details><summary>Как я посчитал ${vis('me')}</summary><div class="sm">
    <div class="rowl"><span>Приход в месяц</span><b class="num">${rubT(m.income.m)}</b></div><div class="rowl"><span>Обязательные</span><b class="num">− ${rubT(m.income.mand)}</b></div>
    <div class="rowl"><span>На покупки: ${rubT(reserve(w))} в день × 30</span><b class="num">− ${rubT(reserve(w) * 30)}</b></div>
@@ -563,13 +715,13 @@ function scrStmtResult(){ const p = active('oleg')[0], gap = p ? gapOf(p) : 0, f
      : `<div class="rowl"><span>В копилку и на вклады: ${rubT((p.conf || {}).oleg || 0)} — ${((p.conf || {}).oleg || 0) >= p.saved.oleg ? 'отметки подтверждены' : 'это подтверждённая часть отметок'}.</span></div>`}
    <p class="xs mut" style="margin-top:6px">Скрыто номеров карт, телефонов и имён: 14. Возвратов: 2. Дублей: 1. Обновить — после зарплаты 10 октября.</p></div></details>`, main:['Считать «Сегодня» по выписке','stmtUse']}; }
 
-function scrData(){ const m = me(); return {html:`<div class="head"><h1 class="disp">Мои данные</h1></div><p class="mut sm">Всё на этой странице ${vis('me')}</p>
-  <div class="sec"><h2>Что храним</h2><div class="rowl"><span>Покупки, ваши части и отметки «отложил»</span></div><div class="rowl"><span>Приходы и обязательные</span><span class="mut sm">${m.income ? (m.income.src === 'stmt' ? 'из выписки' : 'вписаны') : 'нет'}</span></div>
-   <div class="rowl"><span>Сводка выписки (файла нет)</span>${S.who === 'oleg' && m.stmt ? '<button class="chip press sm" data-act="delStmt">Удалить</button>' : '<span class="mut sm">нет</span>'}</div></div>
-  <div class="sec"><h2>Напоминания</h2><div class="rowl"><span>${m.bot ? 'Бот в ' + (m.bot === 'max' ? 'Max' : 'Telegram') : 'Не подключены'}</span>${m.bot ? '<button class="chip press sm" data-act="botStop">Отключить</button>' : '<button class="chip press sm" data-sheet="remind">Подключить</button>'}</div></div>
-  <div class="sec"><h2>Не потерять данные</h2><div class="rowl"><span>На главный экран телефона</span><button class="chip press sm" data-sheet="install">Как</button></div>
-   <div class="rowl"><span>${m.email ? 'Почта привязана' : 'Данные живут на этом телефоне'}</span>${m.email ? '' : '<button class="chip press sm" data-sheet="email">Привязать почту</button>'}</div></div>
-  <div class="sec"><button class="link" data-sheet="policy">Как мы обращаемся с данными</button><br><button class="link" data-sheet="delAsk" style="color:var(--warm)">Удалить все мои данные</button></div>`}; }
+function scrData(){ const m = me(); return {html:`<div class="head"><h1 class="disp">Мои данные</h1></div><p class="mut sm">Только для вас ${vis('me')}</p>
+  <div class="sec"><h2>Что храним</h2><div class="rowl"><span>Покупки, части, отметки</span></div><div class="rowl"><span>Приходы</span><span class="mut sm">${m.income ? (m.income.src === 'stmt' ? 'из выписки' : 'вписаны') : 'нет'}</span></div>
+   <div class="rowl"><span>Сводка выписки</span>${S.who === 'oleg' && m.stmt ? '<button class="chip press sm" data-act="delStmt">Удалить</button>' : '<span class="mut sm">нет</span>'}</div></div>
+  <div class="sec"><h2>Напоминания</h2><div class="rowl"><span>${m.bot ? 'Бот в ' + (m.bot === 'max' ? 'Max' : 'Telegram') : 'Не подключены'}</span>${m.bot ? '<button class="chip press sm" data-go="bot">Открыть</button><button class="chip press sm" data-act="botStop">Отключить</button>' : '<button class="chip press sm" data-sheet="remind">Подключить</button>'}</div></div>
+  <div class="sec"><h2>Доступ</h2><div class="rowl"><span>На главный экран</span><button class="chip press sm" data-sheet="install">Как</button></div>
+   <div class="rowl"><span>${m.email ? 'Почта привязана' : 'Только на этом телефоне'}</span>${m.email ? '' : '<button class="chip press sm" data-sheet="email">Привязать почту</button>'}</div></div>
+  <div class="sec"><button class="link" data-sheet="policy">Как храним данные</button><br><button class="link" data-sheet="delAsk" style="color:var(--warm)">Удалить мои данные</button></div>`}; }
 function scrDeleted(){ return {notabs:true, html:`<h1 class="h1 disp">Данные удалены</h1><p>Покупки, части, отметки, приходы, траты, сводка выписки и связь с ботом удалены. ${S.purchases.length ? 'У партнёра покупка осталась с пометкой «вышел».' : ''}</p>`, main:['Начать заново','restart']}; }
 
 function botHello(w){ const tg = me().bot === 'tg' || S.flags.tg; return tg
@@ -605,10 +757,10 @@ const SH = {
   input: k => { const t = {share:['Ваша часть, ₽','например, 80 000'], dl:['Новый срок','например, к 31 января'], took:['Сколько взяли из отложенного, ₽','например, 3 000']}[k]; return `<h3 class="disp">${t[0]}</h3><form id="inputf" data-k="${k}" class="field"><input class="inp" id="inputv" placeholder="${t[1]}" aria-label="${t[0]}"><button class="go press">Готово</button></form>${k === 'took' ? '<p class="xs mut" style="margin-top:8px">Бывает. Пересчитаю план и предложу срок без упрёков.</p>' : ''}`; },
   cancelAsk: () => `<h3 class="disp">Отменить покупку?</h3><p>Покупка уйдёт в архив у вас и у партнёра. Отметки сохранятся.</p><button class="main press" data-act="cancelBuy">Отменить покупку</button><button class="sec2 press" data-close>Оставить</button>`,
   delAsk: () => `<h3 class="disp">Удалить все данные?</h3><p>Покупки, части, отложенное, приходы, траты, сводка выписки и связь с ботом исчезнут. Вернуть нельзя.</p><button class="main press" data-act="delAll">Удалить всё</button><button class="sec2 press" data-close>Оставить</button>`,
-  remind: () => `<h3 class="disp">Где напоминать?</h3><button class="sec2 press" data-act="linkMax" style="text-align:left;padding:10px 14px;min-height:64px"><b>В Max</b><br><span class="mut sm">траты и «влезет ли» прямо в чате</span></button><button class="sec2 press" data-act="linkTg" style="text-align:left;padding:10px 14px;min-height:64px"><b>В Telegram</b><br><span class="mut sm">только напоминания, без сумм</span></button>
-   <label class="tip"><input type="checkbox" checked><span>По утрам — сколько сегодня на себя</span></label><label class="tip"><input type="checkbox" checked><span>Раз в месяц — обновить выписку</span></label>
-   <p class="xs mut" style="margin-top:8px">Откроется мессенджер → «Старт». Ссылка одноразовая, действует сутки. Партнёр этот чат не видит.</p>
-   <details><summary>Без мессенджера — уведомлением на телефоне</summary><p class="sm">1. Добавьте приложение на главный экран. 2. Разрешите уведомления.</p><button class="sec2 press" data-act="linkPush">Разрешить уведомления</button></details>`,
+  remind: () => `<h3 class="disp">Где напоминать?</h3><button class="sec2 press" data-act="linkMax" style="text-align:left;padding:10px 14px;min-height:64px"><b>В Max</b><br><span class="mut sm">траты и «влезет ли» в чате</span></button><button class="sec2 press" data-act="linkTg" style="text-align:left;padding:10px 14px;min-height:64px"><b>В Telegram</b><br><span class="mut sm">только напоминания, без сумм</span></button>
+   <label class="tip"><input type="checkbox" checked><span>Утром — сколько на себя</span></label><label class="tip"><input type="checkbox" checked><span>Ежемесячно — выписка</span></label>
+   <p class="xs mut" style="margin-top:8px">Чат видите только вы.</p>
+   <details><summary>Или уведомлением на телефоне</summary><p class="sm">1. Добавьте приложение на главный экран. 2. Разрешите уведомления.</p><button class="sec2 press" data-act="linkPush">Разрешить уведомления</button></details>`,
   install: () => `<h3 class="disp">На главный экран</h3><p>iPhone: «Поделиться» → «На экран Домой».</p><p>Android: меню браузера → «Добавить на главный экран».</p><p class="mut sm">Так приложение открывается одним касанием и может присылать уведомления.</p><button class="main press" data-close>Понятно</button>`,
   email: () => S.emailStep ? `<h3 class="disp">Код из письма</h3><p class="mut sm">Отправили код на почту. Введите четыре цифры.</p><form id="codef" class="field"><input class="inp" inputmode="numeric" maxlength="4" placeholder="0000" aria-label="Код из письма"><button class="go press">Готово</button></form>`
     : `<h3 class="disp">Сохранить по почте</h3><p>Сейчас данные живут на этом телефоне. Привяжите почту — и они не пропадут при смене устройства.</p><form id="emailf" class="field"><input class="inp" type="email" placeholder="почта" aria-label="Почта"><button class="go press">Код</button></form>`,
@@ -655,7 +807,7 @@ function go(scr, keep){ S.scr = scr; if (scr === 'list' || scr === 'purchase') S
 /* ── действия ── */
 function step(amount){ const p = P() || active(S.who)[0]; if (!p) return; const w = S.who, v = Math.min(leftOf(p, w), Math.round(amount)); if (!(v > 0)) return;
   const before = mileOf(pctOf(p, w)); me().stepAmt = (me().stepAmt || 0) + v; p.saved[w] += v; if (S.off) (p.tom = p.tom || {})[w] = ((p.tom || {})[w] || 0) + v; me().stepped = true; S.flash = true;
-  if (S.purchases.every(q => q.state !== 'active' || (leftOf(q, 'oleg') === 0 && (q.share.anya == null || leftOf(q, 'anya') === 0))) && gapOf(p) === 0) p.state = 'done';
+  if (v3collected(p)) p.state = 'done';
   if (navigator.vibrate && navigator.userActivation && navigator.userActivation.hasBeenActive) navigator.vibrate(10);
   const first = !me().email && !me().emailAsked; me().emailAsked = true;
   go('purchase'); const after = mileOf(pctOf(p, w));
@@ -758,7 +910,7 @@ document.addEventListener('click', e => {
     if (BUSY[k] && !reduce() && !S.flags.offline) { if (b.disabled) return; b.disabled = true; b.setAttribute('aria-busy', 'true'); b.textContent = BUSY[k]; setTimeout(ACT[k], 550); } else ACT[k](); }
   else if (d.act) ACT[d.act]();
   else if (d.go) go(d.go);
-  else if (d.tab) { S.tab = d.tab; go(d.tab === 'buy' ? (S.purchases.length > 1 ? 'list' : S.purchases.length ? 'purchase' : 'phrase') : d.tab); }
+  else if (d.tab) { S.tab = d.tab; go(d.tab === 'buy' ? (S.purchases.length > 1 ? 'list' : S.purchases.length ? 'purchase' : 'list') : d.tab); }
   else if (d.sheet) openSheet(d.sheet);
   else if (d.close !== undefined) closeSheet();
   else if (d.open) { S.cur = d.open; go('purchase'); }
@@ -778,7 +930,7 @@ document.addEventListener('click', e => {
     else if (k === 'undoLast') { m.spent.pop(); m.chat.push({b:'Отменил. Сегодня на себя осталось ' + rubT(leftToday(S.who)) + '.'}); render(true); }
     else if (k === 'payStep') { S.flags.push = false; S.cur = active(S.who)[0].id; step(paydaySum(S.who)); }
     else if (k === 'later') { m.chat.push({b:'Хорошо. Напомню в 20:00.'}); render(true); } }
-  else if (d.sc) scenario(d.sc);
+  else if (d.sc) { closeSheet(); $('#sheet').innerHTML = ''; if (V3_SCEN[d.sc]) { $('#panel').classList.remove('open'); V3_SCEN[d.sc](); } else scenario(d.sc); }
   else if (d.who) { S.who = d.who; S.aff = null; closeSheet(); $('#sheet').innerHTML = ''; $('#toast').classList.remove('on'); $('#toast').textContent = ''; if (!me().consent) me().consent = S.mode === 'mid'; go(S.tab === 'today' ? 'today' : S.tab === 'data' ? 'data' : 'purchase'); }
   else if (d.day) setDay(d.day === 'tomorrow' ? 1 : 0);
   else if (d.th) setTheme(d.th); else if (d.font) setFont(d.font);
@@ -834,19 +986,766 @@ window.demo = {
   newPurchase: () => { S.draft = parsePhrase('Отпуск 120 тысяч к 1 июня, я могу 70'); S.draft.done = true; go('answer'); }
 };
 
+const V3_SCEN = {};
+/* v3 · flow_group */
+
+/* ── v3 · flow_group: вход с примером, режим одного, «Копить вместе?», общая цель ── */
+const V3_MAX = 6;
+const V3_EX = {name:'Диван в гостиную', price:120000, dl:Date.UTC(2026, 11, 31), saved:61000, step:12000};
+Object.assign(NAME, {timur:'Тимур', sveta:'Света'});
+const V3_FEM = ['anya', 'sveta'];
+/* нейтральный туман для цели, которую не узнали по названию (раньше — диван, как в примере) */
+ART.v3fog = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 500" preserveAspectRatio="xMidYMid slice"><defs><linearGradient id="v3g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#D5DCDE"/><stop offset="1" stop-color="#8E9FA4"/></linearGradient></defs><rect width="400" height="500" fill="url(#v3g)"/><ellipse cx="110" cy="380" rx="230" ry="80" fill="#7D9095" opacity=".45"/><ellipse cx="320" cy="440" rx="210" ry="70" fill="#6C8086" opacity=".4"/></svg>';
+const v3warn = [];
+/* подмена текста v2 на лету; если строки нет (её поменял другой модуль) — запись в demo.v3.warn(), экран не падает */
+function v3sub(s, a, b, where){ if (!s.includes(a)) { if (!v3warn.includes(where)) v3warn.push(where); return s; } return s.replace(a, b); }
+function v3dom(html, fn){ const t = document.createElement('template'); t.innerHTML = html; fn(t.content); return t.innerHTML; }
+function v3log(ev){ (S.v3 = S.v3 || {log:[]}).log.push(ev); }
+const visG = () => vis('all').replace(/видит партнёр/g, 'видят участники');
+const v3solo = (p, w) => !!p && !p.group && p.owner === w && p.share[w] != null && p.share[OTHER[w]] == null && !p.invited;
+const v3mode = () => { const p = P(); return !p ? 'pair' : p.group ? 'group' : v3solo(p, S.who) ? 'solo' : 'pair'; };
+
+/* ── расчёт общей цели: всё из договорённостей и суточного снимка, чужие отложенные суммы на экран не попадают ── */
+function v3people(p){ return p.group ? p.group.members : ['oleg', 'anya']; }          /* gapOf, overOf, «Собрано» */
+function v3from(p, w){ return (p.join || {})[w] || p.cr; }                           /* план участника — от его входа */
+function v3collected(p){ return gapOf(p) === 0 && v3people(p).every(m => p.share[m] == null || leftOf(p, m) === 0); }
+const v3floor10 = x => Math.floor(Math.min(1, Math.max(0, x)) * 10 + 1e-9) / 10;
+const v3promised = p => p.group.members.reduce((s, m) => s + (p.share[m] || 0), 0);
+const v3gap = p => Math.max(0, p.price - v3promised(p));
+/* снимок раз в сутки: общий % и статусы участников из одних и тех же данных одного момента */
+function v3snap(p){ const g = p.group;
+  g.snap = v3floor10(g.members.reduce((s, m) => s + (p.saved[m] || 0), 0) / p.price);
+  g.stat = {}; for (const m of g.members) g.stat[m] = {plan:onPlan(p, m), started:(p.saved[m] || 0) > 0};
+  if (p.state === 'active' && v3collected(p)) p.state = 'done'; }
+/* свой статус — живой (это свои данные), чужой — только из снимка */
+const v3planOf = (p, m) => m === S.who ? onPlan(p, m) : !!((p.group.stat || {})[m] || {}).plan;
+const v3stat = (p, m) => { const st = m === S.who ? {plan:onPlan(p, m), started:(p.saved[m] || 0) > 0} : (p.group.stat || {})[m] || {plan:true, started:false};
+  return !st.started ? 'только начали' : st.plan ? 'по плану' : 'отстаёт'; };
+const v3fits = p => v3gap(p) === 0 && p.group.members.every(m => v3planOf(p, m));
+/* что видно на строке участника: чужой — только «по плану» (решение владельца 05.10), свой — всё */
+function v3word(p, m, many){ const s = v3stat(p, m);
+  if (m !== S.who && s !== 'по плану') return '';
+  if (many || s === 'только начали') return s;
+  return s === 'по плану' ? 'к сроку сходится' : 'пока не сходится'; }
+function v3makeGroup(p){ if (!p.group) { p.group = {members:[p.owner], sent:false, snap:0, gone:[]}; v3snap(p); } return p.group; }
+/* выход из цели: часть освобождается, у остальных — «вышел(ла)»; организатор передаётся следующему по входу */
+function v3leave(p, w){ const g = p.group; g.members = g.members.filter(m => m !== w); g.gone = (g.gone || []).filter(m => m !== w).concat([w]);
+  p.share[w] = null; p.saved[w] = 0; if (p.conf) p.conf[w] = 0; if (p.where) delete p.where[w]; if (g.stat) delete g.stat[w];
+  if (p.owner === w && g.members.length) p.owner = g.members[0]; }
+/* видит ли человек цель: участник; приглашённый по отправленной ссылке; не вышедший */
+const v3sees = (p, w) => p.share[w] != null || (!(p.group && (p.group.gone || []).includes(w)) && !!p.invited);
+
+/* ── состояние ── */
+const v3seed0 = seed;
+seed = function(mode){ const s = v3seed0(mode); s.v3 = {ex:V3_EX.saved, log:[], back:null, fromEx:false};
+  for (const w of ['oleg','anya']) s.people[w].exSeen = mode === 'mid'; return s; };
+/* новая цель человека без других целей: неделя с нуля, фото — нейтральный туман, если цель не узнали по названию */
+const v3commit0 = commitDraft;
+commitDraft = function(){ const w = S.who, first = !active(w).length, name = (S.draft || {}).name || '';
+  v3commit0(); const p = P();
+  if (first) Object.assign(me(), {week:[0, 0, 0], stepped:false, stepAmt:0});
+  if (p && p.photo === 'sofa' && !/диван|софа|кресл|мебел/i.test(name)) p.photo = 'v3fog'; };
+
+/* ── сторис-знакомство: механика v2, тексты под пивот — помощник для одного, общая цель по желанию ── */
+SLIDES.splice(0, SLIDES.length,
+  {p:0,   h:'Сколько сегодня можно на себя', t:'Каждое утро — одна сумма. Обязательное и отложенное на цель уже вычтены.'},
+  {p:.15, h:'Цель к дате — на фото', t:'Поставьте фото того, на что копите. Пока оно в тумане.'},
+  {p:.5,  h:'Туман отступает, когда откладываете', t:'Чёткая часть — уже отложено. Пропустили день — ничего не сгорает.'},
+  {p:.6,  h:'Влезет ли покупка?', t:'Спросите до траты — ответим, сдвинет ли она цель.'},
+  {p:1,   h:'Вместе с кем-то — по желанию', t:'Каждый видит свою часть и общий ход. Чужих денег не видит никто.', last:true});
+const v3storyOn = () => $('#story').classList.contains('on');
+document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('#skip, #start'); if (!b || !v3storyOn()) return;
+  v3log(b.id === 'start' ? 'onboarding_done' : 'onboarding_skipped'); }, true);
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && v3storyOn()) v3log('onboarding_skipped'); }, true);
+
+/* ── Э-01 согласие: без партнёра в обещаниях ── */
+const v3consent0 = scrConsent;
+scrConsent = SCR.consent = function(){ const r = v3consent0();
+  r.html = v3sub(r.html, 'Посчитаем, сойдётся ли покупка к сроку', 'Посчитаем, сойдётся ли цель к сроку', 'consent:h1');
+  r.html = v3sub(r.html, 'Партнёр не видит ваши деньги — только общую покупку.', 'Ваши деньги видите только вы.', 'consent:partner');
+  r.main = ['Согласен, дальше', r.main[1]]; return r; };
+const v3policy0 = SH.policy;
+SH.policy = a => v3sub(v3policy0(a), 'Партнёр видит покупку и свою часть, но не ваши деньги.', 'Участники общей цели видят цель и части, но не ваши деньги.', 'policy');
+const v3consentOk0 = ACT.consentOk;
+ACT.consentOk = function(){ const w = S.who;
+  if (!me().exSeen && !S.purchases.some(p => p.share[w] != null || p.invited)) { me().consent = true; S.v3.back = null; S.v3.ex = V3_EX.saved; v3log('example_shown'); return go('example'); }
+  v3consentOk0(); };
+
+/* ── Э-08 пример: тот же вид цели на демо-данных, но видно, что это не ваши деньги; «Отложить» ничего не сохраняет ── */
+let v3exToast = false;
+function v3exScr(){ const e = V3_EX, saved = Math.min(e.price, S.v3.ex), pc = saved / e.price, left = e.price - saved,
+    days = Math.max(1, Math.round((e.dl - now()) / DAY)), per = Math.ceil(left / days), ml = mileOf(pc);
+  me().exSeen = true;
+  return {notabs:true, html:`<div class="v3-example" data-v3-example="root">${S.v3.back ? backBtn(S.v3.back) : ''}
+  <div class="head"><div><span class="v3-tag v3-exbadge v3-example">Пример</span><h1 class="disp">${e.name}</h1><p class="mut" style="margin:2px 0 0">к ${dStr(e.dl)} · через ${daysW(days)}</p></div></div>
+  <div class="cardp"><div class="photo" data-pic="sofa" data-pct="${pc}" data-conf="${pc}" data-step="${e.step / e.price}" role="img" aria-label="Фото цели в примере: чёткая часть — отложено, в тумане — впереди">
+    <img class="fog" alt=""><img class="color" alt=""><div class="thin"></div><div class="edge"></div><div class="rule"></div><div class="band"></div><div class="bandlab num">отложено</div><span class="pctlab num">отложено ${Math.round(pc * 100)}${NB}%</span>
+    ${ml ? `<span class="mile${S.flash ? ' pop' : ''}">${ml[1]}</span>` : ''}</div>
+    <div class="cap"><span class="hand">Диван</span><span class="stamp">${left ? 'сходится к сроку' : 'собрано'}</span></div></div>
+  <p class="left disp"><small>Осталось отложить</small><span class="num" data-v3-money>${rub(left)}</span></p>
+  ${left ? `<p class="mut" style="margin:0">по плану: <span class="num">${rub(per)}</span> в день</p>` : ''}
+  <p class="sm v3-exnote">Это пример, не ваши деньги.</p>
+  <div class="v3-row">${left ? `<button class="chip press num" data-act="v3exStep">Отложить ${rubT(Math.min(e.step, left))}</button>` : ''}<button class="link sm" data-sheet="how" style="min-height:44px">Как это работает?</button></div>
+  </div>`, main:['Создать свою цель','v3own']}; }
+SCR.example = v3exScr;
+/* тост примера не переживает уход с примера */
+const v3go0 = go;
+go = function(scr, keep){ if (v3exToast && scr !== 'example') { v3exToast = false; clearTimeout(toastT); $('#toast').classList.remove('on'); } return v3go0(scr, keep); };
+
+/* «Как это работает?»: ≤30 слов; значки видимости расшифрованы словами; о партнёре — только в паре */
+SH.how = () => { if (S.scr === 'example') return `<h3 class="disp">Как читать пример</h3><p class="sm">Чёткая часть фото — отложено, туман — ещё впереди.</p><p class="sm">«Отложить» проясняет туман. Это пример — ничего не сохраняется.</p><button class="sec2 press" data-act="closeS">Понятно</button>`;
+  const m = v3mode(), p = P(), many = m === 'group' && p.group.members.length >= 3;
+  const photo = many ? '<b>Чётко</b> — отложено вместе, шаг 10 %. <b>Туман</b> — впереди.' : '<b>Чётко</b> — подтверждено выпиской, <b>дымка</b> — по отметкам, <b>туман</b> — впереди.';
+  const legend = vis('me') + ' — видите только вы' + (m === 'solo' ? '' : m === 'group' ? '; ' + visG() + ' — видят участники' : '; ' + vis('all') + ' — видит партнёр');
+  return `<h3 class="disp">Как это работает</h3><p class="sm">${photo}</p><p class="sm">${m === 'group' ? (p.group.members.length === 2 ? 'Точка — день у обоих. ' : '') : 'Кадр недели — 5 дней из 7. '}Пропуск ничего не отнимает.</p>
+  <p class="sm v3-legend">${legend}.</p><button class="link" data-act="v3showEx">Посмотреть пример</button><button class="sec2 press" data-act="closeS">Понятно</button>`; };
+
+/* ── Э-02 фраза и Э-03 уточнение: без партнёра по умолчанию ── */
+const v3phrase0 = scrPhrase;
+scrPhrase = SCR.phrase = function(){ const r = v3phrase0();
+  r.html = v3sub(r.html, '<h1 class="h1 disp">Что покупаете?</h1><p class="mut">Как написали бы партнёру. Или ссылка на товар.</p>',
+    '<h1 class="h1 disp">Что хотите купить и к какому сроку?</h1><p class="mut">Одной фразой или ссылкой.</p>', 'phrase:h1');
+  r.html = r.html.replace(/, я могу (\d)/g, ', откладываю $1'); return r; };
+const v3clar0 = scrClarify;
+scrClarify = SCR.clarify = function(){ const r = v3clar0(); if (!/Сколько вносите вы\?/.test(r.html)) return r;
+  r.html = r.html.replace(/Сколько вносите вы\?/g, 'Сколько отложите сами к сроку?');
+  r.html = v3dom(r.html, f => {
+    f.querySelectorAll('[data-clar="плачу сам"]').forEach(b => { b.textContent = 'всю сумму сам'; });
+    f.querySelectorAll('[data-clar="половину"]').forEach(b => { b.removeAttribute('data-clar'); b.setAttribute('data-act', 'v3clarPart'); b.textContent = 'часть — впишу'; }); });
+  return r; };
+const v3phraseGo0 = ACT.phraseGo;
+ACT.phraseGo = function(){ if (S.v3.fromEx) { S.v3.fromEx = false; v3log('own_goal_started'); } return v3phraseGo0(); };
+
+/* ── Э-05 ответ: «Сохранить цель» → Э-06; строки ответа — .v3-answer-line (блочные) ── */
+const v3ans0 = scrAnswer;
+scrAnswer = SCR.answer = function(){ const r = v3ans0();
+  r.html = v3dom(r.html, f => {
+    [...f.children].forEach(el => { if ((el.tagName === 'P' || el.tagName === 'DIV') && !el.classList.contains('backb')) el.classList.add('v3-answer-line'); });
+    const big = f.querySelector('.big.num'); if (big) big.setAttribute('data-v3-money', '');
+    f.querySelectorAll('.rowl > span').forEach(s => { if (/^Партнёр внесёт/.test(s.textContent)) s.textContent = 'Скинуться с кем-то — позовёте после сохранения'; });
+  });
+  r.main = ['Сохранить цель','v3save']; r.extra = ''; return r; };
+
+/* ── Э-06 «Копить вместе?»: две кнопки одного веса; подтверждение — обычным шрифтом (курсив — только ответ GigaChat) ── */
+function v3togetherScr(){ const p = P(); if (!p) return scrList();
+  return {notabs:true, html:`<p class="sm mut">Цель сохранена: ${esc(p.name)} к ${dStr(p.dl)}</p>
+  <h1 class="h1 disp">Копить вместе с кем-то?</h1>
+  <p class="mut">Позовёте — люди увидят цель, срок и свои части, но не ваши деньги.</p>
+  <div class="v3-pair"><button class="sec2 press" data-act="v3alone">Пока сам</button><button class="sec2 press" data-act="v3call">Позвать</button></div>
+  <p class="xs mut">Позвать можно и позже — с экрана цели.</p>`}; }
+SCR.together = v3togetherScr;
+
+/* ── «Покупки»: только цели, которые человек видит; без целей — карточка примера ── */
+const v3list0 = scrList;
+scrList = SCR.list = function(){ const w = S.who, all = S.purchases, mine = all.filter(p => v3sees(p, w));
+  if (!mine.length) return {html:`<div class="head"><h1 class="disp">Покупки</h1></div><p class="mut">Своих целей пока нет. Так выглядит цель, которая сходится.</p>
+  <button class="pl press" data-act="v3showEx"><span class="mini" data-pic="sofa" data-pct="${V3_EX.saved / V3_EX.price}"><img class="fog" alt=""><img class="color" alt=""></span>
+  <span><span class="v3-tag">Пример</span><br><b>${V3_EX.name}</b><br><span class="mut sm">к ${dStr(V3_EX.dl)} · сходится</span></span></button>`, main:['Создать свою цель','v3own']};
+  S.purchases = mine; try { return v3list0(); } finally { S.purchases = all; } };
+
+/* ── экран цели: своя / общая ── */
+const v3whereRow = () => '<button class="rowl press v3-where" data-sheet="where"><span>Где лежат деньги — указать</span><span aria-hidden="true">›</span></button>';
+function v3soloPost(html, p){ return v3dom(html, f => {
+  const st = f.querySelector('.stamp'); if (st) { st.className = 'stamp v3-plain'; st.textContent = 'своя цель'; } else v3warn.push('solo:stamp');
+  f.querySelectorAll('.wd.both').forEach(x => x.classList.remove('both'));
+  f.querySelectorAll('.note').forEach(n => { if (n.querySelector('[data-act="cheer"]')) n.remove(); });   /* «Партнёр сделал шаг» — не про свою цель */
+  if (p.photo === 'v3fog') { const sw = f.querySelector('.swap'); if (sw) sw.textContent = 'Добавить фото'; }
+  const left = f.querySelector('[data-out="my-left"]'); if (left) left.setAttribute('data-v3-money', '');
+  if (p.state !== 'done' && !(p.where || {})[p.owner]) { const pd = f.querySelector('[data-out="perday"]'), at = pd && pd.closest('p');
+    const after = at && at.nextElementSibling && at.nextElementSibling.matches('p.xs') ? at.nextElementSibling : at;
+    if (after) after.insertAdjacentHTML('afterend', v3whereRow()); else v3warn.push('solo:where'); }
+  const sec = [...f.querySelectorAll('.sec')].find(s => /До полной суммы/.test((s.querySelector('h2') || {}).textContent || ''));
+  if (!sec) return v3warn.push('solo:sec');
+  sec.querySelector('h2').innerHTML = 'До полной суммы ' + vis('me');
+  sec.querySelectorAll('.rowl').forEach(r => { const s = r.querySelector('span'), b = r.querySelector('b');
+    if (s && /часть партнёра/.test(s.textContent)) { s.textContent = 'Ваша часть'; if (b) b.textContent = rubT(p.share[p.owner]); } });
+  const sb = sec.querySelector('[data-go="share"]'); if (sb) sb.remove();
+  if (p.state !== 'done') sec.insertAdjacentHTML('beforeend', '<button class="sec2 press" data-go="groupShare">Копить вместе с кем-то</button>');
+}); }
+function v3groupScr(p){ const w = S.who, g = p.group, ms = g.members, n = ms.length, many = n >= 3, done = p.state === 'done',
+    left = leftOf(p, w), mine = perDay(p, w), plan = onPlan(p, w), gap = v3gap(p), over = Math.max(0, v3promised(p) - p.price), fits = v3fits(p),
+    pc = done ? 1 : many ? g.snap : pctOf(p, w), pct = Math.round(pc * 100), more = n < V3_MAX && !done,
+    tot = Math.max(1, Math.round((p.dl - p.cr) / DAY)), el = Math.min(tot, Math.max(0, Math.round((now() - p.cr) / DAY))), x = (el / tot * 100).toFixed(1),
+    o2 = n === 2 ? ms.find(m => m !== w) : null, wk = o2 && !done ? weekRow(w) : null;   /* как в паре Р1 — только на двоих (ТЗ 1.4, ФТ-91/92) */
+  const member = m => { const s = v3word(p, m, many), ok = s === 'по плану' || s === 'к сроку сходится';
+    return `<div class="v3-member" data-v3-member="${m}"><span class="v3-ava" aria-hidden="true">${NAME[m][0]}</span>
+    <span><b>${m === w ? 'Вы' : NAME[m]}</b><br><span class="mut sm">${m === w ? 'беру' : 'берёт'} <span class="num">${rubT(p.share[m] || 0)}</span></span></span>
+    ${s ? `<span class="v3-st${ok ? '' : ' wait'}">${s}</span>${ok ? '' : vis('me')}` : ''}</div>`; };
+  const gone = m => `<div class="v3-gonerow"><span class="v3-ava" aria-hidden="true">${NAME[m][0]}</span><span><b>${NAME[m]}</b><br><span class="sm">${V3_FEM.includes(m) ? 'вышла' : 'вышел'} из цели</span></span></div>`;
+  const stamp = done ? '<span class="stamp">собрано</span>' : many ? `<span class="v3-stampw"><span class="stamp">вместе ${pct}${NB}%</span>${visG()}</span>`
+    : `<span class="stamp${fits ? '' : ' wait'}">${fits ? 'к сроку сходится' : 'пока не сходится'}</span>`;
+  const html = `<div class="head"><div>${S.purchases.length > 1 ? backBtn('list', 'Покупки') : ''}<h1 class="disp">${esc(p.name)}</h1><p class="mut" style="margin:2px 0 0">к ${fxDl(p.dl)} · ${p.state === 'done' ? 'собрано' : `<span class="num" data-out="days">через ${daysW(daysTo(p))}</span>`} · ${n} ${plural(n, 'участник', 'участника', 'участников')}</p></div>
+  <button class="icon press" data-sheet="change" aria-label="Изменить цель"><svg width="20" height="20" viewBox="0 0 20 20"><circle cx="4" cy="10" r="1.6" fill="currentColor"/><circle cx="10" cy="10" r="1.6" fill="currentColor"/><circle cx="16" cy="10" r="1.6" fill="currentColor"/></svg></button></div>
+  ${o2 && S.flags.partnerStep && !done ? `<div class="note v3-step">${NAME[o2]} сегодня ${V3_FEM.includes(o2) ? 'сделала' : 'сделал'} шаг. ${me().stepped ? 'Сегодня точка у обоих.' : 'Отложите и вы — будет точка у обоих.'}<div class="kb"><button data-act="cheer">Подбодрить</button></div></div>` : ''}
+  <div class="cardp"><div class="photo" data-pic="${p.photo}" data-pct="${pc}" data-conf="${many || done ? pc : confPct(p, w)}" role="img" aria-label="${many ? 'Фото цели: чёткая часть — отложено вместе, с шагом 10 %' : 'Фото цели: чёткая часть — ваше отложенное'}">
+    <img class="fog" alt=""><img class="color" alt=""><div class="thin"></div><div class="edge"></div><div class="rule"></div><button class="swap press" data-sheet="photo">${p.photo === 'v3fog' ? 'Добавить фото' : 'Сменить фото'}</button></div>
+    <div class="cap"><span class="hand">${esc(p.cap || p.name)}</span>${stamp}</div></div>
+  <div class="v3-mine">${done ? '<p class="left disp">Собрано</p><div class="note">Деньги у каждого из вас — в своём банке. Мы деньги не храним.</div>'
+    : `<p class="left disp"><small>Вам осталось отложить ${vis('me')}</small><span class="num" data-out="my-left" data-v3-money>${rub(left)}</span></p>
+  <p class="mut" style="margin:0">${plan ? 'по плану' : 'догнать план'}: <span class="num" data-out="perday">${rub(mine)}</span> в день <button class="link sm" data-sheet="how" style="min-height:0">Как это работает?</button></p>
+  ${(p.where || {})[w] ? '' : v3whereRow()}${wk ? wk.html : ''}`}</div>
+  <div class="sec"><h2>Общая цель ${visG()}</h2>
+  ${many ? `<p class="v3-big disp num">${done ? 'Собрано' : 'Вместе ≈ ' + pct + NB + '%'}</p><div class="v3-steps" aria-hidden="true">${Array.from({length:10}, (_, i) => `<i${i < Math.round(pc * 10) ? ' class="on"' : ''}></i>`).join('')}</div><p class="xs mut">Шаг 10 %, обновляется раз в сутки.</p>`
+    : `<p class="v3-big disp">${done ? 'Собрано' : fits ? 'К сроку сходится' : 'Пока не сходится'}</p>${n === 2 ? '<p class="xs mut">Вдвоём процент раскрыл бы, сколько отложил партнёр. Поэтому — только «сходится».</p>' : ''}
+    ${done ? '' : `<div class="v3-tl" role="img" aria-label="До срока прошло ${daysW(el)} из ${daysW(tot)}"><span class="v3-tnow xs mut" style="left:${x}%;transform:translateX(-${x}%)">сегодня</span><div class="v3-time"><i style="left:${x}%"></i></div></div><p class="xs mut v3-timelab"><span>${dStr(p.cr)}</span><span>${dStr(p.dl)}</span></p>`}`}
+  <div class="v3-members">${ms.map(member).join('')}${(g.gone || []).map(gone).join('')}</div>
+  ${n === 1 && g.sent ? '<p class="sm">Ссылка отправлена. Пока копите сами — план не меняется.</p>' : ''}
+  ${over ? `<div class="rowl"><span>Части больше цены на <b class="num">${rubT(over)}</b></span><button class="chip press" data-input="share">Уменьшить свою часть</button></div>`
+    : gap ? `<div class="rowl"><span>По договорённостям не хватает <b class="num">${rubT(gap)}</b></span></div>` : '<div class="rowl"><span>Договорённости покрывают цену</span></div>'}
+  <p class="xs mut">Части — договорённость, их видят все. Отложенное каждого видит только он сам.</p>
+  ${more ? `<button class="sec2 press" data-go="groupShare">${n > 1 || g.sent ? 'Позвать ещё' : 'Позвать людей'}</button>` : done ? '' : '<p class="xs mut">В цели 6 человек — это максимум.</p>'}</div>`;
+  return {html:html.replace(/(\d) (участник)/, '$1' + NB + '$2'), main: done ? null : ['Я отложил(а)', 'saveSheet']}; }
+/* приглашение глазами приглашённого: без аккаунта; что увидят все и что только вы — до договорённостей и поля (≤45 слов) */
+function v3inviteScr(p){ const o = p.owner, ms = p.group.members, n = ms.length + 1, full = ms.length >= V3_MAX, many = n >= 3, need = v3gap(p);
+  if (S.v3.via && S.v3.via !== v3link(p)) return {notabs:true, html:`<h1 class="h1 disp">Ссылка больше не работает</h1><p class="mut">${NAME[o]} ${V3_FEM.includes(o) ? 'сделала' : 'сделал'} новую. Попросите её — по ней можно присоединиться.</p>`};
+  return {notabs:true, html:`<div class="v3-invite"><h1 class="h1 disp">${NAME[o]} зовёт копить вместе</h1>
+  <div class="cardp"><div class="photo" data-pic="${p.photo}" data-pct="0"><img class="fog" alt=""><img class="color" alt=""><div class="edge"></div><div class="rule"></div></div><div class="cap"><span class="hand">${esc(p.cap || p.name)}</span><span class="stamp v3-plain">к ${dStr(p.dl)}</span></div></div>
+  <div class="sec"><p>Все увидят ${visG()}: ${many ? 'части, общий прогресс шагом 10 % и «по плану»' : 'части и «сходится ли» к сроку'}.</p>
+  <p>Только вам ${vis('me')}: отложенное, траты и доходы. Организатор их не видит.</p></div>
+  <div class="sec"><h2>Договорённости</h2><div class="rowl"><span>${need ? `Свободно <b class="num">${rubT(need)}</b> из <span class="num">${rubT(p.price)}</span>` : `Цена <span class="num">${rubT(p.price)}</span> уже покрыта частями`}</span></div>
+  <details><summary>Кто сколько берёт</summary><div class="v3-members">${ms.map(m => `<div class="v3-member" data-v3-member="${m}"><span class="v3-ava" aria-hidden="true">${NAME[m][0]}</span><span><b>${NAME[m]}</b><br><span class="mut sm">берёт <span class="num">${rubT(p.share[m] || 0)}</span></span></span></div>`).join('')}</div></details></div>
+  ${full ? '<div class="note">В цели уже 6 человек — это максимум.</div>' : `<form id="v3acceptf"><input class="inp" id="v3accept" placeholder="беру ${fmt(need || 15000)}" aria-label="Сколько возьмёте на себя"><button class="main press" style="margin-top:8px">Присоединиться</button></form>
+  <p class="xs mut" id="v3accnote" style="margin-top:6px">Без регистрации.</p>`}</div>`}; }
+/* одна ссылка на всю цель (не своя на каждого); новая — старая перестаёт работать */
+const v3link = p => p.v3link || (p.v3link = '4Rt9');
+/* позвать: отправитель; в тексте ссылки нет ни моего «в день», ни отложенного */
+function v3shareScr(){ const p = P(); if (!p) return scrList(); const n = p.group ? p.group.members.length : 1, free = V3_MAX - n, own = p.owner === S.who;
+  const txt = `${esc(p.cap || p.name)} к ${dStr(p.dl)}, ${rubT(p.price)}. Каждый копит свою часть. Чужих денег никто не видит.`;
+  return {notabs:true, html:`${backBtn('purchase')}<h1 class="h1 disp">Позвать в цель</h1><div class="note" id="v3sharetxt">${txt}<br><span class="mut" data-v3-link>fa.example/g/${v3link(p)}</span></div>
+  <div class="sec"><p class="sm">Увидят цель, срок и части ${visG()}, но не ваши деньги ${vis('me')}</p></div>
+  <p class="xs mut">Одна ссылка для всех, без регистрации. ${free <= 0 ? 'В цели уже 6 человек.' : n > 1 ? `Свободно мест: ${free} из 6.` : 'До 6 человек.'}</p>
+  ${own && p.group && p.group.sent ? '<button class="sec2 press" data-act="v3newLink">Новая ссылка</button>' : ''}<button class="sec2 press" data-act="v3asGuest">Глазами приглашённого</button>`, main: free > 0 ? ['Отправить ссылку','v3send'] : null}; }
+SCR.groupShare = v3shareScr;
+const v3purchase0 = scrPurchase;
+function v3purchase(){ const p = P(), w = S.who;
+  /* QA №10, №11: чужая цель, куда не звали, и цель, из которой вышли, — не показываются */
+  if (p && !v3sees(p, w)) { const q = S.purchases.find(x => v3sees(x, w)); if (q) { S.cur = q.id; return v3purchase(); } S.scr = 'list'; return scrList(); }
+  if (p && p.group) return p.share[w] == null ? v3inviteScr(p) : v3groupScr(p);
+  const r = v3purchase0(); if (!v3solo(p, w) || !r.html) return r;
+  r.html = v3soloPost(r.html, p);
+  /* только что созданная цель: следующий шаг — «Сегодня на себя», а не «Я отложил(а)» на пустой цели */
+  if (p.state !== 'done' && !(p.saved[w] > 0) && !me().income) { r.main = ['Посмотреть, сколько можно на себя', 'v3today'];
+    r.extra = '<button class="sec2 press" data-main="saveSheet">Я отложил(а)</button>'; r.html += '<div class="v3-pad" aria-hidden="true"></div>'; }
+  return r; }
+scrPurchase = SCR.purchase = v3purchase;
+
+/* листы: подпись видимости по режиму цели */
+for (const k of ['save','change','where','photo']) { const f = SH[k]; SH[k] = a => { let h = f(a); const m = v3mode();
+  if (m === 'group') h = h.replace(/Партнёр увидит/g, 'Участники увидят').replace(/Партнёр этого не видит/g, 'Участники этого не видят').replace('в общей покупке', 'в общей цели');
+  else if (m === 'solo') h = h.replace(/Партнёр (увидит|этого не видит)[^<.]*\./g, 'Это видно только вам.').replace(' Это видно только вам. Ниже', ' Ниже');
+  return h; }; }
+/* QA №4: участник выходит из цели; отменить её у всех может только организатор — с предупреждением */
+const v3change1 = SH.change;
+SH.change = a => { const h = v3change1(a), p = P();
+  return p && p.group && p.owner !== S.who ? v3sub(h, '<button class="sec2 press" data-sheet="cancelAsk" style="color:var(--warm)">Отменить покупку</button>', '<button class="sec2 press" data-sheet="v3leaveAsk">Выйти из цели</button>', 'change:leave') : h; };
+const v3cancelAsk0 = SH.cancelAsk;
+SH.cancelAsk = a => { const m = v3mode(), p = P(), was = 'Покупка уйдёт в архив у вас и у партнёра. Отметки сохранятся.';
+  if (m === 'group' && p.owner !== S.who) return SH.v3leaveAsk();
+  return m === 'solo' ? v3sub(v3cancelAsk0(a), was, 'Покупка уйдёт в архив. Отметки сохранятся.', 'cancelAsk:solo')
+    : m === 'group' ? v3sub(v3cancelAsk0(a), was, 'Покупка уйдёт в архив у всех участников. Все увидят, что вы её отменили.', 'cancelAsk:group') : v3cancelAsk0(a); };
+SH.v3leaveAsk = () => `<h3 class="disp">Выйти из цели?</h3><p>Ваша часть освободится. Участники увидят «${V3_FEM.includes(S.who) ? 'вышла' : 'вышел'}», без ваших сумм.</p><p class="sm mut">Цель останется у них.</p>
+  <button class="main press" data-act="v3leave">Выйти из цели</button><button class="sec2 press" data-close>Остаться</button>`;
+
+/* ── действия ── */
+Object.assign(ACT, {
+  v3own(){ S.v3.back = null; S.v3.fromEx = true; S.draftText = ''; go('phrase'); },
+  v3exStep(){ const before = mileOf(S.v3.ex / V3_EX.price); S.v3.ex = Math.min(V3_EX.price, S.v3.ex + V3_EX.step); S.flash = true; v3log('example_action'); render(true);
+    const after = mileOf(S.v3.ex / V3_EX.price); toast((after && (!before || after[0] > before[0]) ? after[1] + '. ' : '') + 'Это пример — ничего не сохранилось.'); v3exToast = true; },
+  v3showEx(){ if (S.scr !== 'example') S.v3.back = S.scr === 'list' || S.purchases.length ? S.scr : null; S.v3.ex = V3_EX.saved; v3log('example_shown'); go('example'); },
+  v3clarPart(){ const i = $('#clar'); if (!i) return; i.placeholder = 'например, ' + fmt(Math.round((S.draft.price || 0) / 2000) * 1000); i.focus(); },
+  v3save(){ commitDraft(); v3log('goal_saved'); go('together'); },
+  v3alone(){ v3log('together_solo'); go('purchase'); },
+  v3today(){ v3log('bridge_today'); go('today'); },
+  v3call(){ v3log('together_invite'); go('groupShare'); },
+  v3send(){ const p = P(), g = v3makeGroup(p), t = $('#v3sharetxt').innerText; g.sent = true; p.invited = true;
+    if (navigator.share) navigator.share({text:t}).catch(() => {}); go('purchase'); toast('Ссылка отправлена'); },
+  v3asGuest(){ const p = P(), g = v3makeGroup(p); g.sent = true; p.invited = true; const guest = ['anya','oleg'].find(x => !g.members.includes(x));
+    if (!guest) return toast('В показе все уже в цели'); S.v3.via = v3link(p); S.who = guest; me().consent = true; me().exSeen = true; go('purchase'); },
+  v3newLink(){ const p = P(), old = v3link(p); let t; do { t = Math.random().toString(36).slice(2, 6); } while (t === old || t.length < 4);
+    p.v3link = t; v3log('link_renewed'); render(true); toast('Новая ссылка готова. Старая больше не работает.'); },
+  v3leave(){ const p = P(), w = S.who; if (!p || !p.group || p.share[w] == null) return closeSheet();
+    v3leave(p, w); v3log('group_left'); go('list'); toast('Вы вышли из цели. Ваши суммы никто не видел.'); }   /* S.cur не трогаем: у вышедшего цель скрывает v3sees */
+});
+const v3cancel0 = ACT.cancelBuy;
+ACT.cancelBuy = function(){ const p = P(); if (p && p.group && p.owner !== S.who && p.share[S.who] != null) return ACT.v3leave();
+  v3cancel0(); if (!S.purchases.length) go('list'); };
+/* QA №11: удалил все данные — из общих целей человек выходит, цель остаётся у остальных с отметкой «вышел(ла)» */
+const v3delAll0 = ACT.delAll;
+ACT.delAll = function(){ const w = S.who, keep = S.purchases.filter(p => p.group && p.group.members.includes(w) && p.group.members.some(m => m !== w));
+  keep.forEach(p => v3leave(p, w)); S.purchases = S.purchases.filter(p => !keep.includes(p)); v3delAll0(); S.purchases = S.purchases.concat(keep);
+  if (!S.purchases.some(p => p.id === S.cur)) S.cur = S.purchases[0] ? S.purchases[0].id : null; };
+/* вход в пару v2 — тоже с даты входа (QA №7 для всех общих целей) */
+document.addEventListener('submit', e => { if (e.target.id !== 'acceptf') return; const p = P(); if (p) (p.join = p.join || {})[S.who] = now(); }, true);
+document.addEventListener('submit', e => { const f = e.target; if (f.id !== 'v3acceptf') return; const p = P(), w = S.who; if (!p || !p.group) return;
+  if (S.v3.via && S.v3.via !== v3link(p)) return go('purchase');
+  let v = numIn($('#v3accept').value); if (!v) return; if (v < 1000) v *= 1000; const need = v3gap(p);
+  if (v > need && need > 0) { $('#v3accnote').textContent = 'Вместе выйдет больше цены. Хватит ' + rubT(need) + ' — взять столько?'; $('#v3accept').value = fmt(need); return; }
+  /* QA №6: цену уже покрыли — переплата только после явного согласия */
+  if (v > need && +f.dataset.over !== v) { f.dataset.over = v; $('#v3accnote').textContent = 'Цену уже покрыли. С вашей частью выйдет на ' + rubT(v - need) + ' больше — присоединиться так?'; return; }
+  if (p.group.members.length >= V3_MAX) return;
+  p.share[w] = v; p.saved[w] = 0; (p.conf = p.conf || {})[w] = 0; (p.join = p.join || {})[w] = now();
+  const g = p.group; g.members.push(w); g.gone = (g.gone || []).filter(m => m !== w); (g.stat = g.stat || {})[w] = {plan:true, started:false};
+  v3log('group_joined'); go('purchase'); });
+
+/* день сменился — новый снимок: общий прогресс и статусы (раз в сутки, без «+N % сегодня») */
+const v3setDay0 = setDay;
+setDay = function(off){ v3setDay0(off); let ch = false; for (const p of S.purchases) if (p.group) { v3snap(p); ch = true; } if (ch) render(true); };
+
+/* «fresh» — как в v2: сторис поверх согласия. Сценарии v2 про пару — только на цели пары: на своей или общей цели они подменились бы словами о партнёре (QA №13) */
+const v3scenario0 = scenario;
+scenario = function(k){ const pc = P();
+  if (k === 'partner' && pc && pc.group && pc.group.members.length === 2 && pc.share[S.who] != null) { $('#panel').classList.remove('open'); S.flags.partnerStep = true; return go('purchase'); }
+  const p0 = S.purchases[0]; if (k !== 'mid' && k !== 'fresh' && p0 && (p0.v3 || p0.group || v3solo(p0, p0.owner))) { S = seed('mid'); snap(); }
+  return v3scenario0(k); };
+demo.scenario = scenario;
+demo.v3 = {log: () => S.v3.log.slice(), warn: () => v3warn.slice()};
+
+/* ── коды состояний ── */
+function v3reset(keepWho){ const who = S && S.who; S = seed('fresh'); snap();
+  Object.assign(S.people.oleg, {consent:true, exSeen:true, income:{m:80000, mand:30000, pay:[10,25], src:'manual'}});
+  Object.assign(S.people.anya, {consent:true, exSeen:true, income:{m:72000, mand:29500, pay:[10,25], src:'manual'}});
+  if (keepWho && who) S.who = who; }
+function v3goal(o){ const p = Object.assign({link:null, owner:'oleg', conf:{}, where:{}, invited:false, state:'active', v3:true}, o); p.cap = p.cap || p.name; S.purchases.push(p); S.cur = p.id; return p; }
+function v3groupSeed(members, keepWho){ v3reset(keepWho);
+  const sh = {oleg:40000, anya:30000, timur:30000, sveta:20000}, sv = {oleg:14000, anya:11500, timur:9000, sveta:3000}, two = members.length === 2;
+  const p = v3goal(two ? {id:'g2', name:'Ремонт кухни', photo:'flat-light', price:150000, cr:Date.UTC(2026, 7, 1), dl:Date.UTC(2027, 2, 1), share:{oleg:80000, anya:70000}, saved:{oleg:24000, anya:21000}, conf:{oleg:20000, anya:21000}}
+    : {id:'g3', name:'Дом у моря на неделю', cap:'Дом у моря', photo:'sea', price:120000, cr:Date.UTC(2026, 7, 1), dl:Date.UTC(2027, 2, 1), share:{}, saved:{}, conf:{}});
+  if (!two) for (const m of members) { p.share[m] = sh[m]; p.saved[m] = sv[m]; p.conf[m] = Math.round(sv[m] * .8); }
+  p.where = {oleg:'Копилка в банке', anya:'Вклад'}; p.invited = true; p.group = {members:members.slice(), sent:true, snap:0, gone:[]}; v3snap(p);
+  if (!members.includes(S.who)) S.who = 'oleg'; return p; }
+Object.assign(V3_SCEN, {
+  example(){ S = seed('fresh'); snap(); me().consent = true; v3log('example_shown'); go('example'); },
+  solo(){ v3reset(); v3goal({id:'p1', name:'Отпуск на море', cap:'Море', photo:'sea', price:120000, cr:Date.UTC(2026, 8, 1), dl:Date.UTC(2027, 5, 1),
+    share:{oleg:120000, anya:null}, saved:{oleg:14000, anya:0}, conf:{oleg:9000, anya:0}, where:{oleg:'Копилка в банке'}}); go('purchase'); },
+  together(){ v3reset(); const d = parsePhrase('Ноутбук 90 тысяч к 1 марта'); if (d.share == null) d.share = d.price; S.draft = d; commitDraft(); S.purchases[0].v3 = true; go('together'); },
+  group2(){ v3groupSeed(['oleg','anya'], true); go('purchase'); },
+  group3(){ v3groupSeed(['oleg','anya','timur','sveta'], true); go('purchase'); },
+  groupInvite(){ const p = v3groupSeed(['oleg','timur','sveta']); S.who = 'anya'; p.share.anya = null; delete p.where.anya; S.v3.via = v3link(p); go('purchase'); },
+  group2step(){ V3_SCEN.group2(); S.flags.partnerStep = true; render(true); },
+  groupShare(){ V3_SCEN.solo(); go('groupShare'); },
+  empty(){ v3reset(); go('list'); }
+});
+
+/* v3 · motivation */
+
+/* ── v3 · motivation: механики Р2 (M-B…M-L), см. market/motivation/2026-10-04_D_mechanics.md ── */
+const V3_SLIP_MIN = 150;                             /* M-E: доплата меньше — сдвиг срока не предлагается равной кнопкой (решение владельца 05.10) */
+const V3_BUF = .05;                                  /* M-B: запас прочности — доля дохода в месяц */
+const V3_WEEK = 7 * DAY;
+const V3_WKMAX = 13;                                 /* M-F: сколько недель видно в сетке (прошедшие + текущая) */
+const V3_SHIFT_MAX = 365;                            /* M-E: сдвиг срока — не больше года и не больше исходного срока цели */
+const V3_BANK = {'Копилка в банке':'копилку', 'Вклад':'вклад', 'Отдельный счёт':'отдельный счёт'};
+function v3buf(w){ const i = S.people[w].income; return i ? Math.round(i.m * V3_BUF / 100) * 100 : 0; }
+function v3miss(where){ if (!v3warn.includes(where)) v3warn.push(where); }
+const v3goalOf = w => P() && P().share[w] != null ? P() : active(w)[0];
+const v3yr = t => new Date(t).getUTCFullYear();
+/* дата с годом, если год другой, чем у ref (старого срока); без ref — как dStr во всём прототипе */
+const v3dY = (t, ref) => dStr(t) + (ref != null && v3yr(t) !== v3yr(ref) ? NB + v3yr(t) : '');
+const v3N = s => `<span class="num">${s}</span>`;
+const v3she = w => w === 'anya' || w === 'sveta';
+
+/* ── M-F: счёт недель без сгорания. Неделя — с понедельника, как в weekRow ── */
+const v3mon = t => t - ((new Date(t).getUTCDay() + 6) % 7) * DAY;
+/* отметки этой недели по цели: дни до создания цели не считаются (у новой цели нет «1 неделя по плану») */
+function v3wkMarks(p, w){ const d = weekRow(w).html.split('<div class="wd').slice(1), st = v3mon(p.cr) === v3mon(now()) ? (new Date(p.cr).getUTCDay() + 6) % 7 : 0;
+  return d.filter((x, i) => i >= st && /^ on/.test(x)).length; }
+function v3weeks(p, w){ const m0 = v3mon(p.cr), total = Math.max(1, Math.round((v3mon(p.dl) - m0) / V3_WEEK) + 1),
+    ci = Math.min(total - 1, Math.max(0, Math.round((v3mon(now()) - m0) / V3_WEEK)));
+  let past = (p.v3wk || {})[w];
+  const none = !past && !((p.saved[w] || 0) > 0) && p.state !== 'done';   /* до первой отметки считать нечего */
+  if (!past) {   /* истории нет — доля недель по плану из отложенного против плана; пропуски разнесены равномерно */
+    const tot = Math.max(1, Math.round((p.dl - p.cr) / DAY)), el = Math.max(1, Math.round((now() - p.cr) / DAY)), exp = (p.share[w] || 0) * el / tot,
+      k = Math.round(ci * Math.min(1, exp > 0 ? (p.saved[w] || 0) / exp : 1)), miss = ci - k;
+    past = Array.from({length:ci}, (_, j) => Math.floor((j + 1) * miss / ci) === Math.floor(j * miss / ci)); }
+  past = Array.from({length:ci}, (_, j) => !!past[j]);
+  const cur = p.state === 'done' || (!none && onPlan(p, w) && v3wkMarks(p, w) > 0), cells = past.concat([cur]);
+  return {cells, ci, total, none, n:cells.filter(Boolean).length}; }
+const v3wkW = n => plural(n, 'неделя', 'недели', 'недель');
+/* line — на экране уже есть v2-плёнка недели: одна строка вместо третьей полоски */
+function v3weeksHtml(p, w, line){ const k = v3weeks(p, w); if (k.none) return '';
+  const cnt = `<span class="num">${k.n}</span> ${v3wkW(k.n)} по плану`;
+  if (line) return `<div class="v3-weeks v3-wkline"><p class="sm">${cnt}. Пропуск их не обнуляет. ${vis('me')}</p></div>`;
+  const fut = Math.max(0, k.total - k.ci - 1), from = Math.max(0, k.cells.length - V3_WKMAX),
+    cells = k.cells.slice(from).map((on, j) => `<i class="v3-day${on ? ' on' : ''}${from + j === k.ci && p.state !== 'done' ? ' v3-now' : ''}"></i>`).join('');
+  return `<div class="sec v3-weeks"><h2>Недели по плану ${vis('me')}</h2><p class="v3-big disp">${cnt}</p>
+  <div class="v3-wk" role="img" aria-label="Недель по плану: ${k.n} из ${k.ci + 1}">${cells}</div>
+  <p class="xs mut">${fut ? `Впереди ещё ${fut} ${v3wkW(fut)}. ` : ''}Пропуск не обнуляет счёт.</p></div>`; }
+
+/* ── M-C: цена траты в днях цели ── */
+function v3dayPrice(w, v, html){ const p = active(w).find(q => leftOf(q, w) > 0); if (!p || !(v > 0)) return '';
+  const per = perDay(p, w); if (!(per > 0)) return ''; const n = Math.round(v / per), nm = html ? esc(p.name) : p.name;
+  return n < 1 ? `Это меньше дневного плана на «${nm}».` : `На «${nm}» вы откладываете столько за ${daysW(n)}.`; }
+
+/* ── M-E: срыв без обнуления — две равные дороги ──
+   was  — темп до траты (его человек видел на экране цели); rate — темп к прежнему сроку; plus — разница.
+   shift — сколько дней нужно, чтобы держать прежний темп, но не больше cap: исходный срок цели и год.
+   Дальше — уже другая цель, а не сдвиг. base — темп к новому сроку (при упоре в cap он выше was). */
+const v3paceTo = (p, w, dl) => Math.ceil(leftOf(p, w) / Math.max(1, Math.round((dl - now()) / DAY) - (S.people[w].stepped ? 1 : 0)));
+function v3slipCalc(p, w, amt){ const st = S.people[w].stepped ? 1 : 0, d0 = daysTo(p), days = Math.max(1, d0 - st), left = leftOf(p, w),
+    rate = perDay(p, w), was = Math.ceil(Math.max(0, left - amt) / days), plus = Math.max(0, rate - was),
+    cap = Math.max(1, Math.min(V3_SHIFT_MAX, Math.round((p.dl - p.cr) / DAY))),
+    shift = Math.min(cap, Math.max(1, was > 0 ? Math.ceil(left / was) - days : cap)),
+    base = Math.ceil(left / Math.max(1, d0 + shift - st));
+  const keep = plus === 0 || base >= rate;
+  return {rate, was, plus, cap, shift, base, dl:p.dl + shift * DAY, keep, small: !keep && plus < V3_SLIP_MIN}; }
+function v3took(p, w, amt){ p.saved[w] -= amt; if (p.conf && p.conf[w] > p.saved[w]) p.conf[w] = p.saved[w];
+  S.v3.slip = {id:p.id, amt, why:'took'}; v3log('slip_shown'); go('slip'); }
+function v3behind(p, w){ const tot = Math.max(1, Math.round((p.dl - p.cr) / DAY)), el = Math.round((now() - p.cr) / DAY);
+  return Math.floor((p.share[w] || 0) * el / tot) - (p.saved[w] || 0); }
+const v3shared = p => p.group ? p.group.members.length > 1 : p.share[OTHER[p.owner]] != null;
+const v3members = p => p.group ? p.group.members.slice() : [p.owner, OTHER[p.owner]].filter(m => p.share[m] != null);
+SCR.slip = function(){ const sl = S.v3.slip, p = sl && P(sl.id), w = S.who; if (!p || p.share[w] == null) return scrPurchase();
+  const c = v3slipCalc(p, w, sl.amt), took = sl.why === 'took', sh = v3shared(p);
+  const why = took ? `Взяли ${v3N(rubT(sl.amt))}. Отложенное не сгорело: осталось ${v3N(rubT(p.saved[w] || 0))}.` : `До плана не хватает ${v3N(rubT(sl.amt))}. Ничего не сгорело.`;
+  const top = `${backBtn('purchase', 'К цели')}<h1 class="h1 disp">${c.keep ? 'План почти не изменился' : took ? 'Бывает. Как вернуться к плану?' : 'Как догнать план?'}</h1><p class="mut">${why} ${vis('me')}</p>`;
+  if (c.keep) return {notabs:true, html:`${top}<p>По-прежнему ${v3N(rubT(c.rate))} в день, к ${dStr(p.dl)}.</p>`, main:['Продолжить по плану', 'v3slipDay']};
+  const note = sh ? '<p class="xs mut">Новый срок сменится, если согласятся все. Без причин и сумм.</p>' : '';
+  /* доплата меньше V3_SLIP_MIN: одна главная кнопка «Догнать», сдвиг — вторичной ссылкой */
+  if (c.small) return {notabs:true, html:`${top}<p>К ${dStr(p.dl)} — ${v3N(rubT(c.rate))} в день вместо ${v3N(rubT(c.was))}.</p>
+  <button class="link sm v3-sliplink" data-act="v3slipDate">или сдвинуть срок</button>${note}`, main:[`Догнать: +${rubT(c.plus)} в день`, 'v3slipDay']};
+  const sub = `<small>к ${v3N(v3dY(c.dl, p.dl))}, ${v3N(rubT(c.base))} в день</small>`;
+  return {notabs:true, html:`${top}
+  <div class="v3-pair"><button class="sec2 press" data-act="v3slipDate">${sh ? 'Предложить новый срок' : 'Сдвинуть срок на ' + daysW(c.shift)}${sub}</button>
+  <button class="sec2 press" data-act="v3slipDay">Откладывать +${rubT(c.plus)} в день<small>к ${dStr(p.dl)}, ${v3N(rubT(c.rate))} в день</small></button></div>
+  ${sh ? '<p class="xs mut">Сменится, если согласятся все. Без причин и сумм.</p>' : ''}`}; };
+
+/* общая цель: предложение нового срока. Видят все участники — только дату и «согласны k из n», без причин, сумм и автора */
+function v3propCheck(p){ const pr = p.v3prop; if (!pr || pr.st !== 'open' || !v3members(p).every(m => pr.ok.includes(m))) return false;
+  p.dl = pr.dl; p.v3prop = null; v3log('slip_agreed'); return true; }
+function v3propHtml(p, w){ const pr = p.v3prop, ms = v3members(p), k = ms.filter(m => pr.ok.includes(m)).length, d = v3dY(pr.dl, p.dl),
+    up = perDay(p, w) - v3paceTo(p, w, pr.dl), cat = up > 0 ? `<br>Пока ждём — догнать свою часть: +${v3N(rubT(up))} в день.` : '';
+  if (pr.st === 'kept') return pr.by !== w ? '' : `<div class="note v3-prop">Срок оставили прежним.${up > 0 ? `<br>Догнать свою часть: +${v3N(rubT(up))} в день.` : ''}<div class="kb"><button data-act="v3propSeen">Понятно</button></div></div>`;
+  if (pr.by === w || pr.ok.includes(w)) return `<div class="note v3-prop">Предложено перенести срок на ${v3N(d)}. Согласны ${v3N(k)} из ${v3N(ms.length)}.${pr.by === w ? cat : ''}</div>`;
+  return `<div class="note v3-prop">Предложено перенести срок на ${v3N(d)}.<div class="kb"><button data-act="v3propYes">${v3she(w) ? 'Согласна' : 'Согласен'}</button><button data-act="v3propNo">Оставить срок</button></div></div>`; }
+
+/* ── M-G / M-F / M-J: сводка недели ── */
+function v3weekSolo(p, w){ const wk = weekRow(w), k = p ? v3weeks(p, w) : null;
+  return `<h3 class="disp">Итоги недели ${vis('me')}</h3><p class="big disp">${wk.done} ${plural(wk.done, 'шаг', 'шага', 'шагов')} из 7</p>
+  ${k && !k.none ? `<p>Недель по плану: <span class="num">${k.n}</span>. Пропуск не обнуляет счёт.</p>` : ''}${wk.html}
+  <button class="main press" data-act="shareWeek" style="margin-top:12px">Поделиться карточкой</button><button class="sec2 press" data-sheet="v3direct">Показать как есть</button>
+  <p class="xs mut" style="margin-top:8px">В карточке нет сумм.</p>`; }
+function v3weekGroup(p, w){ const ms = p.group.members, many = ms.length >= 3, wk = weekRow(w), k = v3weeks(p, w),
+    on = ms.filter(m => v3stat(p, m) === 'по плану').length;
+  return `<h3 class="disp">Итоги недели</h3><div class="sec" style="margin-top:8px"><h2>Ваш результат ${vis('me')}</h2>
+  <p class="big disp">${wk.done} ${plural(wk.done, 'шаг', 'шага', 'шагов')} из 7</p>${k.none ? '' : `<p>Недель по плану: <span class="num">${k.n}</span>.</p>`}</div>
+  <div class="sec"><h2>Общая цель ${visG()}</h2><p class="v3-wsum">${many ? `По плану <span class="num">${on}</span> из <span class="num">${ms.length}</span> участников.` : v3fits(p) ? 'К сроку сходится.' : 'Пока не сходится.'}</p>
+  <p class="xs mut">Напоминаем мы — без имён и сумм.</p></div>
+  <button class="main press" data-close>Закрыть</button><button class="sec2 press" data-sheet="v3direct">Показать как есть</button>`; }
+SH.weeksum = () => { const w = S.who, p = v3goalOf(w); return p && p.group && p.share[w] != null ? v3weekGroup(p, w) : v3weekSolo(p, w); };
+/* прямота — только по кнопке: свои цифры, без оценок характера */
+SH.v3direct = () => { const w = S.who, p = v3goalOf(w); if (!p) return `<h3 class="disp">Как есть</h3><p>Целей пока нет.</p><button class="main press" data-close>Вернуться</button>`;
+  const b = v3behind(p, w), c = v3slipCalc(p, w, Math.max(0, b));
+  return `<h3 class="disp">Как есть, раз вы спросили ${vis('me')}</h3>
+  ${b > 0 && c.plus > 0 ? `<p>До плана не хватает <b class="num">${rubT(b)}</b>. Догнать — это +${rubT(c.plus)} в день.</p><p class="sm mut">Или сдвинуть срок. Решать вам.</p><button class="main press" data-act="v3slipBehind">Перестроить план</button>`
+    : `<p>Вы по плану${b < 0 ? `: отложено на <b class="num">${rubT(-b)}</b> больше нужного` : ''}.</p><p class="sm mut">Дальше — <span class="num">${rubT(perDay(p, w))}</span> в день.</p><button class="main press" data-close>Вернуться к цели</button>`}`; };
+
+/* ── M-L: отдельная копилка под цель ── */
+const v3where0 = SH.where;
+SH.where = a => v3sub(v3where0(a), 'Отдельное место помогает не потратить отложенное.', 'Отдельная копилка под эту цель помогает не потратить отложенное.', 'mot:where');
+
+/* ── M-D: ссылка на копилку своего банка ── */
+function v3bankBtn(cls, short){ const p = v3goalOf(S.who), wh = p ? (p.where || {})[S.who] : null;
+  return `<button class="${cls}" data-act="v3bank">${V3_BANK[wh] ? (short ? 'Открыть ' + V3_BANK[wh] : `Открыть ${V3_BANK[wh]} в своём банке`) : 'Завести копилку в своём банке'}</button>`; }
+
+/* ── экраны v2 и flow_group: дописываем поверх ── */
+const v3mToday0 = scrToday;
+scrToday = SCR.today = function(){ const r = v3mToday0(), w = S.who; if (!me().income || !r.html) return r;
+  r.html = v3dom(r.html, f => {
+    const big = f.querySelector('[data-out="left-today"]'); if (!big) return v3miss('mot:today');
+    big.setAttribute('data-v3-money', '');
+    const sub = big.nextElementSibling; (sub || big).insertAdjacentHTML('afterend', `<p class="xs mut v3-buf">Запас вычтен.</p>`);
+    const self = [...f.querySelectorAll('details .rowl')].find(x => /На себя в день/.test(x.textContent));
+    if (self) self.insertAdjacentHTML('beforebegin', `<div class="rowl"><span>Запас на непредвиденное</span><b class="num">− ${rubT(v3buf(w))}</b></div>`); else v3miss('mot:today-calc');
+    const ans = f.querySelector('[data-out="afford"]'), dp = S.aff != null ? v3dayPriceShort(w, S.aff) : '';
+    if (ans && dp) ans.insertAdjacentHTML('afterend', `<p class="sm v3-dayprice">${dp}</p>`); });
+  return r; };
+/* бот: фраза M-C — отдельным предложением. У ответов v2 «Останется 896 ₽», «Зарплата 10 октября» нет точки */
+const v3mBotSay0 = botSay;
+botSay = function(text){ const m = me(), n = m.chat.length; v3mBotSay0(text);
+  const a = m.chat.slice(n).find(x => x.out === 'afford'), dp = a ? v3dayPrice(S.who, numIn(text.replace(/\d{1,2}\s*числ/g, '')), true) : '';
+  if (dp) { const b = a.b.trim(); a.b = (/[.!?…]$/.test(b) ? b : b + '.') + ' ' + dp; } };
+const v3mBot0 = scrBot;
+scrBot = SCR.bot = function(){ const r = v3mBot0(); r.html = v3dom(r.html, f => { const s = f.querySelector('[data-out="bot-payday"]'); if (!s) return;
+  const kb = s.closest('.bub').querySelector('.kb'); if (kb) kb.insertAdjacentHTML('beforeend', v3bankBtn('', true)); }); return r; };
+
+const v3mPurchase0 = scrPurchase;
+scrPurchase = SCR.purchase = function(){ const r = v3mPurchase0(), p = P(), w = S.who; if (!p || p.share[w] == null || !r.html) return r;
+  r.html = v3dom(r.html, f => {
+    const film = !!f.querySelector('.film'), wk = v3weeksHtml(p, w, film || p.state === 'done'), row = f.querySelector('.week'),
+      shared = [...f.querySelectorAll('.sec')].find(s => /^Общая цель/.test(((s.querySelector('h2') || {}).textContent || '').trim()));
+    if (wk) { if (row) row.insertAdjacentHTML('afterend', wk); else if (shared) shared.insertAdjacentHTML('beforebegin', wk); else f.append(document.createRange().createContextualFragment(wk)); }
+    if (p.v3prop) { const ph = v3propHtml(p, w), hd = f.querySelector('.head'); if (ph) { if (hd) hd.insertAdjacentHTML('afterend', ph); else f.prepend(document.createRange().createContextualFragment(ph)); } }
+    if (p.group) { const ms = f.querySelector('.v3-members'); if (ms) ms.insertAdjacentHTML('afterend', '<p class="xs mut v3-remind">Напоминаем участникам мы, без сумм. Писать никому не нужно.</p>'); else v3miss('mot:remind'); }
+    if (p.state === 'done') { const done = S.purchases.filter(q => q.state === 'done' && q.share[w] != null).sort((a, b) => a.dl - b.dl), sum = done.reduce((s, q) => s + (q.share[w] || 0), 0);
+      const shelf = `<div class="sec v3-shelfsec"><h2>Собранные цели ${vis('me')}</h2><div class="v3-shelf">${done.map(q => `<figure><span class="mini" data-pic="${q.photo}" data-pct="1"><img class="fog" alt=""><img class="color" alt=""></span><figcaption>${esc(q.cap || q.name)}<br>${dStr(q.dl)}</figcaption></figure>`).join('')}</div>
+        <p class="sm">Вы собрали ${done.length} ${plural(done.length, 'цель', 'цели', 'целей')} — <span class="num">${rubT(sum)}</span>.</p></div>`;
+      const note = [...f.querySelectorAll('.left')].find(x => /Собрано/.test(x.textContent)), at = note && note.nextElementSibling && note.nextElementSibling.classList.contains('note') ? note.nextElementSibling : note;
+      if (at) at.insertAdjacentHTML('afterend', shelf); else f.prepend(document.createRange().createContextualFragment(shelf)); }
+  });
+  if (p.state === 'done') r.main = ['Создать следующую цель', 'v3next'];
+  return r; };
+
+/* уведомление в день зарплаты: ссылка на копилку и подпись видимости по режиму цели */
+const v3mRender0 = render;
+render = function(...a){ const r = v3mRender0.apply(this, a);
+  try { const pu = $('#pushwrap .push'); if (pu && !pu.querySelector('[data-act="v3bank"]')) { const s = $('.sm', pu), m = v3mode();
+      if (s && m !== 'pair') s.textContent = v3sub(s.textContent, 'Партнёр увидит только общий прогресс.', m === 'group' ? 'Участники увидят только статус.' : 'Это видно только вам.', 'mot:push');
+      pu.insertAdjacentHTML('beforeend', v3bankBtn('link sm v3-bank')); } } catch (e) { console.warn('v3 motivation:', e); }
+  return r; };
+
+/* M-J: похвала за факт — когда неделя только что засчиталась */
+const v3mStep0 = step;
+step = function(a){ const w = S.who, p = P() && P().share[w] != null ? P() : active(w)[0], b = p ? v3weeks(p, w).n : 0; v3mStep0(a);
+  if (!p) return; const n = v3weeks(p, w).n; if (n > b) toast(`Неделя засчитана — уже ${n} ${v3wkW(n)} по плану.`); };
+
+/* общая цель: в показе участники без своего входа (Тимур, Света) соглашаются на следующий день */
+const v3mSetDay0 = setDay;
+setDay = function(off){ v3mSetDay0(off); let ch = false;
+  for (const p of S.purchases) { const pr = p.v3prop; if (!pr || pr.st !== 'open') continue;
+    for (const m of v3members(p)) if (!S.people[m] && !pr.ok.includes(m)) { pr.ok.push(m); ch = true; }
+    if (v3propCheck(p)) ch = true; }
+  if (ch) render(true); };
+
+/* M-E: «Пришлось взять из отложенного» — вместо тоста экран с двумя дорогами. Захват раньше обработчика v2 */
+document.addEventListener('submit', e => { const f = e.target; if (f.id !== 'inputf' || f.dataset.k !== 'took') return;
+  e.preventDefault(); e.stopImmediatePropagation(); const p = P(), w = S.who, v = numIn($('#inputv').value); if (!p || !v) return;
+  const took = Math.min(v, p.saved[w] || 0); if (!(took > 0)) { closeSheet(); return toast('Отложенного пока нет — план прежний'); }
+  v3took(p, w, took); }, true);
+
+Object.assign(ACT, {
+  v3slipDate(){ const sl = S.v3.slip, p = P(sl.id), w = S.who, c = v3slipCalc(p, w, sl.amt), dl0 = p.dl; S.v3.slip = null;
+    if (v3shared(p)) { p.v3prop = {by:w, dl:c.dl, ok:[w], st:'open'}; v3log('slip_propose'); const now1 = v3propCheck(p); go('purchase');
+      return toast(now1 ? `Новый срок — ${v3dY(p.dl, dl0)}.` : 'Предложение отправлено. Срок сменится, когда согласятся все.'); }
+    p.dl = c.dl; v3log('slip_date'); go('purchase'); toast(`Новый срок — ${v3dY(p.dl, dl0)}. ${rubT(perDay(p, w))} в день.`); },
+  v3slipDay(){ const p = P(S.v3.slip.id); v3log('slip_day'); S.v3.slip = null; go('purchase'); toast(`Срок прежний. ${rubT(perDay(p, S.who))} в день.`); },
+  v3slipBehind(){ const w = S.who, p = v3goalOf(w); S.cur = p.id; S.v3.slip = {id:p.id, amt:Math.max(1, v3behind(p, w)), why:'behind'}; v3log('slip_shown'); go('slip'); },
+  v3propYes(){ const p = P(), pr = p && p.v3prop, w = S.who; if (!pr || pr.st !== 'open') return; if (!pr.ok.includes(w)) pr.ok.push(w); const dl0 = p.dl;
+    const done = v3propCheck(p); render(true); toast(done ? `Все согласны. Новый срок — ${v3dY(p.dl, dl0)}.` : 'Ждём остальных участников.'); },
+  v3propNo(){ const p = P(), pr = p && p.v3prop; if (!pr || pr.st !== 'open') return; pr.st = 'kept'; v3log('slip_kept'); render(true); toast('Срок прежний.'); },
+  v3propSeen(){ const p = P(); if (p) p.v3prop = null; render(true); },
+  v3next(){ v3log('next_goal_started'); S.v3.back = null; S.draftText = ''; go('phrase'); },
+  v3bank(){ const p = v3goalOf(S.who), wh = p ? (p.where || {})[S.who] : null; v3log('bank_open');
+    if (!V3_BANK[wh]) { if (p) S.cur = p.id; return openSheet('where'); }
+    toast('Откроется приложение вашего банка. Деньги остаются у вас.'); }
+});
+
+/* ── коды состояний ── */
+Object.assign(V3_SCEN, {
+  dayprice(){ V3_SCEN.solo(); S.aff = 7000; go('today'); const el = $('#view .v3-dayprice'); if (el) $('#view').scrollTop = Math.max(0, el.offsetTop - 260); },
+  /* доплата 164 ₽ ≥ V3_SLIP_MIN — две равные дороги; меньше порога — см. тест (одна кнопка + ссылка) */
+  slip(){ V3_SCEN.solo(); const p = P(); p.saved.oleg = 50000; p.conf.oleg = 45000; v3took(p, 'oleg', 40000); },
+  /* общая цель на четверых глазами Ани: Олег предложил новый срок, Тимур и Света согласились */
+  slipPropose(){ V3_SCEN.group3(); const p = P(); p.v3prop = {by:'oleg', dl:p.dl + 30 * DAY, ok:['oleg', 'timur', 'sveta'], st:'open'}; S.who = 'anya'; go('purchase'); },
+  weeks(){ V3_SCEN.solo(); const p = P(); p.v3wk = {oleg:[1, 1, 0, 1]}; Object.assign(S.people.oleg, {week:[0, 0, 0], stepped:false}); go('purchase');
+    const el = $('#view .v3-weeks'); if (el) $('#view').scrollTop = Math.max(0, el.offsetTop - 300); },
+  weeksum3(){ V3_SCEN.group3(); openSheet('weeksum'); },
+  nextgoal(){ v3reset();
+    v3goal({id:'n1', name:'Новый телефон', cap:'Телефон', photo:'phone-dark', price:45000, cr:Date.UTC(2026, 1, 1), dl:Date.UTC(2026, 5, 1),
+      share:{oleg:45000, anya:null}, saved:{oleg:45000, anya:0}, conf:{oleg:45000}, where:{oleg:'Копилка в банке'}, state:'done'});
+    v3goal({id:'n2', name:'Отпуск на море', cap:'Море', photo:'sea', price:120000, cr:Date.UTC(2026, 0, 12), dl:Date.UTC(2026, 9, 1),
+      share:{oleg:120000, anya:null}, saved:{oleg:120000, anya:0}, conf:{oleg:120000}, where:{oleg:'Копилка в банке'}, state:'done'});
+    go('purchase'); const el = $('#view .v3-shelfsec'); if (el) $('#view').scrollTop = Math.max(0, el.offsetTop - 300); }
+});
+
+/* v3 · distill */
+/* M-C коротко для экрана: та же арифметика, что v3dayPrice */
+function v3dayPriceShort(w, v){ const p = active(w).find(q => leftOf(q, w) > 0); if (!p || !(v > 0)) return '';
+  const per = perDay(p, w); if (!(per > 0)) return ''; const n = Math.round(v / per);
+  return n < 1 ? `Это меньше дневного плана на «${esc(p.name)}».` : `Это ${daysW(n)} копилки «${esc(p.name)}».`; }
+/* 10. лист о данных: суть ≤ 30 слов, полный текст (как был) — под «Подробнее»; формулировки — на визу юриста */
+const dsPolicy0 = SH.policy;
+SH.policy = a => { const full = dsPolicy0(a), btn = (full.match(/<button[^>]*data-close[^>]*>[\s\S]*?<\/button>/) || [''])[0],
+    body = full.replace(/<h3[^>]*>[\s\S]*?<\/h3>/, '').replace(btn, '');
+  return `<h3 class="disp">Как мы обращаемся с данными</h3><p>GigaChat видит фразы без номеров карт и телефонов.</p><p>Файл выписки удаляется сразу.</p>
+  <p>Чужих денег никто не видит. Хранение — в России.</p><details><summary>Подробнее</summary><div class="sm">${body}</div></details>${btn}`; };
+const V3_CAM = '<svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l1.5-2h7L17 8h3v11H4z" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><circle cx="12" cy="13.5" r="3.4" fill="none" stroke="currentColor" stroke-width="1.6"/></svg>';
+/* v3 · fixes */
+/* 0. срок с годом, если он не в текущем году */
+const fxDl = t => { const y = new Date(t).getUTCFullYear(); return dStr(t) + (y !== new Date(now()).getUTCFullYear() ? NB + y : ''); };
+const fxOpen0 = openSheet, fxClose0 = closeSheet;
+function fxSheetIdle(on){ const sw = $('#sheetwrap'); if (!sw) return; sw.inert = on; if (on) sw.setAttribute('aria-hidden', 'true'); else sw.removeAttribute('aria-hidden'); }
+openSheet = function(k, arg){ fxSheetIdle(false); return fxOpen0(k, arg); };
+closeSheet = function(){ fxClose0(); fxSheetIdle(true); clearTimeout(closeSheet.t); closeSheet.t = setTimeout(() => { if (!S.sheet) $('#sheet').innerHTML = ''; }, 450); };
+fxSheetIdle(true);
+const fxConsent0 = scrConsent;
+scrConsent = SCR.consent = function(){ const r = fxConsent0(); const g = typeof visG === 'function' ? visG() : vis('all');
+  r.html = v3sub(r.html, 'Ваши деньги видите только вы.', `Ваши деньги видите только вы ${vis('me')}<br><span class="fx-leg">${g} — видят участники</span>`, 'fixes:consent');
+  r.html = v3sub(r.html, 'Регистрация не нужна.', 'Без регистрации.', 'fixes:consent-reg'); return r; };
+/* v3 · theme */
+
+/* ── тема: «Как в системе» / «Светлая» / «Тёмная» ── */
+const THEME_KEY = 'fogp-theme-mode', THEME_MQ = matchMedia('(prefers-color-scheme: dark)');
+const THEME_SAY = {light:'Светлая тема', dark:'Тёмная тема'}, THEME_META = {light:'#F3F3F1', dark:'#121415'};
+let themeMode = 'system', themeAnimT = null;
+const themeOk = m => m === 'system' || m === 'light' || m === 'dark' ? m : 'system';
+const themeNow = () => themeMode === 'system' ? (THEME_MQ.matches ? 'dark' : 'light') : themeMode;
+
+/* туман: та же копия, что в v2 (40×40, приглушённая), но вуаль — цвет поверхности темы.
+   Светлая — белая вуаль .42 (.5 у тёмных снимков), как в v2; тёмная — вуаль --card, копия темнее проявленного фото (.88).
+   Копии кэшируются на обе темы, смена темы только переставляет готовую картинку — без мигания. */
+const FOG_T = {};
+function fogMake(img, t){
+  const W = 40, H = 40, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const x = c.getContext('2d', {willReadFrequently:true}), k = Math.max(W / img.naturalWidth, H / img.naturalHeight), w = img.naturalWidth * k, h = img.naturalHeight * k;
+  x.drawImage(img, (W - w) / 2, (H - h) / 2, w, h);
+  const d = x.getImageData(0, 0, W, H).data; let L = 0; for (let i = 0; i < d.length; i += 4) L += (0.2126 * d[i] + 0.7152 * d[i+1] + 0.0722 * d[i+2]) / 255; L /= d.length / 4;
+  const dim = L < 0.30, dark = t === 'dark'; x.clearRect(0, 0, W, H);
+  if ('filter' in x) x.filter = `saturate(.5) brightness(${dark ? (dim ? .95 : .8) : (dim ? 1.28 : 1.1)})`;
+  x.drawImage(img, (W - w) / 2, (H - h) / 2, w, h); x.filter = 'none';
+  x.globalAlpha = dark ? (dim ? .35 : .45) : (dim ? .5 : .42);
+  x.fillStyle = dark ? (getComputedStyle(document.documentElement).getPropertyValue('--card').trim() || '#1D2022') : '#FFFFFF';
+  x.fillRect(0, 0, W, H); x.globalAlpha = 1;
+  return c.toDataURL('image/jpeg', .8);
+}
+fogCopy = function(img){ const s = img.src, t = document.documentElement.dataset.theme === 'dark' ? 'dark' : 'light', m = FOG_T[s] || (FOG_T[s] = {});
+  return m[t] || (m[t] = fogMake(img, t)); };
+/* смена темы: готовые туманные копии пересобираются под новую поверхность; старая картинка висит, пока новая не готова */
+function themeFogs(){ Object.keys(FOGS).forEach(k => { if (!FOGS[k]) return; const im = new Image();
+  im.onload = () => { try { FOGS[k] = fogCopy(im); } catch(e) { return; } paintPhotos(); }; im.src = srcOf(k); }); }
+
+function themeApply(animate){ const root = document.documentElement, t = themeNow(), was = root.dataset.theme;
+  if (animate && was !== t && !reduce()) { root.classList.add('theme-anim'); clearTimeout(themeAnimT); themeAnimT = setTimeout(() => root.classList.remove('theme-anim'), 250); }
+  root.dataset.theme = t;
+  if (was && was !== t) themeFogs();
+  let m = document.querySelector('meta[name="theme-color"]');
+  if (!m) { m = document.createElement('meta'); m.name = 'theme-color'; document.head.appendChild(m); }
+  m.content = THEME_META[t];
+  $$('[data-th]').forEach(x => x.setAttribute('aria-pressed', x.dataset.th === themeMode)); }
+/* один вход для «Моих данных», пульта и demo.theme; смена объявляется тостом (role="status") */
+setTheme = function(m){ themeMode = themeOk(m); lsSet(THEME_KEY, themeMode); themeApply(true);
+  toast(themeMode === 'system' ? 'Как в системе: ' + THEME_SAY[themeNow()].toLowerCase() : THEME_SAY[themeMode]); };
+function themeInit(){ themeMode = themeOk(lsGet(THEME_KEY)); themeApply(false); }
+const themeSys = () => { if (themeMode === 'system') themeApply(true); };
+if (THEME_MQ.addEventListener) THEME_MQ.addEventListener('change', themeSys); else if (THEME_MQ.addListener) THEME_MQ.addListener(themeSys);
+window.demo.theme = setTheme;
+
+/* блок «Тема» в «Моих данных» — перед ссылками о данных; оборачиваем SCR.data, чтобы не стереть правки модулей до нас.
+   Пояснение к «Как в системе» — в описании кнопки (title → accessible description), а не строкой на экране (QA №16). */
+const themeBlock = () => `<div class="sec v3-theme" id="v3-theme"><h2 id="v3-theme-h">Тема</h2>
+  <div class="seg" role="group" aria-labelledby="v3-theme-h">${[['system','Как в системе','Меняется вместе с настройкой телефона'],['light','Светлая',''],['dark','Тёмная','']].map(x => `<button data-th="${x[0]}" aria-pressed="${themeMode === x[0]}"${x[2] ? ` title="${x[2]}"` : ''}>${x[1]}</button>`).join('')}</div></div>`;
+const _themeData = SCR.data;
+SCR.data = function(){ const r = _themeData.apply(this, arguments), at = '<div class="sec"><button class="link" data-sheet="policy">';
+  return Object.assign({}, r, {html: r.html.includes(at) ? r.html.replace(at, themeBlock() + at) : r.html + themeBlock()}); };
+
+/* ?s=themeSet / #themeSet — «Мои данные», блок «Тема» в видимой части */
+V3_SCEN.themeSet = () => { $('#panel').classList.remove('open'); if (!S.purchases.length) { S = seed('mid'); snap(); }
+  me().consent = true; go('data');
+  const v = $('#view'), el = $('#v3-theme'); if (el) v.scrollTop += el.getBoundingClientRect().top - v.getBoundingClientRect().top - 72; };
+
+/* v3 · anim */
+
+const V3_ANIM_VIEW_FADE = true;   /* строка 7: false — выключить проявление #view при смене экрана */
+(() => {
+  let depth = 0, lastKey = null, lastScreen = null, ready = false;
+  const seen = new Set();                       /* участники, которых уже показывали */
+  setTimeout(() => { ready = true; }, 0);       /* отрисовки при запуске и по ?s= — без движения */
+  const keyOf = () => [S.scr, S.cur, S.who, S.off ? 1 : 0].join('|');
+  const screenOf = () => S.scr + '|' + S.cur;
+  const play = (el, cls) => { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); };
+  const moneyEl = (scr, v) => $('[data-v3-money]', v) || (scr === 'purchase' ? $('[data-out="my-left"]', v) || $('.big', v) : null);
+  const isOn = el => el.matches('.on, .done, .filled, [data-v3-on]');
+  const memberKey = el => S.cur + ':' + (el.dataset.v3Member || el.dataset.who || el.dataset.id || el.getAttribute('aria-label') || el.textContent.trim().split(/\s+/)[0]);
+
+  /* строка 3: снимок примера уходит, новый экран входит */
+  function exitExample(ex, v){
+    const g = ex.node; g.removeAttribute('id'); $$('[id]', g).forEach(x => x.removeAttribute('id'));
+    g.classList.remove('v3-vin', 'v3-ex-in'); g.classList.add('v3-ghost'); g.setAttribute('aria-hidden', 'true'); g.inert = true;
+    v.after(g); g.scrollTop = ex.top;
+    const kill = () => g.remove(); g.addEventListener('animationend', e => { if (e.target === g) kill(); }); setTimeout(kill, 600);
+    play(v, 'v3-ex-in');
+  }
+  /* строка 1: строки ответа по очереди, «Сходится» — поп */
+  function answerIn(v){
+    let ls = $$('.v3-answer-line', v);
+    if (!ls.length) ls = [...v.children].filter(x => !x.matches('.backb') && !x.querySelector('[data-sheet="feedback"]'));
+    ls.forEach((x, i) => {
+      x.style.setProperty('--v3-d', Math.min(i, 3) * 50 + 'ms'); x.classList.add('v3-line');
+      const big = x.matches('.big') ? x : $('.big', x);
+      if (big && /^сходится/i.test(big.textContent.trim())) big.classList.add('v3-pop');
+    });
+  }
+  /* строка 2: старое значение уходит вверх, новое входит снизу.
+     Прерываемость (QA №15): пока идёт уход, в DOM лежит старое число — поэтому «что было» берётся из mSwap, а не из DOM;
+     если прошлая смена ещё не доиграла (уход 160 + вход 200 мс), уход не повторяется: новое число входит сразу.
+     Итог: последнее нажатие показывает верное число не позже 220 мс (обычно сразу или через 160 мс). */
+  let mSwap = null;                              /* {n, txt, html, out, t}: элемент и настоящее (новое) значение */
+  const MONEY_BUSY = 380;
+  function moneyNow(n){
+    if (!n) return null;
+    if (mSwap && mSwap.n === n && mSwap.out) return {txt: mSwap.txt, html: mSwap.html};
+    return {txt: n.textContent, html: n.innerHTML};
+  }
+  function moneySwap(m, v){
+    if (!m) return; const n = moneyEl(S.scr, v); if (!n) return;
+    const txt = n.textContent, html = n.innerHTML, t = performance.now();
+    const busy = !!mSwap && t - mSwap.t < MONEY_BUSY;   /* прошлая смена ещё идёт (её уход прерван новой отрисовкой) */
+    if (mSwap) mSwap.out = false;                         /* таймер прошлой смены больше ничего не подставит */
+    if (txt === m.txt) { mSwap = busy ? {n, txt, html, out: false, t: mSwap.t} : null; return; }
+    if (getComputedStyle(n).display === 'inline') n.classList.add('v3-ib');
+    if (reduce() || busy) { mSwap = {n, txt, html, out: false, t}; return play(n, 'v3-min'); }
+    const s = mSwap = {n, txt, html, out: true, t};
+    const swap = () => { if (!s.out) return; s.out = false; if (!n.isConnected) return; n.innerHTML = html; n.classList.remove('v3-mout'); play(n, 'v3-min'); };
+    n.innerHTML = m.html; n.classList.add('v3-mout');
+    n.addEventListener('animationend', e => { if (e.target === n && e.animationName === 'v3-mout') swap(); }); setTimeout(swap, 220);
+  }
+  /* строка 6: закрасилась ячейка, которая на этом же экране была пустой */
+  function daysFill(b, v){
+    if (reduce()) return;
+    $$('.wd', v).forEach((x, i) => { const c = $('i', x); if (!c || !x.classList.contains('on') || b.wd[i] !== false) return;
+      const bar = document.createElement('span'); bar.className = 'v3-fillbar'; bar.setAttribute('aria-hidden', 'true');
+      c.classList.add('v3-filling'); c.prepend(bar);
+      const end = () => { bar.remove(); c.classList.remove('v3-filling'); }; bar.addEventListener('animationend', end, {once:true}); setTimeout(end, 500); });
+    $$('.v3-day', v).forEach((x, i) => { if (isOn(x) && b.vd[i] === false) play(x, 'v3-fill'); });
+  }
+  /* строка 5: участник входит один раз — при первом появлении */
+  function members(v, animate){
+    $$('.v3-member', v).forEach(x => { const k = memberKey(x); if (seen.has(k)) return; seen.add(k); if (animate) x.classList.add('v3-join'); });
+  }
+
+  const _render = render;
+  render = function(...a){
+    if (depth) return _render.apply(this, a);
+    const v = $('#view'), prevKey = lastKey, prevScreen = lastScreen;
+    const m0 = prevKey ? moneyEl(prevKey.split('|')[0], v) : null;
+    const b = {
+      money: moneyNow(m0),
+      wd: $$('.wd', v).map(x => x.classList.contains('on')),
+      vd: $$('.v3-day', v).map(isOn),
+      ex: $('.v3-example', v) ? {node: v.cloneNode(true), top: v.scrollTop} : null };
+    depth++; let r;
+    try { r = _render.apply(this, a); } finally { depth--; }
+    lastKey = keyOf(); lastScreen = screenOf();
+    try {
+      if (!ready) { members(v, false); return r; }
+      const changed = prevScreen !== lastScreen; let viewDone = false;
+      if (b.ex && !$('.v3-example', v)) { exitExample(b.ex, v); viewDone = true; }
+      else if (S.scr === 'answer' && changed) { answerIn(v); viewDone = true; }
+      if (!viewDone && changed && V3_ANIM_VIEW_FADE && !reduce()) play(v, 'v3-vin');
+      if (prevKey === lastKey) { moneySwap(b.money, v); daysFill(b, v); }
+      members(v, true);
+    } catch (e) { console.warn('v3 anim:', e); }
+    return r;
+  };
+})();
+
+/* v3 · pult */
+if (/[?&#]clean/.test(location.search + location.hash) || new URLSearchParams(location.search).has('clean')) document.documentElement.classList.add('v3-clean');
+/* v3 · compat */
+const cpFog0 = fogCopy;
+fogCopy = function(img){ if (location.protocol === 'file:' && !/^data:/.test(img.src)) throw new Error('file:// — запасной туман'); return cpFog0(img); };
 /* ── запуск ── */
-setTheme(lsGet('fogp-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+themeInit();
 setFont(lsGet('fogp-font2') || 'sber');
 S = seed('mid'); snap(); render();
 /* Состояния по ?s=<код>: сценарии пульта (fresh, mid, payday, partner, price, week, recon, done, offline, limit, format, botoff, used),
    экраны (consent, phrase, answer, share, list, purchase, today, source, income, stmtIntro, stmtResult, data, deleted, bot),
    листы (where, weeksum, save, change, remind, policy, install, email, shot, feedback, photo), примеры ссылок (linkTwo, linkFail, linkNot),
    и то же для партнёра с приставкой anya- (например ?s=anya-purchase). */
-(() => { const q = new URLSearchParams(location.search).get('s'); if (!q) return;
+(() => { const q = new URLSearchParams(location.search).get('s') || decodeURIComponent(location.hash.slice(1)); if (!q) return;
   let k = q; if (k.startsWith('anya-')) { k = k.slice(5); S.who = 'anya'; }
   const SC = ['fresh','mid','payday','partner','price','week','recon','done','offline','limit','format','botoff','used'];
   const LINK = {linkTwo:'https://shop.example/tv-two к 1 марта, я могу 30', linkFail:'https://shop.example/fail/Робот-пылесос к 1 декабря, я могу 20', linkNot:'https://blog.example/notproduct к 1 декабря'};
-  if (SC.includes(k)) scenario(k);
+  if (V3_SCEN[k]) V3_SCEN[k](); else if (SC.includes(k)) scenario(k);
   else if (SCR[k]) { if (k === 'answer') demo.newPurchase(); else if (k === 'stmtResult') { runStmt(true); } else go(k); }
   else if (SH[k]) { go(k === 'weeksum' || k === 'where' || k === 'save' || k === 'change' || k === 'photo' ? 'purchase' : k === 'remind' || k === 'shot' ? 'today' : k === 'install' || k === 'email' || k === 'policy' ? 'data' : 'purchase'); openSheet(k); }
   else if (LINK[k]) { S.draftText = LINK[k]; S.draft = parsePhrase(LINK[k]); draftNext(); }

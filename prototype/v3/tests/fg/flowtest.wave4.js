@@ -1,0 +1,53 @@
+<script>
+(() => { const out = [], ok = (n, c, x) => out.push((c ? 'PASS ' : 'FAIL ') + n + (x !== undefined && !c ? ' :: ' + x : ''));
+const vt = () => $('#view').innerText, bt = () => $('#bottom').innerText.trim(), words = s => (s.match(/[A-Za-zА-Яа-яЁё0-9]+/g) || []).length;
+const longSent = s => s.split(/[.!?\n]+/).map(x => x.trim()).filter(x => words(x) > 15);
+const budget = (name) => { const t = vt().replace('Что не так?', ''); ok(name + ': ≤45 слов', words(t) <= 45, words(t)); ok(name + ': предложения ≤15 слов', !longSent(t).length, longSent(t).join(' / ')); };
+try {
+  scenario('fresh'); ok('fresh → согласие без сторис', S.scr === 'consent' && !$('#story').classList.contains('on'));
+  ok('согласие: без «Партнёр»', !/Партнёр/.test(vt()), vt().slice(0, 120)); budget('согласие');
+  ACT.consentOk(); ok('согласие → пример', S.scr === 'example' && !!$('#view .v3-example'));
+  ok('пример: плашка и кнопка', /Пример/.test(vt()) && bt() === 'Создать свою цель', bt()); budget('пример');
+  ACT.v3exStep(); ok('«Отложить» в примере: туман проясняется, ничего не сохранено', S.v3.ex === 73000 && S.purchases.length === 0 && +$('#view .photo').dataset.pct > 0.6);
+  openSheet('how'); ok('how в примере без ссылки на пример', !/Посмотреть пример/.test($('#sheet').innerText)); closeSheet();
+  ACT.v3own(); ok('«Создать свою цель» → фраза Э-02', S.scr === 'phrase' && /Что хотите купить и к какому сроку\?/.test(vt()));
+  $('#phrase').value = 'Ноутбук 90 тысяч к 1 марта'; ACT.phraseGo();
+  ok('уточнение без партнёра', S.scr === 'clarify' && /Сколько отложите сами/.test(vt()) && /всю сумму сам/.test(vt()), vt().slice(0, 160));
+  ok('имя разобрано (фикс парсера)', S.draft.name === 'Ноутбук', S.draft.name);
+  $('#clar').value = 'плачу сам'; $('#clarf').requestSubmit();
+  ok('ответ: «Сохранить цель», блочные строки ответа', S.scr === 'answer' && bt() === 'Сохранить цель' && $$('#view .v3-answer-line').length >= 3 && $$('#view .v3-answer-line').every(x => getComputedStyle(x).display === 'block'), $$('#view .v3-answer-line').length);
+  ACT.v3save(); ok('сохранить → «Копить вместе?»', S.scr === 'together' && $$('#view .v3-pair .sec2').length === 2); budget('вместе?');
+  const pb = $$('#view .v3-pair button'); ok('кнопки одного веса', pb[0].className === pb[1].className && pb[0].offsetWidth === pb[1].offsetWidth, pb.map(b => b.className + ':' + b.offsetWidth).join(' '));
+  ACT.v3alone(); ok('«Пока сам» → своя цель без партнёра', S.scr === 'purchase' && /своя цель/.test(vt()) && !/Аня|партн/i.test(vt()), (vt().match(/.*(Аня|партн).*/i) || [''])[0]);
+  ok('лист «где» без «Партнёр»', S.sheet === 'where' && !/Партнёр/.test($('#sheet').innerText)); closeSheet();
+  ok('журнал событий', ['example_shown','example_action','own_goal_started','goal_saved','together_solo'].every(e => S.v3.log.includes(e)), S.v3.log.join(','));
+  openSheet('how'); ok('how с экрана цели: «Посмотреть пример»', /Посмотреть пример/.test($('#sheet').innerText));
+  ACT.v3showEx(); ok('пример повторно, с «Назад»', S.scr === 'example' && /Назад/.test(vt())); go(S.v3.back);
+  ok('пример только один раз', (() => { const s0 = S; S = seed('fresh'); me().exSeen = true; ACT.consentOk(); const r = S.scr === 'phrase'; S = s0; go('purchase'); return r; })());
+  ACT.v3call(); ok('«Позвать» → отправка ссылки', S.scr === 'groupShare' && /до 6 человек/i.test(vt())); budget('позвать');
+  ok('текст ссылки без моих сумм', !/в день|отложен|отложил/i.test($('#v3sharetxt').innerText), $('#v3sharetxt').innerText);
+  ACT.v3send(); const p = P(); ok('после отправки — общая цель на одного', !!p.group && p.group.members.length === 1 && S.scr === 'purchase' && /Ссылка отправлена/.test(vt()));
+  ACT.v3asGuest(); ok('глазами приглашённого', S.who === 'anya' && /зовёт копить вместе/.test(vt()) && /Без регистрации/.test(vt()));
+  $('#v3accept').value = 'беру 15'; $('#v3acceptf').requestSubmit();
+  ok('вступила: пара, без процентов', p.group.members.join() === 'oleg,anya' && p.share.anya === 15000 && !/%/.test($('#view .sec').innerText) && $$('#view [data-v3-member]').length === 2, $('#view .sec').innerText.replace(/\n/g, ' ').slice(0, 200));
+  closeSheet();
+  V3_SCEN.group3(); const g = P(), t3 = vt();
+  ok('group3: «Вместе ≈ 30 %», снимок 0.3', /Вместе ≈ 30/.test(t3) && g.group.snap === 0.3);
+  ok('group3: статусы в порядке входа', $$('#view .v3-member').map(x => x.dataset.v3Member + ':' + x.querySelector('.v3-st').textContent).join() === 'oleg:по плану,anya:по плану,timur:по плану,sveta:отстаёт', $$('#view .v3-member').map(x => x.querySelector('.v3-st').textContent).join());
+  ok('group3: чужих отложенных сумм нет', !/11\s500|9\s000|3\s000|14\s000/.test(t3), (t3.match(/.*(11\s500|9\s000|3\s000|14\s000).*/) || [''])[0]);
+  ok('group3: значок «видят участники»', !!$('#view [aria-label="видят участники"]'));
+  ok('без красного', !$$('#view *').some(x => { const m = getComputedStyle(x).color.match(/\d+/g).map(Number); return m[0] > 150 && m[1] < 90 && m[2] < 90; }));
+  step(9000); ok('своя отметка не двигает общий % в тот же день', P().group.snap === 0.3 && /Вместе ≈ 30/.test(vt()));
+  setDay(1); ok('назавтра — новый снимок', P().group.snap === 0.3 || P().group.snap === 0.4, P().group.snap); setDay(0);
+  V3_SCEN.group2(); const t2 = vt(); ok('group2: «к сроку сходится», без %', /К сроку сходится/.test(t2) && !/%/.test(t2.replace('Что не так?', '')), t2.slice(0, 200));
+  ok('group2: отложенного Ани нет', !/21\s000/.test(t2));
+  demo.who('anya'); ok('group2 глазами Ани', /беру 70/.test(vt()) && !/24\s000/.test(vt()), vt().slice(0, 300));
+  V3_SCEN.groupInvite(); ok('groupInvite: что увидит / не увидит', S.who === 'anya' && /Чего не увидит никто/.test(vt()) && /Организатор видит то же/.test(vt()));
+  V3_SCEN.empty(); ok('пустые «Покупки»: пример и кнопка', S.scr === 'list' && /Пример/.test(vt()) && bt() === 'Создать свою цель');
+  go('data'); $('#tabs [data-tab="buy"]').click(); ok('вкладка «Покупки» без целей → пустой список', S.scr === 'list');
+  scenario('partner'); ok('v2 partner работает', S.scr === 'purchase' && /Аня: по плану/.test(vt()) && /сделала шаг/.test(vt()), vt().slice(0, 300));
+  scenario('mid'); demo.who('anya'); ok('v2 anya-purchase работает', /Олег/.test(vt()) && !/своя цель/.test(vt()));
+  ok('все подмены текста сработали', demo.v3.warn().length === 0, demo.v3.warn().join());
+} catch (e) { ok('ИСКЛЮЧЕНИЕ', false, e.stack); }
+const pre = document.createElement('pre'); pre.id = 'T'; pre.textContent = out.join('\n'); document.body.append(pre); })();
+</script>

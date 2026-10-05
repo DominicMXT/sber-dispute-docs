@@ -1,0 +1,193 @@
+{
+ "screens": [
+  {
+   "c": "mid",
+   "scr": "purchase",
+   "sheet": null,
+   "firstWords": 51,
+   "long": [],
+   "warn": []
+  },
+  {
+   "c": "payday",
+   "scr": "purchase",
+   "sheet": null,
+   "firstWords": 51,
+   "long": [],
+   "warn": []
+  },
+  {
+   "c": "week",
+   "scr": "purchase",
+   "sheet": "weeksum",
+   "firstWords": 51,
+   "long": [],
+   "warn": [],
+   "sheetWords": 30,
+   "sheetLong": []
+  },
+  {
+   "c": "recon",
+   "scr": "stmtResult",
+   "sheet": null,
+   "firstWords": 74,
+   "long": [],
+   "warn": []
+  },
+  {
+   "c": "offline",
+   "scr": "phrase",
+   "sheet": null,
+   "firstWords": 54,
+   "long": [],
+   "warn": []
+  },
+  {
+   "c": "limit",
+   "scr": "phrase",
+   "sheet": null,
+   "firstWords": 53,
+   "long": [],
+   "warn": []
+  },
+  {
+   "c": "format",
+   "scr": "stmtIntro",
+   "sheet": null,
+   "firstWords": 63,
+   "long": [],
+   "warn": []
+  },
+  {
+   "c": "themeSet",
+   "scr": "data",
+   "sheet": null,
+   "firstWords": 60,
+   "long": [],
+   "warn": []
+  },
+  {
+   "c": "anya-purchase",
+   "scr": "purchase",
+   "sheet": null,
+   "firstWords": 50,
+   "long": [],
+   "warn": []
+  },
+  {
+   "c": "anya-mid",
+   "scr": "purchase",
+   "sheet": null,
+   "firstWords": 51,
+   "long": [],
+   "warn": []
+  }
+ ],
+ "all": [
+  "fresh:consent/:45",
+  "mid:purchase/:51",
+  "payday:purchase/:51",
+  "partner:purchase/:37",
+  "price:purchase/:38",
+  "week:purchase/weeksum:51",
+  "recon:stmtResult/:74",
+  "done:purchase/:38",
+  "offline:phrase/:54",
+  "limit:phrase/:53",
+  "format:stmtIntro/:63",
+  "botoff:today/:32",
+  "used:purchase/:23",
+  "example:example/:37",
+  "solo:purchase/:45",
+  "together:together/:33",
+  "group2:purchase/:37",
+  "group3:purchase/:40",
+  "anya-group2:purchase/:37",
+  "anya-group3:purchase/:40",
+  "groupInvite:purchase/:43",
+  "groupShare:groupShare/:44",
+  "empty:list/:18",
+  "dayprice:today/:45",
+  "slip:slip/:37",
+  "weeks:purchase/:45",
+  "weeksum3:purchase/weeksum:40",
+  "nextgoal:purchase/:35",
+  "themeSet:data/:60",
+  "anya-purchase:purchase/:50",
+  "anya-mid:purchase/:51"
+ ],
+ "sheetRows": [
+  {
+   "c": "mid",
+   "k": "policy",
+   "w": 49,
+   "long": []
+  },
+  {
+   "c": "mid",
+   "k": "remind",
+   "w": 45,
+   "long": []
+  },
+  {
+   "c": "solo",
+   "k": "policy",
+   "w": 49,
+   "long": []
+  },
+  {
+   "c": "solo",
+   "k": "remind",
+   "w": 45,
+   "long": []
+  },
+  {
+   "c": "group2",
+   "k": "policy",
+   "w": 49,
+   "long": []
+  },
+  {
+   "c": "group2",
+   "k": "remind",
+   "w": 45,
+   "long": []
+  },
+  {
+   "c": "group3",
+   "k": "policy",
+   "w": 49,
+   "long": []
+  },
+  {
+   "c": "group3",
+   "k": "remind",
+   "w": 45,
+   "long": []
+  },
+  {
+   "c": "anya-group3",
+   "k": "policy",
+   "w": 49,
+   "long": []
+  },
+  {
+   "c": "anya-group3",
+   "k": "remind",
+   "w": 45,
+   "long": []
+  },
+  {
+   "c": "groupInvite",
+   "k": "policy",
+   "w": 49,
+   "long": []
+  },
+  {
+   "c": "groupInvite",
+   "k": "remind",
+   "w": 45,
+   "long": []
+  }
+ ]
+}
