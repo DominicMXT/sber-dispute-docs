@@ -2,6 +2,8 @@
 
 Здесь лежат пакеты изменений ТЗ — почему меняли и что именно. Само ТЗ — `tz/TZ_finance-assistant.md`, история версий — его Приложение В. Эталон поведения — прототип v3 `prototype/2026-10-04_fog-prototype-v3.html?s=<код>`. Он собирается из модулей `prototype/v3/*.py` командой `python prototype/build_v3.py`.
 
+PDF текущих версий — `pdf/TZ_finance-assistant_v1.4.2.pdf` и `pdf/BT_finance-assistant_v1.5.pdf` (собираются из Markdown: `python tools/build_docs.py --pdf`).
+
 Короткое сообщение команде о 1.4.1 и 1.4.2 — [2026-10-05_message-to-front.md](2026-10-05_message-to-front.md).
 
 Ссылки на `review/`, `design/` (кроме `design/board/`) и `market/` внутри пакетов ведут на рабочие материалы. Их в репозитории нет, для разработки они не нужны.
