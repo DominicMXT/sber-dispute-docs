@@ -2,6 +2,8 @@
 
 Здесь лежат пакеты изменений ТЗ — почему меняли и что именно. Само ТЗ — `tz/TZ_finance-assistant.md`, история версий — его Приложение В. Эталон поведения — прототип v3 `prototype/2026-10-04_fog-prototype-v3.html?s=<код>`. Он собирается из модулей `prototype/v3/*.py` командой `python prototype/build_v3.py`.
 
+Короткое сообщение команде о 1.4.1 и 1.4.2 — [2026-10-05_message-to-front.md](2026-10-05_message-to-front.md).
+
 Ссылки на `review/`, `design/` (кроме `design/board/`) и `market/` внутри пакетов ведут на рабочие материалы. Их в репозитории нет, для разработки они не нужны.
 
 | Версия | Пакет | Главное | Релиз |
@@ -53,7 +55,7 @@
 
 | Что | Команда | Ожидается |
 |---|---|---|
-| все состояния и сценарии K1–K7 | `node prototype/v3/tests/cov/covcheck.mjs` | 140 из 140, 7 из 7 |
+| все состояния и сценарии K1–K7 по карте покрытия `prototype/2026-10-05_coverage-v3.md` (требование → коды экранов) | `node prototype/v3/tests/cov/covcheck.mjs` | 142 из 142, 7 из 7 |
 | путь одного человека и общая цель | `python prototype/v3/tests/fg/runft.py 2026-10-04_fog-prototype-v3.html` | 136 / 0 |
 | мотивация и бюджет текста | `python prototype/v3/tests/mot/runmt.py 2026-10-04_fog-prototype-v3.html` | 586 / 0 |
 | ввод второй волны | `node prototype/v3/tests/mac/polish_probe.mjs <путь к html>` | 27 из 27 |
