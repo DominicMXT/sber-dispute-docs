@@ -30,4 +30,4 @@ R = [
 ]
 # ?clean (например ?s=group3&clean или ?clean#group3) — показ людям и скриншоты: пульт и его кнопка скрыты (в продукт пульт не идёт; QA №9, design §6.6).
 CSS = """html.v3-clean #fab,html.v3-clean #panel{display:none!important}"""
-JS = r"""if (/[?&#]clean/.test(location.search + location.hash) || new URLSearchParams(location.search).has('clean')) document.documentElement.classList.add('v3-clean');"""
+JS = r"""if (/[?&#]clean\b/.test(location.search + location.hash) || new URLSearchParams(location.search).has('clean')) document.documentElement.classList.add('v3-clean');"""

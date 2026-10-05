@@ -1729,7 +1729,7 @@ const V3_ANIM_VIEW_FADE = true;   /* строка 7: false — выключит�
 })();
 
 /* v3 · pult */
-if (/[?&#]clean/.test(location.search + location.hash) || new URLSearchParams(location.search).has('clean')) document.documentElement.classList.add('v3-clean');
+if (/[?&#]clean\b/.test(location.search + location.hash) || new URLSearchParams(location.search).has('clean')) document.documentElement.classList.add('v3-clean');
 /* v3 · edge */
 const edgeMI = s => ['январ','феврал','март','апрел','ма','июн','июл','август','сентябр','октябр','ноябр','декабр'].findIndex(x => s.toLowerCase().startsWith(x));
 const edgeMON = '(январ|феврал|март|апрел|ма[йя]|июн|июл|август|сентябр|октябр|ноябр|декабр)[а-я]*';
