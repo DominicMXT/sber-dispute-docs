@@ -1,7 +1,7 @@
 ---
 version: alpha
 name: Finance Assistant — крупная покупка к дате
-description: "Мобильная PWA для пар с раздельными деньгами. Основа — shadcn/ui (Radix + Tailwind v4, MIT); палитра, фото цели с туманом и движение — визуальный язык «Туман». Эталон вида — prototype/2026-10-04_fog-prototype-v2.html; все состояния — prototype/2026-09-24_mvp-prototype.html."
+description: "Мобильная PWA: помощник «сколько сегодня на себя» и цели к дате; общая цель с другими (2–6 человек) — по желанию. Основа — shadcn/ui (Radix + Tailwind v4, MIT); палитра, фото цели с туманом и движение — визуальный язык «Туман». Эталон вида — prototype/2026-10-04_fog-prototype-v3.html (сборка build_v3.py, ТЗ 1.4); все состояния — доска design/board/ и пульт прототипа."
 colors:
   background: "#F3F3F1"
   foreground: "#1A1A19"
