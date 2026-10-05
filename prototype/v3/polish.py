@@ -21,6 +21,9 @@ WCAG 2.2 — 1.4.4 (текст 200 %), 2.4.11 (фокус не под закре
    легенда значков на согласии — двумя одинаковыми строками; вопрос о своей части — «Какую часть цены отложите вы?».
 """
 R = [
+    # 7. шрифты не блокируют первую отрисовку (web.dev): сразу — только Onest и Caveat, остальные — когда пульт включит другой вариант
+    ('<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Golos+Text:wght@400;500;600&family=Literata:opsz,wght@7..72,500;7..72,600&family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">',
+     '<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media=\'all\'"><noscript><link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>'),
     # минус — знаком минуса, не дефисом (типографика; «-7 967 ₽» читалось как тире)
     ("const fmt = n => String(Math.round(n)).replace(/\\B(?=(\\d{3})+(?!\\d))/g, NB);",
      "const fmt = n => String(Math.round(n)).replace(/\\B(?=(\\d{3})+(?!\\d))/g, NB).replace(/^-/, '−');"),
@@ -223,4 +226,9 @@ render = function(){ const r = pRender0.apply(this, arguments);
   } catch(e) { console.warn('polish:', e); }
   return r; };
 addEventListener('resize', () => { try { pLayout(); } catch(e) {} });
+/* 7. варианты шрифта пульта (data-font) — Golos Text, Literata, Unbounded подгружаются по требованию */
+let pFontsMore = false;
+new MutationObserver(() => { if (pFontsMore || !document.documentElement.dataset.font) return; pFontsMore = true;
+  const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Literata:opsz,wght@7..72,500;7..72,600&family=Unbounded:wght@500;600&display=swap'; document.head.appendChild(l);
+}).observe(document.documentElement, {attributes:true, attributeFilter:['data-font']});
 """

@@ -1,0 +1,61 @@
+// Проба третьей волны правок (polish2.py): node polish2_probe.mjs <путь к html>
+import { createRequire } from 'module';
+import { pathToFileURL } from 'url';
+const require = createRequire(process.cwd() + '/package.json');
+const { chromium } = require('playwright');
+const f = pathToFileURL(process.argv[2]).href;
+const b = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe' });
+const errs = [], res = [];
+const ok = (n, c, d) => res.push((c ? 'PASS ' : 'FAIL ') + n + (c ? '' : ' :: ' + d));
+const pg = async (q, vp = { width: 375, height: 812 }) => { const p = await b.newPage({ viewport: vp }); p.on('pageerror', e => errs.push(e.message)); await p.goto(f + q); await p.waitForTimeout(300); return p; };
+const vt = p => p.evaluate(() => document.querySelector('#view').innerText.replace(/\s+/g, ' '));
+let p = await pg('?clean&s=phrase');
+const phrase = t => p.evaluate(t => { S.draft = null; go('phrase'); render(); $('#phrase').value = t; ACT.phraseGo(); return { scr: S.scr, d: S.draft && { name: S.draft.name, price: S.draft.price, share: S.draft.share, rate: S.draft.rate } }; }, t);
+let r = await phrase('Хочу ноутбук за 95 000 к 1 марта, уже есть 20 тысяч');
+ok('«Хочу» не в названии', r.d && r.d.name === 'Ноутбук', JSON.stringify(r));
+await p.evaluate(() => { S.draft.share = S.draft.price; S.draft.done = true; go('answer'); });
+ok('«уже есть 20 тысяч» — пояснение на ответе', /Уже отложенное отметьте/.test(await vt(p)), (await vt(p)).slice(0, 300));
+r = await phrase('Ноутбук 90 тысяч к 1 марта, откладываю 10 тысяч в месяц');
+ok('«10 тысяч в месяц» — темп, а не доля', r.d && r.d.rate && r.d.rate.v === 10000 && r.d.share === 90000, JSON.stringify(r));
+const t1 = await vt(p); ok('ответ: сколько соберётся к сроку', r.scr === 'answer' && /Если откладывать 10\s000\s₽ в месяц/.test(t1) && /Нужно ≈/.test(t1), r.scr + ' ' + t1.slice(0, 300));
+r = await phrase('Яхта 10 миллионов к 15 ноября, плачу сам'); const t2 = await vt(p);
+ok('очень большой план в день — подсказка сдвинуть срок', /Можно сдвинуть срок/.test(t2), t2.slice(0, 300));
+r = await phrase('https://ozon.ru/product/noutbuk-123456 к 1 мая'); ok('ссылка → «Товар по ссылке», не транслит', r.d && r.d.name === 'Товар по ссылке', JSON.stringify(r));
+/* поля: копейки, карта, цена > 50 млн */
+r = await p.evaluate(() => [hSum('9,5', '5 000').err, hSum('1,5 тысячи', '5 000').n, hSum('4276 1234 5678 9012', '5 000').err, hSum('9 500', '5 000').n]);
+ok('«9,5» → вопрос про рубли; «1,5 тысячи» → 1 500; карта → ошибка; «9 500» → 9 500', /без копеек/.test(r[0]) && r[1] === 1500 && /карты/.test(r[2]) && r[3] === 9500, JSON.stringify(r));
+r = await p.evaluate(() => { S.draft = { name: 'Дом', price: 90000, dl: Date.UTC(2027, 0, 1), share: 90000, done: true }; go('fields'); $('#f-price').value = '999999999999'; ACT.fieldsGo(); const a = { scr: S.scr, e: (document.getElementById('f-price-err') || {}).textContent }; ACT.fieldsGo(); a.scr2 = S.scr; return a; });
+ok('цена 999 999 999 999 в полях → переспрос, второе нажатие — дальше', r.scr === 'fields' && /верно\?/.test(r.e) && r.scr2 === 'answer', JSON.stringify(r));
+r = await p.evaluate(() => { go('income'); $('#income').value = 'получаю 80 тысяч на карту 4276 1234 5678 9012, обязательные 30 тысяч'; ACT.incomeGo(); return { scr: S.scr, e: (document.getElementById('income-err') || {}).textContent }; });
+ok('номер карты в приходе → ошибка', r.scr === 'income' && /карты/.test(r.e), JSON.stringify(r));
+await p.close();
+/* «Пришлось взять»: буквы и больше отложенного; отмена отметки */
+p = await pg('?clean&s=mid');
+const took = v => p.evaluate(v => { go('purchase'); S.input = 'took'; openSheet('input', 'took'); const i = $('#inputv'); if (!i) return { none: true, sheet: S.sheet }; i.value = v; $('#inputf').requestSubmit(); return { sheet: S.sheet, scr: S.scr, e: (document.getElementById('inputv-err') || {}).textContent }; }, v);
+r = await took('abc'); ok('«Пришлось взять» «abc» → ошибка, лист открыт', r.e && /сумм/i.test(r.e) && r.sheet, JSON.stringify(r));
+r = await took('10000000'); ok('«Пришлось взять» больше отложенного → ошибка', r.e && /больше взять нельзя|нечего/.test(r.e), JSON.stringify(r));
+r = await p.evaluate(() => { closeSheet(); go('purchase'); const p0 = P(), w = S.who, s0 = p0.saved[w]; step(1234); go('purchase'); const has = /Отмечено сегодня 1\s234/.test(document.querySelector('#view').innerText); ACT.p2Undo(); return { s0, s1: P().saved[w], has }; });
+ok('отметку можно отменить в тот же день', r.has && r.s1 === r.s0, JSON.stringify(r));
+r = await p.evaluate(() => { go('purchase'); return /Подтверждено 0\s₽/.test(document.querySelector('#view').innerText); });
+ok('нет «Подтверждено 0 ₽»', !r, String(r));
+r = await p.evaluate(() => { go('purchase'); return { frames: document.querySelectorAll('#view .film .fr').length, label: (document.querySelector('#view .filmlab') || {}).textContent }; });
+ok('плёнка — 7 кадров при «из 7»', r.frames === 7 || r.frames === 0, JSON.stringify(r));
+await p.close();
+/* согласие, значки, отзыв */
+p = await pg('?clean&s=consent');
+r = await vt(p); ok('согласие без обрывка «— видят участники»', !/— видят участники/.test(r), r.slice(0, 300));
+await p.close();
+p = await pg('?clean&s=fresh');
+r = await p.evaluate(() => { me().consent = true; S.purchases.push({ id: 'x1', name: 'Ноутбук', cap: 'Ноутбук', price: 90000, dl: Date.UTC(2027, 1, 28), cr: now(), photo: 'laptop', owner: S.who, share: { [S.who]: 90000, [OTHER[S.who]]: null }, saved: { [S.who]: 0, [OTHER[S.who]]: 0 }, state: 'active' }); S.cur = 'x1'; S.pid = 'x1'; go('purchase');
+  const vis = [...document.querySelectorAll('#view .vis')].filter(x => getComputedStyle(x).display !== 'none').length; return { solo: $('#app').classList.contains('p-solo'), vis }; });
+ok('своя цель без общих — значки видимости скрыты', r.solo && r.vis === 0, JSON.stringify(r));
+r = await p.evaluate(() => { openSheet('feedback'); const t = document.querySelector('#fbf textarea'); t.value = ''; $('#fbf').requestSubmit(); return { sheet: S.sheet, e: (document.getElementById((t.id || 'x') + '-err') || {}).textContent }; });
+ok('пустой отзыв не отправляется', r.sheet === 'feedback' && /Напишите/.test(r.e), JSON.stringify(r));
+await p.close();
+/* тост не на главной кнопке */
+p = await pg('?clean&s=purchase');
+r = await p.evaluate(() => { toast('Проверка'); const t = $('#toast').getBoundingClientRect(), m = $('#bottom .main'); const mb = m && m.getBoundingClientRect(); return { overlap: mb ? !(t.bottom <= mb.top || t.top >= mb.bottom) : false, t: Math.round(t.top), m: mb && Math.round(mb.top) }; });
+ok('тост не перекрывает главную кнопку', !r.overlap, JSON.stringify(r));
+await p.close();
+console.log(res.join('\n')); console.log('PASS', res.filter(x => x.startsWith('PASS')).length, '/', res.length, '· errors', errs.length, errs.slice(0, 3));
+await b.close();

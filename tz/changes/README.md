@@ -61,6 +61,7 @@ PDF текущих версий — `pdf/TZ_finance-assistant_v1.4.2.pdf` и `pd
 | путь одного человека и общая цель | `python prototype/v3/tests/fg/runft.py 2026-10-04_fog-prototype-v3.html` | 136 / 0 |
 | мотивация и бюджет текста | `python prototype/v3/tests/mot/runmt.py 2026-10-04_fog-prototype-v3.html` | 586 / 0 |
 | ввод второй волны | `node prototype/v3/tests/mac/polish_probe.mjs <путь к html>` | 27 из 27 |
+| ввод третьей волны (`polish2.py`: «Пришлось взять», копейки, карта в полях, отмена отметки, «в месяц») | `node prototype/v3/tests/mac/polish2_probe.mjs <путь к html>` | 18 из 18 |
 | своя цель с входом на 320×568, 812×375, 375×812 | `node prototype/v3/tests/mac/own_goal_layout.mjs <путь к html>` | без ошибок |
 
 Playwright стоит в `prototype/v3/tests/mac` (`npm i`). Проверка документов — `python tools/check_docs.py`.

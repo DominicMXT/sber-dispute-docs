@@ -8,7 +8,7 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Golos+Text:wght@400;500;600&family=Literata:opsz,wght@7..72,500;7..72,600&family=Onest:wght@400;500;600;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet" media="print" onload="this.media='all'"><noscript><link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500&family=Onest:wght@400;500;600;700&display=swap" rel="stylesheet"></noscript>
 <style>
 :root{
   --bg:#F3F3F1; --card:#FFFFFF; --film:#E4E4E0; --ink:#1A1A19; --ink2:#5E5E5A; --line:#DADAD5; --input:#82827C; --ai:#5E5E5A;
@@ -433,6 +433,22 @@ form.field>.inp{flex:1 1 8em;min-width:0}
 .l-sber{background:#107F2C !important;color:#fff !important}
 #sheet .l-btn{text-align:left;padding:0 16px}
 
+/* v3 · polish2 */
+
+/* плёнка — 7 кадров по дням недели, той же высоты, что прежние 13 */
+.film{grid-template-columns:repeat(7,1fr)}
+.film .fr{aspect-ratio:7/4}
+.fr:last-child{outline:none}
+/* значки видимости без общих целей ничего не различают */
+.p-solo #view .vis:not(.p-keep){display:none}
+/* тост — над нижней зоной */
+.toast{top:auto !important;bottom:var(--p-tb,146px) !important;transform:translateY(8px)}
+.toast.on{transform:none}
+/* длинное название цели переносится, а не уходит за край */
+.ai,.head h1,.cap .hand{overflow-wrap:anywhere}
+/* панель вкладок не просвечивает (WebKit) */
+.tabs{background:var(--card) !important}
+
 </style>
 </head>
 <body>
@@ -714,7 +730,7 @@ function scrPurchase(){ const p = P(), w = S.who, o = OTHER[w];
   <p class="mut" style="margin:0">${paydaySum(w) ? 'С зарплаты ≈ <span class="num">' + rub(paydaySum(w)) + '</span> · ' : ''}${plan ? 'по плану' : 'догнать план'}: <span class="num" data-out="perday">${rub(mine)}</span> в день</p>
   <p class="xs mut" style="margin:6px 0 0">${(p.saved[w] || 0) === 0 ? 'Отметок пока нет' : ((p.conf || {})[w] || 0) >= p.saved[w] ? 'Всё подтверждено выпиской' : 'Подтверждено ' + rubT((p.conf || {})[w] || 0) + ' из ' + rubT(p.saved[w])} <button class="link sm" data-sheet="how" style="min-height:0" aria-label="Как читать фото и неделю">Как это работает?</button></p>`}
   ${p.state === 'done' ? '' : `<div class="filmlab"><span>Неделя: ${steps} из 7</span><span>ещё ${Math.ceil(daysTo(p) / 7)} ${plural(Math.ceil(daysTo(p) / 7), 'неделя', 'недели', 'недель')}</span></div>
-  <div class="film">${'<div class="fr"></div>'.repeat(13).replace('<div class="fr">', `<div class="fr" style="--r:${(100 - steps / 7 * 100).toFixed(1)}%">`)}</div>
+  <div class="film" role="img" aria-label="Дней с отметкой на этой неделе: ${steps} из 7">${Array.from({length:7}, (_, i) => `<div class="fr" style="--r:${i < steps ? 0 : 100}%"></div>`).join('')}</div>
   ${wk.html}`}
   <div class="sec"><h2>До полной суммы ${vis('all')}</h2>${over ? `<div class="rowl"><span>Вдвоём вносите на ${rubT(over)} больше цены.</span><button class="chip press" data-sheet="change">Уменьшить часть</button></div>`
    : gap && !S.stmtFound ? `<div class="rowl"><span>Не хватает <b class="num" data-out="gap">${rubT(gap)}</b></span><button class="chip press" data-act="toStmt">Найти в своих тратах</button></div>`
@@ -830,7 +846,7 @@ const SH = {
   save: () => { const p = P(), w = S.who, ps = paydaySum(w), v = Math.min(leftOf(p, w), ps || perDay(p, w)), rest = me().income && !me().sentRest ? leftToday(w) : 0; return `<h3 class="disp">Сколько отложили</h3><form id="savef" class="field"><input class="inp" id="saveamt" inputmode="numeric" value="${fmt(v)}" aria-label="Сумма"><button class="go press">Записать</button></form><div class="chips">${ps ? `<button class="chip press num" data-saveamt="${Math.min(leftOf(p, w), ps)}">с зарплаты ${rubT(Math.min(leftOf(p, w), ps))}</button>` : ''}${rest > 0 ? `<button class="chip press num" data-act="rest">остаток дня ${rubT(rest)}</button>` : ''}</div><p class="xs mut" style="margin-top:8px">Мы не переводим деньги: отметка — для вашего плана. Партнёр увидит только «по плану».</p>`; },
   change: () => `<h3 class="disp">Изменить покупку</h3><button class="sec2 press" data-input="share">Поменять свою часть</button><button class="sec2 press" data-input="dl">Перенести срок</button><button class="sec2 press" data-input="took">Пришлось взять из отложенного</button><button class="sec2 press" data-sheet="cancelAsk" style="color:var(--warm)">Отменить покупку</button><p class="xs mut" style="margin-top:8px">Партнёр увидит новый статус без причин и без ваших сумм.</p>`,
   input: k => { const t = {share:['Ваша часть, ₽','например, 80 000'], dl:['Новый срок','например, к 31 января'], took:['Сколько взяли из отложенного, ₽','например, 3 000']}[k]; return `<h3 class="disp">${t[0]}</h3><form id="inputf" data-k="${k}" class="field"><input class="inp" id="inputv" placeholder="${t[1]}" aria-label="${t[0]}"><button class="go press">Готово</button></form>${k === 'took' ? '<p class="xs mut" style="margin-top:8px">Бывает. Пересчитаю план и предложу срок без упрёков.</p>' : ''}`; },
-  cancelAsk: () => `<h3 class="disp">Отменить покупку?</h3><p>Покупка уйдёт в архив у вас и у партнёра. Отметки сохранятся.</p><button class="main press" data-act="cancelBuy">Отменить покупку</button><button class="sec2 press" data-close>Оставить</button>`,
+  cancelAsk: () => `<h3 class="disp">Отменить покупку?</h3><p>Покупка уйдёт в архив у вас и у партнёра. Отметки сохранятся.</p><button class="main press p-danger" data-act="cancelBuy">Отменить покупку</button><button class="sec2 press" data-close>Оставить</button>`,
   delAsk: () => `<h3 class="disp">Удалить все данные?</h3><p>Покупки, части, отложенное, приходы, траты, сводка выписки и связь с ботом исчезнут. Вернуть нельзя.</p><button class="main press p-danger" data-act="delAll">Удалить всё</button><button class="sec2 press" data-close>Оставить</button>`,
   remind: () => `<h3 class="disp">Где напоминать?</h3><button class="sec2 press" data-act="linkMax" style="text-align:left;padding:10px 14px;min-height:64px"><b>В Max</b><br><span class="mut sm">траты и «влезет ли» в чате</span></button><button class="sec2 press" data-act="linkTg" style="text-align:left;padding:10px 14px;min-height:64px"><b>В Telegram</b><br><span class="mut sm">только напоминания, без сумм</span></button>
    <label class="tip"><input type="checkbox" checked><span>Утром — сколько на себя</span></label><label class="tip"><input type="checkbox" checked><span>Ежемесячно — выписка</span></label>
@@ -841,7 +857,7 @@ const SH = {
     : `<h3 class="disp">Сохранить по почте</h3><p>Сейчас данные живут на этом телефоне. Привяжите почту — и они не пропадут при смене устройства.</p><form id="emailf" class="field"><input class="inp" type="email" placeholder="почта" aria-label="Почта"><button class="go press">Код</button></form>`,
   shot: () => `<h3 class="disp">Трата скриншотом</h3><p>Пришлите скриншот уведомления банка — распознаю сумму на своём сервере в России и попрошу подтвердить.</p><button class="sec2 press" data-act="shotDemo">Взять пример: «Покупка 1 250 ₽, Пятёрочка»</button>`,
   feedback: () => `<h3 class="disp">Что не так?</h3><form id="fbf"><textarea class="inp" aria-label="Что не так" placeholder="Напишите в двух словах"></textarea><button class="main press" style="margin-top:10px">Отправить</button></form>`,
-  feedbackOk: () => `<h3 class="disp">Спасибо, отправлено</h3><p>Читаем каждый отзыв. Ответим в течение суток, если оставите контакт.</p><button class="main press" data-close>Закрыть</button>`,
+  feedbackOk: () => `<h3 class="disp">Спасибо, отправлено</h3><p>Читаем каждый отзыв и исправляем.</p><button class="main press" data-close>Закрыть</button>`,
   photo: () => `<h3 class="disp">Фото цели</h3><label class="filebtn">Снять или выбрать своё<input type="file" accept="image/*" id="file" aria-label="Своё фото цели"></label><p class="xs mut" style="margin:8px 0 0">Своё фото уменьшается и остаётся на этом устройстве. Партнёр увидит его в общей покупке. Ниже — рисунки и свободные фото для показа.</p><div class="thumbs">${PHOTOS.map(p => `<button data-photo="${p[0]}" aria-label="${p[1]}"><img loading="lazy" src="${srcOf(p[0])}" alt=""></button>`).join('')}</div>`,
   weeksum: () => { const p = active(S.who)[0], wk = weekRow(S.who); return `<h3 class="disp">Итоги недели</h3><p class="big disp">${wk.done} ${plural(wk.done, 'шаг', 'шага', 'шагов')} из 7</p><p>${wk.done >= 5 ? 'Кадр недели проявлен.' : 'До кадра недели не хватило ' + (5 - wk.done) + '. Следующая неделя начинается с чистого кадра — ничего не сгорело.'}</p>${p ? `<p class="mut">До «${esc(p.name)}» — ${daysW(daysTo(p))}.</p>` : ''}${wk.html}<p class="xs mut" style="margin-top:10px">В карточке для друзей нет сумм и процентов.</p><button class="main press" data-act="shareWeek">Поделиться карточкой</button>`; },
   where: () => `<h3 class="disp">Где будут лежать деньги?</h3><p class="mut sm">Отдельное место помогает не потратить отложенное. Партнёр этого не видит.</p>${['Копилка в банке','Вклад','Отдельный счёт','Наличные','На карте, вместе с остальными'].map(x => `<button class="sec2 press" data-where="${x}">${x}</button>`).join('')}`
@@ -1206,7 +1222,7 @@ function v3togetherScr(){ const p = P(); if (!p) return scrList();
   return {notabs:true, html:`<p class="sm mut">Цель сохранена: ${esc(p.name)} к ${dStr(p.dl)}</p>
   <h1 class="h1 disp">Копить вместе с кем-то?</h1>
   <p class="mut">Позовёте — люди увидят цель, срок и свои части, но не ваши деньги.</p>
-  <div class="v3-pair"><button class="sec2 press" data-act="v3alone">Пока сам</button><button class="sec2 press" data-act="v3call">Позвать</button></div>
+  <div class="v3-pair"><button class="sec2 press" data-act="v3alone">Пока только я</button><button class="sec2 press" data-act="v3call">Позвать</button></div>
   <p class="xs mut">Позвать можно и позже — с экрана цели.</p>`}; }
 SCR.together = v3togetherScr;
 
@@ -2162,6 +2178,11 @@ render = function(){ const r = pRender0.apply(this, arguments);
   } catch(e) { console.warn('polish:', e); }
   return r; };
 addEventListener('resize', () => { try { pLayout(); } catch(e) {} });
+/* 7. варианты шрифта пульта (data-font) — Golos Text, Literata, Unbounded подгружаются по требованию */
+let pFontsMore = false;
+new MutationObserver(() => { if (pFontsMore || !document.documentElement.dataset.font) return; pFontsMore = true;
+  const l = document.createElement('link'); l.rel = 'stylesheet'; l.href = 'https://fonts.googleapis.com/css2?family=Golos+Text:wght@400;500;600&family=Literata:opsz,wght@7..72,500;7..72,600&family=Unbounded:wght@500;600&display=swap'; document.head.appendChild(l);
+}).observe(document.documentElement, {attributes:true, attributeFilter:['data-font']});
 
 /* v3 · login */
 /* v3 · login — вход через Сбер ID, VK ID, Яндекс ID, Max */
@@ -2197,6 +2218,85 @@ SCR.data = function(){ const r = lData0.apply(this, arguments), m = me(); if (!r
 
 /* коды доски и карты: ?s=email и ?s=login — лист входа на «Моих данных» */
 V3_SCEN.email = V3_SCEN.login = () => { go('data'); lOpen0('login'); };
+
+/* v3 · polish2 */
+/* v3 · polish2 — третья волна правок под №3 */
+/* 1. «Пришлось взять»: проверка раньше перехвата мотивации (window, фаза захвата) */
+window.addEventListener('submit', e => { const f = e.target; if (!f || f.id !== 'inputf' || f.dataset.k !== 'took') return;
+  const inp = $('#inputv'), p = P(), w = S.who, r = hSum(inp.value, '3 000'), stop = m => { e.preventDefault(); e.stopImmediatePropagation(); hErr(inp, m); };
+  if (r.err) return stop(r.err);
+  if (p && r.n > (p.saved[w] || 0)) return stop((p.saved[w] || 0) > 0 ? 'Отложено ' + rubT(p.saved[w] || 0) + ' — больше взять нельзя.' : 'Отложенного пока нет — взять нечего.');
+  inp.value = String(r.n); }, true);
+/* копейки и номер карты в полях сумм */
+const p2Sum0 = hSum;
+hSum = function(v, ex){ const s = String(v || '').trim(); P_CARD.lastIndex = 0;
+  if (P_CARD.test(s)) { P_CARD.lastIndex = 0; return {err:'Номер карты не нужен — впишите только сумму.'}; } P_CARD.lastIndex = 0;
+  const m = parseMoney(s)[0]; if (m && !m.unit && /\d[.,]\d/.test(m.raw) && m.v < 1000) return {err:'Сумма в рублях, без копеек — например, ' + ex + '.'};
+  return p2Sum0.apply(this, arguments); };
+/* цена больше 50 млн ₽ в форме полей — переспрос */
+let p2BigF = null;
+const p2ValF0 = HVAL.fieldsGo;
+const p2ValFields = () => { const fp = $('#f-price'); if (fp) { const n = hMoney(fp.value); if (n > 5e7 && p2BigF !== n) { p2BigF = n; pErrAt(fp, 'Цена ' + rubT(n) + ' — верно? Нажмите «Посчитать» ещё раз.'); fp.focus(); return false; } }
+  return p2ValF0(); };
+HVAL.fieldsGo = p2ValFields;
+ACT.fieldsGo = function(){ if (!p2ValFields()) return; return hFields0.apply(this, arguments); };
+/* приход: номер карты; подсказки называют кнопку как на экране */
+const p2Inc0 = HVAL.incomeGo;
+HVAL.incomeGo = function(){ const inp = $('#income'); P_CARD.lastIndex = 0; if (inp && P_CARD.test(inp.value || '')) { P_CARD.lastIndex = 0; hErr(inp, 'Номер карты не нужен — уберите его из фразы.'); return false; } P_CARD.lastIndex = 0;
+  const ok = p2Inc0(); const e = document.getElementById('income-err'); if (e) e.textContent = e.textContent.replace('нажмите «Посчитать» ещё раз', 'нажмите «Посчитать «Сегодня»» ещё раз'); return ok; };
+ACT.incomeGo = function(){ if (!HVAL.incomeGo()) return; return hIncome0.apply(this, arguments); };
+/* отзыв пустым не отправляется */
+document.addEventListener('submit', e => { if (e.target.id !== 'fbf') return; const t = e.target.querySelector('textarea');
+  if (t && !t.value.trim()) { e.preventDefault(); e.stopImmediatePropagation(); if (!t.id) t.id = 'fbtext'; hErr(t, 'Напишите, что не так — хватит пары слов.'); } }, true);
+/* отметку «Я отложил(а)» можно отменить в тот же день */
+let p2Last = null;
+const p2Step0 = step;
+step = function(a){ const p = P(), w = S.who, before = p && p.share[w] != null ? (p.saved[w] || 0) : null; const r = p2Step0.apply(this, arguments);
+  const q = p && P(p.id); if (q && before != null && (q.saved[w] || 0) > before) p2Last = {id:q.id, w, v:(q.saved[w] || 0) - before, day:S.off}; return r; };
+ACT.p2Undo = function(){ const l = p2Last; if (!l) return; const p = P(l.id); if (!p) return; p.saved[l.w] = Math.max(0, (p.saved[l.w] || 0) - l.v);
+  const m = S.people[l.w]; m.stepAmt = Math.max(0, (m.stepAmt || 0) - l.v); if (!m.stepAmt) m.stepped = false; if (p.state === 'done') p.state = 'active';
+  p2Last = null; render(true); toast('Отметка отменена.'); };
+/* 2. фраза: название без «хочу», темп «в месяц», пояснения */
+const p2Parse0 = parsePhrase;
+parsePhrase = function(t){ const r = p2Parse0(t), s = String(t || '');
+  if (r && r.name) { r.name = r.name.replace(/^(?:я\s+)?(?:хочу|хотим|хотелось бы|мечтаю о|нужен|нужна|нужно|нужны|надо|куплю|купить|накопить на|коплю на|копим на)\s+/i, '').trim(); if (r.name) r.name = r.name[0].toUpperCase() + r.name.slice(1); }
+  if (r && r.link && r.linkFail && r.name && !/[а-яё]/i.test(r.name)) r.name = 'Товар по ссылке';
+  const rm = s.match(/(?:откладываю|отложу|могу откладывать|буду откладывать|откладываем)\s+([\d\s .,]+\s*(?:тыс[а-яё]*|к(?![а-яё])|k\b)?)\s*(?:₽|руб[а-яё.]*)?\s*(?:в|за|каждый|каждую)\s+(месяц|мес\.?|неделю|день)/i);
+  if (r && rm) { const v = (parseMoney(rm[1])[0] || {}).v || 0; if (v > 0) { const unit = /^нед/i.test(rm[2]) ? 'неделю' : /^д/i.test(rm[2]) ? 'день' : 'месяц'; r.rate = {v, unit}; if (r.price) r.share = r.price; } }
+  return r; };
+const p2Ans0 = SCR.answer;
+scrAnswer = SCR.answer = function(){ const r = p2Ans0.apply(this, arguments), d = S.draft; if (!d || !r || !r.html || !d.dl) return r;
+  const days = Math.max(1, Math.round((d.dl - now()) / DAY)), per = Math.ceil((d.share || 0) / days), echo = /(<p class="ai sm[^"]*">Я понял так:[\s\S]*?<\/p>)/, add = [];
+  if (d.rate) { const k = d.rate.unit === 'день' ? 1 : d.rate.unit === 'неделю' ? 7 : 30.4, got = Math.floor(d.rate.v * days / k), need = Math.ceil((d.share || 0) * k / days);
+    add.push(got >= (d.share || 0) ? 'Если откладывать ' + rubT(d.rate.v) + ' в ' + d.rate.unit + ', к сроку соберётся ' + rubT(got) + ' — хватит.'
+      : 'Если откладывать ' + rubT(d.rate.v) + ' в ' + d.rate.unit + ', к сроку будет ' + rubT(got) + '. Нужно ≈ ' + rubT(need) + ' в ' + d.rate.unit + '.'); }
+  if (/(уже\s+(?:есть|отложен[а-яё]*|накоплен[а-яё]*|скопил[а-яё]*)|отложено|накоплено)\s*\d/i.test(d.text || '') && !/Уже отложенное отметьте/.test(r.html)) add.push('Уже отложенное отметьте после сохранения — «Я отложил(а)».');
+  if (per > 30000) add.push('Это ≈ ' + rubT(per * 30) + ' в месяц. Можно сдвинуть срок или цену — «Поправить».');
+  if (add.length) r.html = r.html.replace(echo, '$1' + add.map(t => '<p class="xs mut">' + t + '</p>').join(''));
+  return r; };
+/* 3. экран цели: строка о выписке, отмена отметки */
+const p2Pur0 = SCR.purchase;
+scrPurchase = SCR.purchase = function(){ const r = p2Pur0.apply(this, arguments), p = P(), w = S.who; if (!p || !r || !r.html || p.share[w] == null) return r;
+  r.html = r.html.replace(/Подтверждено 0(?:\s|&nbsp;)₽ из ([^<]*?)(\s*<button)/, 'Отмечено $1 — сверю с выпиской, когда загрузите её.$2');
+  if (p2Last && p2Last.id === p.id && p2Last.w === w && p2Last.day === S.off)
+    r.html = r.html.replace(/(<p class="mut"[^>]*>[^]*?data-out="perday"[^]*?<\/p>)/, '$1<p class="xs mut">Отмечено сегодня ' + rubT(p2Last.v) + ' · <button class="link sm" data-act="p2Undo">Отменить</button></p>');
+  return r; };
+/* согласие: одна строка видимости, без обрывка */
+const p2Cons0 = SCR.consent;
+scrConsent = SCR.consent = function(){ const r = p2Cons0.apply(this, arguments); if (!r || !r.html) return r;
+  r.html = r.html.replace(/<span class="p-leg">([\s\S]*?) Ваши деньги видите только вы<\/span><span class="p-leg">[\s\S]*?— видят участники<\/span>/, '<span class="p-leg">Ваши деньги видите только вы $1</span>')
+    .replace(/<span class="vis/g, '<span class="p-keep vis');
+  return r; };
+/* 4. значки видимости — только при общих целях; тост — над нижней зоной; альбомная — поток раньше */
+const p2Shared = () => (S.purchases || []).some(p => p.state !== 'archived' && (p.group || Object.keys(p.share || {}).filter(k => p.share[k] != null).length > 1 || p.invited));
+const p2Render0 = render;
+render = function(){ const r = p2Render0.apply(this, arguments);
+  try { const app = $('#app'); if (app) app.classList.toggle('p-solo', !p2Shared());
+    const bar = $('#bottom .bottom'), tabs = $('#tabs'), H = (app && app.clientHeight) || innerHeight, th = tabs && getComputedStyle(tabs).display !== 'none' ? tabs.offsetHeight : 0;
+    if (bar && H < 500 && bar.offsetHeight + th > H * 0.25) { bar.classList.add('p-flow'); bar.style.bottom = ''; $('#view').appendChild(bar); $('#view').style.paddingBottom = (th + 16) + 'px'; }
+    const live = $('#bottom .bottom'); if (app) app.style.setProperty('--p-tb', ((live ? live.offsetHeight : 0) + th + 10) + 'px');
+  } catch(e) { console.warn('polish2:', e); }
+  return r; };
 
 /* v3 · compat */
 const cpFog0 = fogCopy;
