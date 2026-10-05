@@ -24,7 +24,7 @@ try {
   openSheet('how'); ok('how в примере без ссылки на пример', !/Посмотреть пример/.test($('#sheet').innerText)); closeSheet();
   ACT.v3own(); ok('«Создать свою цель» → фраза Э-02', S.scr === 'phrase' && /Что хотите купить и к какому сроку\?/.test(vt()));
   $('#phrase').value = 'Ноутбук 90 тысяч к 1 марта'; ACT.phraseGo();
-  ok('уточнение без партнёра', S.scr === 'clarify' && /Сколько отложите сами/.test(vt()) && /всю сумму сам/.test(vt()), vt().slice(0, 160));
+  ok('уточнение без партнёра', S.scr === 'clarify' && /Какую часть цены отложите вы/.test(vt()) && /всю сумму/.test(vt()) && !/партн/i.test(vt()), vt().slice(0, 160));
   ok('имя разобрано (фикс парсера)', S.draft.name === 'Ноутбук', S.draft.name);
   $('#clar').value = 'плачу сам'; $('#clarf').requestSubmit();
   ok('ответ: «Сохранить цель», блочные строки ответа', S.scr === 'answer' && bt() === 'Сохранить цель' && $$('#view .v3-answer-line').length >= 3 && $$('#view .v3-answer-line').every(x => getComputedStyle(x).display === 'block'), $$('#view .v3-answer-line').length);

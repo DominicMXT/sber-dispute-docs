@@ -1,0 +1,415 @@
+<meta charset="utf-8">
+<title>Доска «Туман» v3</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;600&display=swap">
+<style>
+/* Доска макетов: полоса решений сверху, затем ряды телефонов по сценариям; токены — палитра «Туман» из prototype/DESIGN.md */
+:root{--bg:#F3F3F1;--card:#FFFFFF;--ink:#1A1A19;--ink2:#5E5E5A;--line:#DADAD5;
+  --accent:#1F4B5C;--on-accent:#FFFFFF;--soft:#E9EEF0;--film:#E4E4E0;--warm:#7A5A12;
+  --f:'Onest',system-ui,-apple-system,'Segoe UI',sans-serif;--s:.5}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){--bg:#121415;--card:#1D2022;--ink:#F1F0EC;
+  --ink2:#CBCFD2;--line:#53595C;--accent:#9AC8D6;--on-accent:#06222B;
+  --soft:#1F2A2E;--film:#2A2E31;--warm:#E3C078;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#121415;--card:#1D2022;--ink:#F1F0EC;
+  --ink2:#CBCFD2;--line:#53595C;--accent:#9AC8D6;--on-accent:#06222B;
+  --soft:#1F2A2E;--film:#2A2E31;--warm:#E3C078;color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:400 1rem/1.45 var(--f);margin:0}
+.wrap{max-width:1240px;margin:0 auto;padding-inline:clamp(16px,4vw,40px);padding-block:28px 64px;display:grid;gap:40px}
+a{color:var(--accent)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px;border-radius:6px}
+h1{font-size:clamp(1.75rem,4vw,2.5rem);font-weight:600;letter-spacing:-.022em;line-height:1.05;margin:0;text-wrap:balance}
+h2{font-size:1.25rem;font-weight:600;letter-spacing:-.015em;margin:0;text-wrap:balance}
+.eyebrow{font-size:.8125rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink2);margin:0 0 8px}
+.lead{color:var(--ink2);max-width:62ch;margin:10px 0 0}
+.top{display:grid;gap:20px;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);align-items:start}
+@media (max-width:820px){.top{grid-template-columns:1fr}}
+.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:20px}
+.fact{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;min-width:0}
+.fact span{display:block;font-size:.8125rem;color:var(--ink2)}
+.fact b{display:block;font-weight:600;font-size:.9375rem;margin-top:2px}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:22px;padding:18px 20px;min-width:0}
+.panel h2{font-size:1rem;margin-bottom:10px}
+.open{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.open li{display:grid;grid-template-columns:auto 1fr;gap:10px;font-size:.9375rem;align-items:baseline}
+.who{font-size:.75rem;font-weight:600;letter-spacing:.03em;padding:2px 8px;border-radius:999px;background:var(--soft);color:var(--accent);white-space:nowrap}
+.who.w{background:var(--film);color:var(--warm)}
+.palette{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
+@media (max-width:620px){.palette{grid-template-columns:1fr}}
+.sw{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.sw li{display:grid;grid-template-columns:28px 1fr;grid-template-rows:auto auto;column-gap:10px;font-size:.8125rem;align-items:center}
+.sw .chip{grid-row:span 2;width:28px;height:28px;border-radius:8px;border:1px solid var(--line)}
+.sw b{font-weight:500} .sw code{font:500 .75rem/1.2 ui-monospace,Consolas,monospace;color:var(--ink2)}
+.theme{border-radius:16px;padding:14px;border:1px solid var(--line)}
+.theme h3{font-size:.875rem;font-weight:600;margin:0 0 10px}
+.theme.dark{background:#121415;color:#F1F0EC;border-color:#53595C}
+.theme.dark code{color:#CBCFD2}
+.theme.light{background:#F3F3F1;color:#1A1A19;border-color:#DADAD5}
+.theme.light code{color:#5E5E5A}
+.group{display:grid;gap:16px}
+.group header{display:grid;grid-template-columns:1fr auto;gap:4px 16px;align-items:baseline;border-top:1px solid var(--line);padding-top:18px}
+.group header p{grid-column:1;margin:0;color:var(--ink2);font-size:.9375rem;max-width:62ch}
+.count{grid-row:1/span 2;grid-column:2;font-size:2rem;font-weight:600;color:var(--ink2);font-variant-numeric:tabular-nums}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(375px*var(--s) + 24px),1fr));gap:22px 18px}
+.tile{margin:0;display:grid;gap:8px;justify-items:center;min-width:0}
+.phone{width:calc(375px*var(--s));height:calc(812px*var(--s));border-radius:calc(44px*var(--s));overflow:hidden;
+  background:var(--film);box-shadow:0 0 0 calc(8px*var(--s)) var(--ink),0 10px 24px rgba(0,0,0,.14);position:relative}
+.phone iframe{width:375px;height:812px;border:0;transform:scale(var(--s));transform-origin:0 0;position:absolute;left:0;top:0;background:var(--card)}
+figcaption{display:grid;gap:2px;text-align:center;font-size:.8125rem;max-width:calc(375px*var(--s) + 24px)}
+figcaption span{font-weight:500}
+figcaption a{font:500 .75rem/1.3 ui-monospace,Consolas,monospace;text-decoration:none}
+figcaption a:hover{text-decoration:underline}
+.zoom{display:flex;gap:6px;align-items:center;font-size:.8125rem;color:var(--ink2)}
+.zoom button{font:inherit;font-weight:500;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;padding:6px 12px;min-height:36px;cursor:pointer}
+.zoom button[aria-pressed="true"]{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.toc{display:flex;flex-wrap:wrap;gap:8px}
+.toc a{font-size:.875rem;padding:6px 12px;border-radius:999px;background:var(--soft);text-decoration:none;font-weight:500}
+footer{color:var(--ink2);font-size:.8125rem;border-top:1px solid var(--line);padding-top:16px}
+</style>
+
+<div class="wrap">
+  <div class="top">
+    <div>
+      <p class="eyebrow">Finance Assistant · v3 после ревью · 05.10.2026</p>
+      <h1>Доска «Туман» v3</h1>
+      <p class="lead">Все 62 состояния прототипа на одной странице. Каждый экран живой: его можно листать и нажимать. Ссылка под экраном открывает его во весь размер.</p>
+      <div class="facts">
+        <div class="fact"><span>Основа</span><b>shadcn/ui + Tailwind v4</b></div>
+        <div class="fact"><span>Шрифт</span><b>Onest</b></div>
+        <div class="fact"><span>Контраст</span><b>WCAG AA + APCA</b></div>
+        <div class="fact"><span>Объём</span><b>Р1 + Р2: один и группа</b></div>
+      </div>
+    </div>
+    <aside class="panel" aria-label="Открытые вопросы">
+      <h2>Что ещё не решено</h2>
+      <ul class="open">
+        <li><span class="who">фронт</span>На какой библиотеке собран каркас — если не shadcn, переход стоит времени</li>
+        <li><span class="who">разработка</span>Будут ли функции Р2 к открытию 08–10.10 и новые сроки Р1 и Р2 — таблица часов к 07.10</li>
+        <li><span class="who w">владелец</span>Бот в Max в Р1: без него утреннего числа нет, в Telegram суммы не приходят</li>
+        <li><span class="who">юрист</span>Виза на сокращённые листы о данных: Л-01 — 30 слов, полный текст по «Подробнее»</li>
+        <li><span class="who w">владелец</span>4 интервью P10–P13 на прототипе: «дни копилки», значки видимости, пример</li>
+      </ul>
+    </aside>
+  </div>
+
+  <section class="panel" aria-labelledby="pal">
+    <h2 id="pal">Палитра из DESIGN.md</h2>
+    <div class="palette">
+      <div class="theme light"><h3>Светлая тема</h3><ul class="sw"><li><span class="chip" style="background:#F3F3F1"></span><b>Фон</b><code>#F3F3F1</code></li>
+<li><span class="chip" style="background:#FFFFFF"></span><b>Карточка</b><code>#FFFFFF</code></li>
+<li><span class="chip" style="background:#1A1A19"></span><b>Текст</b><code>#1A1A19</code></li>
+<li><span class="chip" style="background:#5E5E5A"></span><b>Второстепенный</b><code>#5E5E5A</code></li>
+<li><span class="chip" style="background:#1F4B5C"></span><b>Главная кнопка</b><code>#1F4B5C</code></li>
+<li><span class="chip" style="background:#E9EEF0"></span><b>Видят участники</b><code>#E9EEF0</code></li>
+<li><span class="chip" style="background:#E4E4E0"></span><b>Плёнка фото</b><code>#E4E4E0</code></li>
+<li><span class="chip" style="background:#DDE3E6"></span><b>Подложка полосы</b><code>#DDE3E6</code></li>
+<li><span class="chip" style="background:#2D7C93"></span><b>Прогресс</b><code>#2D7C93</code></li>
+<li><span class="chip" style="background:#2D6A3E"></span><b>Сходится</b><code>#2D6A3E</code></li>
+<li><span class="chip" style="background:#7A5A12"></span><b>Тёплый</b><code>#7A5A12</code></li>
+<li><span class="chip" style="background:#82827C"></span><b>Рамка поля</b><code>#82827C</code></li></ul></div>
+      <div class="theme dark"><h3>Тёмная тема</h3><ul class="sw"><li><span class="chip" style="background:#121415"></span><b>Фон</b><code>#121415</code></li>
+<li><span class="chip" style="background:#1D2022"></span><b>Карточка</b><code>#1D2022</code></li>
+<li><span class="chip" style="background:#F1F0EC"></span><b>Текст</b><code>#F1F0EC</code></li>
+<li><span class="chip" style="background:#CBCFD2"></span><b>Второстепенный</b><code>#CBCFD2</code></li>
+<li><span class="chip" style="background:#9AC8D6"></span><b>Главная кнопка</b><code>#9AC8D6</code></li>
+<li><span class="chip" style="background:#1F2A2E"></span><b>Видят участники</b><code>#1F2A2E</code></li>
+<li><span class="chip" style="background:#2A2E31"></span><b>Плёнка фото</b><code>#2A2E31</code></li>
+<li><span class="chip" style="background:#0B0D0E"></span><b>Подложка полосы</b><code>#0B0D0E</code></li>
+<li><span class="chip" style="background:#5398AA"></span><b>Прогресс</b><code>#5398AA</code></li>
+<li><span class="chip" style="background:#8BC69D"></span><b>Сходится</b><code>#8BC69D</code></li>
+<li><span class="chip" style="background:#E3C078"></span><b>Тёплый</b><code>#E3C078</code></li>
+<li><span class="chip" style="background:#7C8386"></span><b>Рамка поля</b><code>#7C8386</code></li></ul></div>
+    </div>
+  </section>
+
+  <nav class="toc" aria-label="Сценарии"><a href="#g-1">Первый вход · 6</a><a href="#g-2">Покупка и фото цели · 12</a><a href="#g-3">Глазами партнёра · 4</a><a href="#g-4">Сегодня на себя · 5</a><a href="#g-5">Выписка · 4</a><a href="#g-6">Бот и мои данные · 8</a><a href="#g-7">Р2 · вход и своя цель · 4</a><a href="#g-8">Р2 · общая цель · 7</a><a href="#g-9">Р2 · мотивация · 6</a><a href="#g-10">Р2 · тема · 1</a><a href="#g-11">Ссылки и сбои · 5</a></nav>
+  <div class="zoom" role="group" aria-label="Размер экранов">Размер экранов:
+    <button type="button" data-s=".42" aria-pressed="false">мельче</button>
+    <button type="button" data-s=".5" aria-pressed="true">обычный</button>
+    <button type="button" data-s=".7" aria-pressed="false">крупнее</button>
+  </div>
+
+  <section class="group" id="g-1">
+  <header><h2>Первый вход</h2><p>Знакомство, согласие и первая фраза — до регистрации и до партнёра.</p><span class="count">6</span></header>
+  <div class="tiles"><figure class="tile">
+  <div class="phone"><iframe title="Знакомство, Э-01" loading="lazy" src="proto.html?clean#fresh" tabindex="-1"></iframe></div>
+  <figcaption><span>Знакомство, Э-01</span><a href="proto.html#fresh" target="_blank" rel="noopener">fresh ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Согласие, Э-01" loading="lazy" src="proto.html?clean#consent" tabindex="-1"></iframe></div>
+  <figcaption><span>Согласие, Э-01</span><a href="proto.html#consent" target="_blank" rel="noopener">consent ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Фраза о покупке, Э-02" loading="lazy" src="proto.html?clean#phrase" tabindex="-1"></iframe></div>
+  <figcaption><span>Фраза о покупке, Э-02</span><a href="proto.html#phrase" target="_blank" rel="noopener">phrase ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Ответ: сходится или нет, Э-05" loading="lazy" src="proto.html?clean#answer" tabindex="-1"></iframe></div>
+  <figcaption><span>Ответ: сходится или нет, Э-05</span><a href="proto.html#answer" target="_blank" rel="noopener">answer ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Отправить партнёру, Э-06" loading="lazy" src="proto.html?clean#share" tabindex="-1"></iframe></div>
+  <figcaption><span>Отправить партнёру, Э-06</span><a href="proto.html#share" target="_blank" rel="noopener">share ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Мои покупки, Э-07" loading="lazy" src="proto.html?clean#list" tabindex="-1"></iframe></div>
+  <figcaption><span>Мои покупки, Э-07</span><a href="proto.html#list" target="_blank" rel="noopener">list ↗</a></figcaption>
+</figure></div>
+</section><section class="group" id="g-2">
+  <header><h2>Покупка и фото цели</h2><p>Туман на фото проясняется по мере того, как пара откладывает.</p><span class="count">12</span></header>
+  <div class="tiles"><figure class="tile">
+  <div class="phone"><iframe title="Покупка на полпути, Э-08" loading="lazy" src="proto.html?clean#mid" tabindex="-1"></iframe></div>
+  <figcaption><span>Покупка на полпути, Э-08</span><a href="proto.html#mid" target="_blank" rel="noopener">mid ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="День зарплаты" loading="lazy" src="proto.html?clean#payday" tabindex="-1"></iframe></div>
+  <figcaption><span>День зарплаты</span><a href="proto.html#payday" target="_blank" rel="noopener">payday ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Кадр недели" loading="lazy" src="proto.html?clean#week" tabindex="-1"></iframe></div>
+  <figcaption><span>Кадр недели</span><a href="proto.html#week" target="_blank" rel="noopener">week ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Цена изменилась" loading="lazy" src="proto.html?clean#price" tabindex="-1"></iframe></div>
+  <figcaption><span>Цена изменилась</span><a href="proto.html#price" target="_blank" rel="noopener">price ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Собрано" loading="lazy" src="proto.html?clean#done" tabindex="-1"></iframe></div>
+  <figcaption><span>Собрано</span><a href="proto.html#done" target="_blank" rel="noopener">done ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Лист «Как это работает?», Л-14" loading="lazy" src="proto.html?clean#how" tabindex="-1"></iframe></div>
+  <figcaption><span>Лист «Как это работает?», Л-14</span><a href="proto.html#how" target="_blank" rel="noopener">how ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Вопрос о прошлой покупке, Л-15" loading="lazy" src="proto.html?clean#askq" tabindex="-1"></iframe></div>
+  <figcaption><span>Вопрос о прошлой покупке, Л-15</span><a href="proto.html#askq" target="_blank" rel="noopener">askq ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Фото цели, Л-16" loading="lazy" src="proto.html?clean#photo" tabindex="-1"></iframe></div>
+  <figcaption><span>Фото цели, Л-16</span><a href="proto.html#photo" target="_blank" rel="noopener">photo ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Сколько отложили, Л-02" loading="lazy" src="proto.html?clean#save" tabindex="-1"></iframe></div>
+  <figcaption><span>Сколько отложили, Л-02</span><a href="proto.html#save" target="_blank" rel="noopener">save ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Изменить покупку, Л-03" loading="lazy" src="proto.html?clean#change" tabindex="-1"></iframe></div>
+  <figcaption><span>Изменить покупку, Л-03</span><a href="proto.html#change" target="_blank" rel="noopener">change ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Где лежат деньги, Л-12" loading="lazy" src="proto.html?clean#where" tabindex="-1"></iframe></div>
+  <figcaption><span>Где лежат деньги, Л-12</span><a href="proto.html#where" target="_blank" rel="noopener">where ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Итоги недели, Л-13" loading="lazy" src="proto.html?clean#weeksum" tabindex="-1"></iframe></div>
+  <figcaption><span>Итоги недели, Л-13</span><a href="proto.html#weeksum" target="_blank" rel="noopener">weeksum ↗</a></figcaption>
+</figure></div>
+</section><section class="group" id="g-3">
+  <header><h2>Глазами партнёра</h2><p>Партнёр видит покупку и свою часть — без сумм второго.</p><span class="count">4</span></header>
+  <div class="tiles"><figure class="tile">
+  <div class="phone"><iframe title="Партнёр отложил" loading="lazy" src="proto.html?clean#partner" tabindex="-1"></iframe></div>
+  <figcaption><span>Партнёр отложил</span><a href="proto.html#partner" target="_blank" rel="noopener">partner ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Покупка у партнёра, Э-11" loading="lazy" src="proto.html?clean#anya-purchase" tabindex="-1"></iframe></div>
+  <figcaption><span>Покупка у партнёра, Э-11</span><a href="proto.html#anya-purchase" target="_blank" rel="noopener">anya-purchase ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Где деньги — у партнёра" loading="lazy" src="proto.html?clean#anya-where" tabindex="-1"></iframe></div>
+  <figcaption><span>Где деньги — у партнёра</span><a href="proto.html#anya-where" target="_blank" rel="noopener">anya-where ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Ссылка уже использована, Э-10" loading="lazy" src="proto.html?clean#used" tabindex="-1"></iframe></div>
+  <figcaption><span>Ссылка уже использована, Э-10</span><a href="proto.html#used" target="_blank" rel="noopener">used ↗</a></figcaption>
+</figure></div>
+</section><section class="group" id="g-4">
+  <header><h2>Сегодня на себя</h2><p>Частая работа: сколько можно потратить сегодня и влезет ли трата.</p><span class="count">5</span></header>
+  <div class="tiles"><figure class="tile">
+  <div class="phone"><iframe title="Сегодня, Э-14" loading="lazy" src="proto.html?clean#today" tabindex="-1"></iframe></div>
+  <figcaption><span>Сегодня, Э-14</span><a href="proto.html#today" target="_blank" rel="noopener">today ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Приходы и обязательные, Э-13" loading="lazy" src="proto.html?clean#income" tabindex="-1"></iframe></div>
+  <figcaption><span>Приходы и обязательные, Э-13</span><a href="proto.html#income" target="_blank" rel="noopener">income ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Источник денег, Э-12" loading="lazy" src="proto.html?clean#source" tabindex="-1"></iframe></div>
+  <figcaption><span>Источник денег, Э-12</span><a href="proto.html#source" target="_blank" rel="noopener">source ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Напоминать в день зарплаты, Л-06" loading="lazy" src="proto.html?clean#remind" tabindex="-1"></iframe></div>
+  <figcaption><span>Напоминать в день зарплаты, Л-06</span><a href="proto.html#remind" target="_blank" rel="noopener">remind ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Трата скриншотом, Л-09" loading="lazy" src="proto.html?clean#shot" tabindex="-1"></iframe></div>
+  <figcaption><span>Трата скриншотом, Л-09</span><a href="proto.html#shot" target="_blank" rel="noopener">shot ↗</a></figcaption>
+</figure></div>
+</section><section class="group" id="g-5">
+  <header><h2>Выписка</h2><p>Выписка вместо подключения к банку: разбор, советы и сверка отметок.</p><span class="count">4</span></header>
+  <div class="tiles"><figure class="tile">
+  <div class="phone"><iframe title="Что возьму, Э-15" loading="lazy" src="proto.html?clean#stmtIntro" tabindex="-1"></iframe></div>
+  <figcaption><span>Что возьму, Э-15</span><a href="proto.html#stmtIntro" target="_blank" rel="noopener">stmtIntro ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Разбор и советы, Э-16" loading="lazy" src="proto.html?clean#stmtResult" tabindex="-1"></iframe></div>
+  <figcaption><span>Разбор и советы, Э-16</span><a href="proto.html#stmtResult" target="_blank" rel="noopener">stmtResult ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Сверка отметок" loading="lazy" src="proto.html?clean#recon" tabindex="-1"></iframe></div>
+  <figcaption><span>Сверка отметок</span><a href="proto.html#recon" target="_blank" rel="noopener">recon ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Чужой формат файла" loading="lazy" src="proto.html?clean#format" tabindex="-1"></iframe></div>
+  <figcaption><span>Чужой формат файла</span><a href="proto.html#format" target="_blank" rel="noopener">format ↗</a></figcaption>
+</figure></div>
+</section><section class="group" id="g-6">
+  <header><h2>Бот и мои данные</h2><p>Бот в мессенджере без сумм; данные удаляются одной кнопкой.</p><span class="count">8</span></header>
+  <div class="tiles"><figure class="tile">
+  <div class="phone"><iframe title="Чат с ботом, Э-19" loading="lazy" src="proto.html?clean#bot" tabindex="-1"></iframe></div>
+  <figcaption><span>Чат с ботом, Э-19</span><a href="proto.html#bot" target="_blank" rel="noopener">bot ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Бот выключен" loading="lazy" src="proto.html?clean#botoff" tabindex="-1"></iframe></div>
+  <figcaption><span>Бот выключен</span><a href="proto.html#botoff" target="_blank" rel="noopener">botoff ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Мои данные, Э-17" loading="lazy" src="proto.html?clean#data" tabindex="-1"></iframe></div>
+  <figcaption><span>Мои данные, Э-17</span><a href="proto.html#data" target="_blank" rel="noopener">data ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Как мы обращаемся с данными, Л-01" loading="lazy" src="proto.html?clean#policy" tabindex="-1"></iframe></div>
+  <figcaption><span>Как мы обращаемся с данными, Л-01</span><a href="proto.html#policy" target="_blank" rel="noopener">policy ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="На главный экран, Л-07" loading="lazy" src="proto.html?clean#install" tabindex="-1"></iframe></div>
+  <figcaption><span>На главный экран, Л-07</span><a href="proto.html#install" target="_blank" rel="noopener">install ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Сохранить доступ, Л-08" loading="lazy" src="proto.html?clean#email" tabindex="-1"></iframe></div>
+  <figcaption><span>Сохранить доступ, Л-08</span><a href="proto.html#email" target="_blank" rel="noopener">email ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Что не так?, Л-10" loading="lazy" src="proto.html?clean#feedback" tabindex="-1"></iframe></div>
+  <figcaption><span>Что не так?, Л-10</span><a href="proto.html#feedback" target="_blank" rel="noopener">feedback ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Данные удалены, Э-18" loading="lazy" src="proto.html?clean#deleted" tabindex="-1"></iframe></div>
+  <figcaption><span>Данные удалены, Э-18</span><a href="proto.html#deleted" target="_blank" rel="noopener">deleted ↗</a></figcaption>
+</figure></div>
+</section><section class="group" id="g-7">
+  <header><h2>Р2 · вход и своя цель</h2><p>После согласия — пример чужой цели, потом своя; копить можно одному.</p><span class="count">4</span></header>
+  <div class="tiles"><figure class="tile">
+  <div class="phone"><iframe title="Пример цели, Э-08" loading="lazy" src="proto.html?clean#example" tabindex="-1"></iframe></div>
+  <figcaption><span>Пример цели, Э-08</span><a href="proto.html#example" target="_blank" rel="noopener">example ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Своя цель одного" loading="lazy" src="proto.html?clean#solo" tabindex="-1"></iframe></div>
+  <figcaption><span>Своя цель одного</span><a href="proto.html#solo" target="_blank" rel="noopener">solo ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Копить вместе?, Э-06" loading="lazy" src="proto.html?clean#together" tabindex="-1"></iframe></div>
+  <figcaption><span>Копить вместе?, Э-06</span><a href="proto.html#together" target="_blank" rel="noopener">together ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Пусто: пример и кнопка" loading="lazy" src="proto.html?clean#empty" tabindex="-1"></iframe></div>
+  <figcaption><span>Пусто: пример и кнопка</span><a href="proto.html#empty" target="_blank" rel="noopener">empty ↗</a></figcaption>
+</figure></div>
+</section><section class="group" id="g-8">
+  <header><h2>Р2 · общая цель</h2><p>Вдвоём — только «сходится / нет»; на 3–6 — общий прогресс шагом 10 %. Чужих сумм нет.</p><span class="count">7</span></header>
+  <div class="tiles"><figure class="tile">
+  <div class="phone"><iframe title="Приглашение в общую цель" loading="lazy" src="proto.html?clean#groupInvite" tabindex="-1"></iframe></div>
+  <figcaption><span>Приглашение в общую цель</span><a href="proto.html#groupInvite" target="_blank" rel="noopener">groupInvite ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Позвать: ссылка" loading="lazy" src="proto.html?clean#groupShare" tabindex="-1"></iframe></div>
+  <figcaption><span>Позвать: ссылка</span><a href="proto.html#groupShare" target="_blank" rel="noopener">groupShare ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Цель на двоих" loading="lazy" src="proto.html?clean#group2" tabindex="-1"></iframe></div>
+  <figcaption><span>Цель на двоих</span><a href="proto.html#group2" target="_blank" rel="noopener">group2 ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="На двоих глазами Ани" loading="lazy" src="proto.html?clean#anya-group2" tabindex="-1"></iframe></div>
+  <figcaption><span>На двоих глазами Ани</span><a href="proto.html#anya-group2" target="_blank" rel="noopener">anya-group2 ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="На двоих: второй сделал шаг" loading="lazy" src="proto.html?clean#group2step" tabindex="-1"></iframe></div>
+  <figcaption><span>На двоих: второй сделал шаг</span><a href="proto.html#group2step" target="_blank" rel="noopener">group2step ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Цель на четверых" loading="lazy" src="proto.html?clean#group3" tabindex="-1"></iframe></div>
+  <figcaption><span>Цель на четверых</span><a href="proto.html#group3" target="_blank" rel="noopener">group3 ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="На четверых глазами Ани" loading="lazy" src="proto.html?clean#anya-group3" tabindex="-1"></iframe></div>
+  <figcaption><span>На четверых глазами Ани</span><a href="proto.html#anya-group3" target="_blank" rel="noopener">anya-group3 ↗</a></figcaption>
+</figure></div>
+</section><section class="group" id="g-9">
+  <header><h2>Р2 · мотивация</h2><p>Поддержка без давления: цена траты в днях цели, срыв без обнуления, счёт недель.</p><span class="count">6</span></header>
+  <div class="tiles"><figure class="tile">
+  <div class="phone"><iframe title="«Влезет ли» с ценой в днях" loading="lazy" src="proto.html?clean#dayprice" tabindex="-1"></iframe></div>
+  <figcaption><span>«Влезет ли» с ценой в днях</span><a href="proto.html#dayprice" target="_blank" rel="noopener">dayprice ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Взяли из отложенного" loading="lazy" src="proto.html?clean#slip" tabindex="-1"></iframe></div>
+  <figcaption><span>Взяли из отложенного</span><a href="proto.html#slip" target="_blank" rel="noopener">slip ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Предложение сдвинуть срок" loading="lazy" src="proto.html?clean#slipPropose" tabindex="-1"></iframe></div>
+  <figcaption><span>Предложение сдвинуть срок</span><a href="proto.html#slipPropose" target="_blank" rel="noopener">slipPropose ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Счёт недель по плану" loading="lazy" src="proto.html?clean#weeks" tabindex="-1"></iframe></div>
+  <figcaption><span>Счёт недель по плану</span><a href="proto.html#weeks" target="_blank" rel="noopener">weeks ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Итоги недели в группе" loading="lazy" src="proto.html?clean#weeksum3" tabindex="-1"></iframe></div>
+  <figcaption><span>Итоги недели в группе</span><a href="proto.html#weeksum3" target="_blank" rel="noopener">weeksum3 ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Собрано — следующая цель" loading="lazy" src="proto.html?clean#nextgoal" tabindex="-1"></iframe></div>
+  <figcaption><span>Собрано — следующая цель</span><a href="proto.html#nextgoal" target="_blank" rel="noopener">nextgoal ↗</a></figcaption>
+</figure></div>
+</section><section class="group" id="g-10">
+  <header><h2>Р2 · тема</h2><p>«Как в системе», светлая и тёмная — в «Моих данных».</p><span class="count">1</span></header>
+  <div class="tiles"><figure class="tile">
+  <div class="phone"><iframe title="Выбор темы" loading="lazy" src="proto.html?clean#themeSet" tabindex="-1"></iframe></div>
+  <figcaption><span>Выбор темы</span><a href="proto.html#themeSet" target="_blank" rel="noopener">themeSet ↗</a></figcaption>
+</figure></div>
+</section><section class="group" id="g-11">
+  <header><h2>Ссылки и сбои</h2><p>Что видит человек, когда что-то пошло не так.</p><span class="count">5</span></header>
+  <div class="tiles"><figure class="tile">
+  <div class="phone"><iframe title="Две цены по ссылке" loading="lazy" src="proto.html?clean#linkTwo" tabindex="-1"></iframe></div>
+  <figcaption><span>Две цены по ссылке</span><a href="proto.html#linkTwo" target="_blank" rel="noopener">linkTwo ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Страница не открылась" loading="lazy" src="proto.html?clean#linkFail" tabindex="-1"></iframe></div>
+  <figcaption><span>Страница не открылась</span><a href="proto.html#linkFail" target="_blank" rel="noopener">linkFail ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Ссылка не на товар" loading="lazy" src="proto.html?clean#linkNot" tabindex="-1"></iframe></div>
+  <figcaption><span>Ссылка не на товар</span><a href="proto.html#linkNot" target="_blank" rel="noopener">linkNot ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Нет сети" loading="lazy" src="proto.html?clean#offline" tabindex="-1"></iframe></div>
+  <figcaption><span>Нет сети</span><a href="proto.html#offline" target="_blank" rel="noopener">offline ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Лимит вызовов модели" loading="lazy" src="proto.html?clean#limit" tabindex="-1"></iframe></div>
+  <figcaption><span>Лимит вызовов модели</span><a href="proto.html#limit" target="_blank" rel="noopener">limit ↗</a></figcaption>
+</figure></div>
+</section>
+
+  <footer>Эталон — prototype/2026-10-04_fog-prototype-v3.html (v2 + модули prototype/v3, сборка build_v3.py); токены — prototype/DESIGN.md, finance-assistant.tokens.json. Экраны входа Э-17, Э-20, Л-17 и новый Л-08 появятся перед Р2. Фото цели — CC0, Wikimedia Commons.</footer>
+</div>
+<script>
+(function(){
+  var btns=document.querySelectorAll('.zoom button');
+  function set(v){document.documentElement.style.setProperty('--s',v);btns.forEach(function(b){b.setAttribute('aria-pressed',String(b.dataset.s===v));});
+    try{localStorage.setItem('board-s',v);}catch(e){}}
+  btns.forEach(function(b){b.addEventListener('click',function(){set(b.dataset.s);});});
+  try{var v=localStorage.getItem('board-s');if(v)set(v);}catch(e){}
+})();
+</script>

@@ -131,7 +131,7 @@ const SCEN = [
   { id: 'K1', cs: 'случай 4', what: 'один пропуск — один вопрос, два — поля', start: 'phrase',
     act: () => { const out = {}; $('#phrase').value = 'Ноутбук 90 тысяч к 1 марта'; ACT.phraseGo(); out.one = S.scr + ' :: ' + $('#view').innerText.replace(/\n+/g, ' ').slice(0, 150);
       go('phrase'); $('#phrase').value = 'Ноутбук 90 тысяч'; ACT.phraseGo(); out.two = S.scr; return out; },
-    ok: o => /^clarify/.test(o.one) && /Сколько отложите сами/.test(o.one) && o.two === 'fields' },
+    ok: o => /^clarify/.test(o.one) && /Какую часть цены отложите вы/.test(o.one) && o.two === 'fields' },
   { id: 'K2', cs: 'случай 5', what: 'срок в прошлом → «Срок уже прошёл — на какую дату переносим?»', start: 'phrase',
     act: () => { $('#phrase').value = 'Ноутбук 90 тысяч к 1 сентября 2026, я могу 40'; ACT.phraseGo(); return S.scr + ' :: ' + $('#view').innerText.replace(/\n+/g, ' ').slice(0, 150); },
     ok: o => /прош/i.test(o) && !/^answer/.test(o) },

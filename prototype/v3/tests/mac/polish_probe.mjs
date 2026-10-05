@@ -1,0 +1,72 @@
+import { createRequire } from 'module';
+import { pathToFileURL } from 'url';
+const require = createRequire(process.cwd() + '/package.json');
+const { chromium } = require('playwright');
+const f = pathToFileURL(process.argv[2]).href;
+const b = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe' });
+const errs = [];
+async function pg(vp = { width: 375, height: 812 }, q = '?clean&s=fresh') { const p = await b.newPage({ viewport: vp }); p.on('pageerror', e => errs.push(e.message)); await p.goto(f + q); await p.waitForTimeout(300); return p; }
+const vt = p => p.evaluate(() => document.querySelector('#view').innerText.replace(/\s+/g, ' ').slice(0, 260));
+const res = [];
+const ok = (n, c, d) => { res.push((c ? 'PASS ' : 'FAIL ') + n + (c ? '' : ' :: ' + d)); };
+const p = await pg({ width: 375, height: 812 }, '?clean&s=phrase');
+const phrase = async t => p.evaluate(t => { S.draft = null; go('phrase'); render(); $('#phrase').value = t; ACT.phraseGo(); const e = document.getElementById('phrase-err'); return { scr: S.scr, err: e ? e.textContent : '', d: S.draft && { name: S.draft.name, price: S.draft.price, dl: S.draft.dl, pastDl: S.draft.pastDl, badDl: S.draft.badDl } }; }, t);
+let r = await phrase('Яхта 900 миллиардов к 1 мая'); ok('900 миллиардов → подтверждение цены', /900\s000\s000\s000/.test(r.err), JSON.stringify(r));
+r = await p.evaluate(() => { ACT.phraseGo(); return { scr: S.scr, price: S.draft && S.draft.price }; }); ok('второе нажатие → дальше, цена 9e11', r.price === 9e11 && r.scr !== 'phrase', JSON.stringify(r));
+r = await phrase('Шуба 10 миллионов к 1 мая, откладываю 10 миллионов'); ok('10 миллионов → 10 000 000', r.d && r.d.price === 1e7, JSON.stringify(r));
+r = await phrase('Диван -50000 к 1 мая'); ok('минус во фразе → ошибка', /отрицательной/.test(r.err) && r.scr === 'phrase', JSON.stringify(r));
+r = await phrase('Диван 50000 к 1 января 2020'); ok('прошедший срок с годом → причина видна (вопрос или поле)', /Срок уже прошёл/.test(await vt(p)) && !/Пустое подсвечено/.test(await vt(p)), r.scr + ' ' + await vt(p));
+r = await phrase('Диван к 32 декабря'); const fdl = await p.evaluate(() => ({ v: ($('#f-dl') || {}).value, e: (document.getElementById('f-dl-err') || {}).textContent, sub: ($('#view h1 + p.mut') || {}).textContent }));
+ok('32 декабря + нет цены → поля, дата в поле с причиной', r.scr === 'fields' && fdl.v === '32 декабря' && /Такой даты нет/.test(fdl.e) && !/Пустое/.test(fdl.sub), JSON.stringify({ r, fdl }));
+r = await phrase('Диван 90 000 к 32 декабря, откладываю 90 000'); ok('32 декабря, остальное есть → вопрос «Такой даты нет»', r.scr === 'clarify' && /Такой даты нет/.test(await vt(p)), await vt(p));
+r = await phrase('Ноутбук 90 тысяч к 15.11, всю сам'); ok('«к 15.11» → срок', r.d && r.d.dl === Date.UTC(2026, 10, 15), JSON.stringify(r));
+r = await phrase('Ноутбук 90 тысяч через 3 месяца'); ok('«через 3 месяца» → срок 1 января', r.d && r.d.dl === Date.UTC(2027, 0, 1), JSON.stringify(r));
+r = await phrase('Ноутбук 1.5 тысячи к 1 мая'); ok('«1.5 тысячи» не дата', r.d && r.d.price === 1500, JSON.stringify(r));
+r = await phrase('https://example.com/item/123 к 1 мая'); ok('чужая ссылка → «не открылась», без «Диван Осло»', r.scr === 'clarify' && /не открылась/.test(await vt(p)) && !/Осло/.test(await vt(p)), await vt(p));
+r = await phrase('Диван 180 тысяч к 31 декабря, карта 4276 1234 5678 9012'); await p.waitForTimeout(120); const tst = await p.evaluate(() => $('#toast').textContent);
+ok('номер карты → убран, тост', /карты/.test(tst) && r.d && r.d.price === 180000, JSON.stringify({ r, tst }));
+r = await phrase('Ноутбук 150 тысяч к 1 марта'); ok('эхо уточнения со сроком и новым вопросом', /· к 1 марта/.test(await vt(p)) && /Какую часть цены отложите вы/.test(await vt(p)), await vt(p));
+/* поля: все ошибки сразу */
+r = await p.evaluate(() => { S.draft = { name: 'Диван', price: 90000, dl: Date.UTC(2026, 11, 31), share: 90000, done: true }; go('fields'); $('#f-price').value = 'дорого'; $('#f-dl').value = '1 января 2020'; $('#f-share').value = '-5'; ACT.fieldsGo();
+  return { scr: S.scr, errs: [...document.querySelectorAll('#fieldsf .v3h-err')].map(x => x.previousElementSibling.id + ':' + x.textContent), sub: $('#view h1 + p.mut').textContent }; });
+ok('поля: три ошибки сразу, каждая у своего поля', r.scr === 'fields' && r.errs.length === 3 && /f-price/.test(r.errs[0]) && /f-dl/.test(r.errs[1]) && /f-share/.test(r.errs[2]) && /3 поля/.test(r.sub), JSON.stringify(r));
+/* суммы 0 */
+r = await p.evaluate(() => { go('purchase'); return hSum('0', '5 000').err; }); ok('«0» → «больше нуля»', /больше нуля/.test(r), r);
+/* приход */
+r = await p.evaluate(() => [parseIncome('получаю 1,5 тысячи 10 числа, обязательные 500'), parseIncome('получаю 80 тысяч 10 и 25 числа, обязательные 30'), parseIncome('аренда 30 тысяч, получаю 90 тысяч 5 и 20 числа, кредит 12 тысяч')]);
+ok('приход «1,5 тысячи, обязательные 500» → 1500/500', r[0].m === 1500 && r[0].mand === 500, JSON.stringify(r[0]));
+ok('приход «80 тысяч, обязательные 30» → 80000/30000', r[1].m === 80000 && r[1].mand === 30000, JSON.stringify(r[1]));
+ok('приход в любом порядке → 90000/42000', r[2].m === 90000 && r[2].mand === 42000, JSON.stringify(r[2]));
+const inc = async v => p.evaluate(v => { go('income'); $('#income').value = v; ACT.incomeGo(); const e = document.getElementById('income-err'); return { scr: S.scr, err: e ? e.textContent : '' }; }, v);
+r = await inc('получаю -80000 10 числа'); ok('приход с минусом → ошибка', /отрицательной/.test(r.err), JSON.stringify(r));
+r = await inc('получаю 0 10 числа'); ok('приход 0 → «больше нуля»', /больше нуля/.test(r.err), JSON.stringify(r));
+r = await inc('получаю 30 тысяч 10 числа, обязательные 50 тысяч'); ok('обязательные > прихода → суммы и «ещё раз»', /50\s000/.test(r.err) && /ещё раз/.test(r.err), JSON.stringify(r));
+r = await p.evaluate(() => { ACT.incomeGo(); return { scr: S.scr, t: document.querySelector('#view').innerText.replace(/\s+/g, ' ').slice(0, 200) }; });
+ok('второе нажатие → «Сегодня» без «потрачено больше плана»', r.scr === 'today' && !/потрачено больше плана/.test(r.t) && /Обязательные больше прихода/.test(r.t), JSON.stringify(r));
+r = await inc('получаю 7к 10 числа, обязательные 3к'); r = await p.evaluate(() => ({ scr: S.scr, t: document.querySelector('#view').innerText.replace(/\s+/g, ' ').slice(0, 220) }));
+ok('нехватка без трат → «На цели не хватает», минус знаком «−»', !/потрачено больше плана/.test(r.t) && /На цели не хватает/.test(r.t) && /−/.test(r.t), JSON.stringify(r));
+await p.close();
+/* экран цели после отметки: один план; строка о выписке; тост первой отметки; лист почты с «Не сейчас» */
+const p2 = await pg({ width: 375, height: 812 }, '?clean&s=fresh');
+r = await p2.evaluate(async () => { S.draft = { name: 'Ноутбук', price: 150000, dl: Date.UTC(2027, 1, 28), share: 150000, done: true, text: '' }; ACT.saveGo ? ACT.saveGo() : null; return S.scr; });
+const flow = await p2.evaluate(() => { const ks = Object.keys(ACT).filter(k => /save|keep/i.test(k)); return ks; });
+res.push('INFO ACT save keys: ' + flow.join(','));
+await p2.close();
+/* вёрстка: 320×568 нижняя зона в потоке; 200 % текста — поле не сжато */
+const p3 = await pg({ width: 320, height: 568 }, '?clean&s=purchase');
+r = await p3.evaluate(() => { me().income = null; go('purchase'); return 0; }); r = await p3.evaluate(() => ({ btns: document.querySelectorAll('#bottom .bottom button, #view .bottom.p-flow button').length, flow: !!document.querySelector('#view .bottom.p-flow'), scr: S.scr, hs: document.documentElement.scrollWidth > innerWidth }));
+ok('320×568: нижняя зона на экране цели — в потоке, без гор. прокрутки', r.flow && !r.hs, JSON.stringify(r));
+await p3.close();
+const p4 = await pg({ width: 375, height: 812 }, '?clean&s=today');
+await p4.evaluate(() => { document.documentElement.style.fontSize = '200%'; render(); });
+r = await p4.evaluate(() => { const s = $('#spend'), pr = $('#price'); return { spend: s && s.getBoundingClientRect().width, price: pr && pr.getBoundingClientRect().width, hs: document.documentElement.scrollWidth > innerWidth, tab: getComputedStyle($('#tabs button')).fontSize }; });
+ok('200 %: поля трат и «влезет ли» не сжаты (≥ 250 px), вкладки растут', r.spend >= 250 && r.price >= 250 && !r.hs && parseFloat(r.tab) >= 20, JSON.stringify(r));
+await p4.close();
+const p5 = await pg({ width: 375, height: 812 }, '?clean&s=purchase');
+r = await p5.evaluate(() => { openSheet('email'); return { close: !!document.querySelector('#sheet [data-close]') }; });
+await p5.keyboard.press('Escape'); const esc = await p5.evaluate(() => !$('#sheetwrap').classList.contains('open'));
+ok('лист почты: «Не сейчас» есть, Escape закрывает', r.close && esc, JSON.stringify({ r, esc }));
+r = await p5.evaluate(() => { const ls = [...document.querySelectorAll('#view button.link')].map(x => Math.round(x.getBoundingClientRect().height)); return ls; });
+ok('кнопки-ссылки ≥ 44 px', r.every(h => h >= 44 || h === 0), JSON.stringify(r));
+await p5.close();
+console.log(res.join('\n')); console.log('errors', errs.length, errs.slice(0, 3)); await b.close();
