@@ -16,7 +16,7 @@ try {
   ok('имя разобрано (фикс парсера)', S.draft.name === 'Ноутбук', S.draft.name);
   $('#clar').value = 'плачу сам'; $('#clarf').requestSubmit();
   ok('ответ: «Сохранить цель», блочные строки ответа', S.scr === 'answer' && bt() === 'Сохранить цель' && $$('#view .v3-answer-line').length >= 3 && $$('#view .v3-answer-line').every(x => getComputedStyle(x).display === 'block'), $$('#view .v3-answer-line').length);
-  ACT.v3save(); ok('сохранить без входа → лист входа: Сбер ID, VK ID, Яндекс ID, Max', S.sheet === 'login' && ['Сбер ID','VK ID','Яндекс ID','Max'].every(t => $('#sheet').textContent.includes(t)) && !/почт/i.test($('#sheet').textContent)); ACT.loginVk(); ok('сохранить → «Копить вместе?»', S.scr === 'together' && $$('#view .v3-pair .sec2').length === 2); budget('вместе?');
+  ACT.v3save(); ok('сохранить без входа → лист входа: VK ID и Яндекс ID (Сбер ID и Max — позже)', S.sheet === 'login' && ['VK ID','Яндекс ID'].every(t => $('#sheet').textContent.includes(t)) && !/почт/i.test($('#sheet').textContent)); ACT.loginVk(); ok('сохранить → «Копить вместе?»', S.scr === 'together' && $$('#view .v3-pair .sec2').length === 2); budget('вместе?');
   const pb = $$('#view .v3-pair button'); ok('кнопки одного веса', pb[0].className === pb[1].className && pb[0].offsetWidth === pb[1].offsetWidth, pb.map(b => b.className + ':' + b.offsetWidth).join(' '));
   ACT.v3alone(); ok('«Пока сам» → своя цель без партнёра', S.scr === 'purchase' && /своя цель/.test(vt()) && !/Аня|партн/i.test(vt()), (vt().match(/.*(Аня|партн).*/i) || [''])[0]);
   ok('лист «где» без «Партнёр»', S.sheet === 'where' && !/Партнёр/.test($('#sheet').innerText)); closeSheet();

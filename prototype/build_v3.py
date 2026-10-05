@@ -22,7 +22,7 @@ sys.stdout.reconfigure(encoding="utf-8")   # консоль Windows cp1251 не 
 HERE = os.path.dirname(os.path.abspath(__file__))
 SRC = os.path.join(HERE, "2026-10-04_fog-prototype-v2.html")
 OUT = os.path.join(HERE, "2026-10-04_fog-prototype-v3.html")
-ORDER = ["flow_group", "motivation", "distill", "fixes", "theme", "anim", "palette", "pult", "edge", "harden", "polish", "login", "polish2", "compat"]   # порядок наложения; distill, fixes, palette, pult, edge, harden, polish, login, polish2, compat — интегратор
+ORDER = ["flow_group", "motivation", "distill", "fixes", "theme", "anim", "palette", "pult", "edge", "harden", "polish", "login", "polish2", "decisions", "compat"]   # порядок наложения; distill, fixes, palette, pult, edge, harden, polish, login, polish2, decisions, compat — интегратор
 DEPS = {"motivation": ["flow_group"]}                    # --only <модуль> подключает и то, на чём он стоит
 
 CORE = [

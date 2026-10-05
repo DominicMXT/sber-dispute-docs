@@ -28,7 +28,7 @@ try {
   ok('имя разобрано (фикс парсера)', S.draft.name === 'Ноутбук', S.draft.name);
   $('#clar').value = 'плачу сам'; $('#clarf').requestSubmit();
   ok('ответ: «Сохранить цель», блочные строки ответа', S.scr === 'answer' && bt() === 'Сохранить цель' && $$('#view .v3-answer-line').length >= 3 && $$('#view .v3-answer-line').every(x => getComputedStyle(x).display === 'block'), $$('#view .v3-answer-line').length);
-  ACT.v3save(); ok('сохранить без входа → лист входа: Сбер ID, VK ID, Яндекс ID, Max', S.sheet === 'login' && ['Сбер ID','VK ID','Яндекс ID','Max'].every(t => $('#sheet').textContent.includes(t)) && !/почт/i.test($('#sheet').textContent)); ACT.loginVk(); ok('сохранить → «Копить вместе?»', S.scr === 'together' && $$('#view .v3-pair .sec2').length === 2); budget('вместе?');
+  ACT.v3save(); ok('сохранить без входа → лист входа: VK ID и Яндекс ID (Сбер ID и Max — позже)', S.sheet === 'login' && ['VK ID','Яндекс ID'].every(t => $('#sheet').textContent.includes(t)) && !/почт/i.test($('#sheet').textContent)); ACT.loginVk(); ok('сохранить → «Копить вместе?»', S.scr === 'together' && $$('#view .v3-pair .sec2').length === 2); budget('вместе?');
   const pb = $$('#view .v3-pair button'); ok('кнопки одного веса', pb[0].className === pb[1].className && pb[0].offsetWidth === pb[1].offsetWidth, pb.map(b => b.className + ':' + b.offsetWidth).join(' '));
   ACT.v3alone(); ok('«Пока сам» → своя цель без партнёра', S.scr === 'purchase' && /своя цель/.test(vt()) && !/Аня|партн/i.test(vt()), (vt().match(/.*(Аня|партн).*/i) || [''])[0]);
   ok('«Пока сам»: без листа поверх, строка «Где лежат деньги — указать»', !S.sheet && /Где лежат деньги — указать/.test(vt()), S.sheet);
@@ -86,11 +86,11 @@ try {
   ok('№2: все части собраны → «Собрано», без «Я отложил(а)»', G5.state === 'done' && /Собрано/.test(vt()) && bt() !== 'Я отложил(а)', G5.state + ' / ' + bt());
   /* №4: участник выходит, организатор отменяет у всех с предупреждением */
   V3_SCEN.group3(); G5 = P(); demo.who('anya'); openSheet('change');
-  ok('№4: у участника — «Выйти из цели», без «Отменить покупку»', /Выйти из цели/.test($('#sheet').innerText) && !/Отменить покупку/.test($('#sheet').innerText), $('#sheet').innerText.replace(/\n/g, ' | '));
+  ok('№4: у участника — «Выйти из цели», без «Отменить цель»', /Выйти из цели/.test($('#sheet').innerText) && !/Отменить (?:покупк|цель)у/.test($('#sheet').innerText), $('#sheet').innerText.replace(/\n/g, ' | '));
   ACT.cancelBuy(); ok('№4: «отмена» участником = выход, цель у остальных осталась', S.purchases.includes(G5) && G5.state === 'active' && G5.group.members.join() === 'oleg,timur,sveta' && G5.group.gone.includes('anya'), G5.group.members.join());
   ok('№4: вышедшая цель у себя не видит', S.scr === 'list' && !/Дом у моря/.test(vt()), S.scr);
   demo.who('oleg'); S.cur = G5.id; go('purchase'); ok('№11: у остальных — «Аня вышла из цели», без «берёт 0»', /Аня\s+вышла из цели/.test(vt()) && !/берёт 0/.test(vt()), vt().slice(0, 400));
-  openSheet('change'); ok('№4: у организатора — «Отменить покупку»', /Отменить покупку/.test($('#sheet').innerText));
+  openSheet('change'); ok('№4: у организатора — «Отменить цель»', /Отменить цель/.test($('#sheet').innerText));
   openSheet('cancelAsk'); ok('№4: предупреждение «у всех участников»', /у всех участников/.test($('#sheet').innerText) && !/партн/i.test($('#sheet').innerText), $('#sheet').innerText); closeSheet();
   /* №11: удалила данные */
   V3_SCEN.group2(); G5 = P(); demo.who('anya'); ACT.delAll(); S.who = 'oleg'; me().consent = true; go('purchase');

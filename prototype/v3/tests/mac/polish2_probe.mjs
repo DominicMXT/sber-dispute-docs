@@ -14,7 +14,7 @@ const phrase = t => p.evaluate(t => { S.draft = null; go('phrase'); render(); $(
 let r = await phrase('Хочу ноутбук за 95 000 к 1 марта, уже есть 20 тысяч');
 ok('«Хочу» не в названии', r.d && r.d.name === 'Ноутбук', JSON.stringify(r));
 await p.evaluate(() => { S.draft.share = S.draft.price; S.draft.done = true; go('answer'); });
-ok('«уже есть 20 тысяч» — пояснение на ответе', /Уже отложенное отметьте/.test(await vt(p)), (await vt(p)).slice(0, 300));
+ok('«уже есть 20 тысяч» — учтено в эхе (решение 05.10, decisions.py)', /уже есть 20\s000\s₽/.test(await vt(p)), (await vt(p)).slice(0, 300));
 r = await phrase('Ноутбук 90 тысяч к 1 марта, откладываю 10 тысяч в месяц');
 ok('«10 тысяч в месяц» — темп, а не доля', r.d && r.d.rate && r.d.rate.v === 10000 && r.d.share === 90000, JSON.stringify(r));
 const t1 = await vt(p); ok('ответ: сколько соберётся к сроку', r.scr === 'answer' && /Если откладывать 10\s000\s₽ в месяц/.test(t1) && /Нужно ≈/.test(t1), r.scr + ' ' + t1.slice(0, 300));

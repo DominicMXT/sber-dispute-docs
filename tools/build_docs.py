@@ -146,11 +146,13 @@ def pdf(md_path, out_pdf, title):
     html = f"<!doctype html><html lang='ru'><head><meta charset='utf-8'><title>{title}</title><style>{CSS}</style></head><body>{body}</body></html>"
     tmp = out_pdf[:-4] + ".html"
     io.open(tmp, "w", encoding="utf-8").write(html)
-    for exe in [r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe", r"C:\Program Files\Google\Chrome\Application\chrome.exe"]:
+    # Chrome первым: Edge на большом ТЗ выходит без файла; если файла нет — следующий браузер
+    for exe in [r"C:\Program Files\Google\Chrome\Application\chrome.exe", r"C:\Program Files (x86)\Microsoft\Edge\Application\msedge.exe"]:
         if os.path.exists(exe):
-            subprocess.run([exe, "--headless=new", "--disable-gpu", "--no-pdf-header-footer", f"--print-to-pdf={out_pdf}", "file:///" + tmp.replace("\\", "/")],
-                           capture_output=True, timeout=120)
-            break
+            # отдельный профиль: если браузер уже открыт, печать в общем профиле молча не срабатывает
+            subprocess.run([exe, "--headless=new", "--disable-gpu", "--no-pdf-header-footer", f"--user-data-dir={os.path.join(os.environ.get('TEMP', ROOT), 'fa-pdf-profile')}", f"--print-to-pdf={out_pdf}", "file:///" + tmp.replace("\\", "/")],
+                           capture_output=True, timeout=240)
+            if os.path.exists(out_pdf): break
     os.remove(tmp)
     return os.path.exists(out_pdf)
 
