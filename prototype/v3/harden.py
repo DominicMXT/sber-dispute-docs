@@ -55,6 +55,9 @@ button.v3-where{width:100%;background:transparent;border:0;border-bottom:1px sol
 /* область касания ссылок-действий — 44 px, вёрстка не меняется */
 button.link{position:relative}
 button.link::after{content:'';position:absolute;inset:-10px -6px}
+/* текст 200 %: заголовок истории переносится, вкладки не слипаются */
+.stxt h2{overflow-wrap:anywhere;hyphens:auto;font-size:min(calc(2.25rem*var(--d-k)),10vw)}
+.tabs button{font-size:min(.875rem,3.6vw)}
 """
 JS = r"""/* 1. общие функции разбора */
 parseMoney = function(s){ const out = [], re = /(\d{1,3}(?:[  ]\d{3})+|\d+)(?:[.,](\d+))?(?:\s*(тыс(?:яч[аиу]?)?\.?|т\.?\s?р\.?|млн)|(к|k)(?![а-яёa-z]))?/gi; let m;
@@ -166,4 +169,44 @@ go = function(scr){ const prev = S && S.scr; const r = hGo0.apply(this, argument
 addEventListener('popstate', () => { const sw = $('#sheetwrap'); if (sw && sw.classList.contains('open')) { closeSheet(); return; }
   /* экраны черновика (ответ, уточнение, поля) без черновика не строятся — их пропускаем */
   let prev = hStack.pop(); while (prev && !S.draft && ['answer', 'clarify', 'fields'].includes(prev)) prev = hStack.pop();
-  if (prev) { hBack = true; try { go(prev); } finally { hBack = false; } } });"""
+  if (prev) { hBack = true; try { go(prev); } finally { hBack = false; } } });
+/* 7. вердикт «сходится» — только с доходом (решение владельца 05.10; Google PAIR, Microsoft HAX G2/G10): без дохода — сумма в день без вердикта */
+const hFree = (w, exclude) => { const i = S.people[w].income; if (!i) return null; return Math.floor((i.m - i.mand) / 30) - reserve(w) + (exclude ? perDayPlan(exclude, w) : 0); };
+const hAns0 = SCR.answer;
+scrAnswer = SCR.answer = function(){ const r = hAns0.apply(this, arguments), d = S.draft; if (!d || !r || !r.html || !d.dl) return r;
+  const days = Math.max(1, Math.round((d.dl - now()) / DAY)), per = Math.ceil((d.share || 0) / days), free = hFree(S.who), re = /<p class="big disp([^"]*)">Сходится<\/p>(\s*)<p class="mut([^"]*)">([^<]*)<\/p>/;
+  if (!re.test(r.html)) return r;
+  if (free == null) r.html = r.html.replace(re, '<p class="big disp num$1">' + rubT(per) + ' в день</p>$2<p class="mut$3">$4</p><p class="xs mut$3">Сойдётся ли — скажу, когда узнаю доход.</p>');
+  else if (per > free) r.html = r.html.replace(re, '<p class="big disp$1">Пока не сходится</p>$2<p class="mut$3">Нужно ' + rubT(per) + ' в день, свободно ≈ ' + rubT(Math.max(0, free)) + '.</p>');
+  return r; };
+const hPur0 = SCR.purchase;
+scrPurchase = SCR.purchase = function(){ const r = hPur0.apply(this, arguments), p = P(), w = S.who; if (!p || !r || !r.html || p.share[w] == null) return r;
+  const re = /<div class="rowl"><span><b>Сходится<\/b> к ([^<]*)<\/span><\/div>/; if (!re.test(r.html)) return r;
+  const free = hFree(w, p), per = perDayPlan(p, w);
+  r.html = r.html.replace(re, free == null ? '<div class="rowl"><span>План: ' + rubT(per) + ' в день к $1. Сойдётся ли — скажу, когда узнаю доход.</span></div>'
+    : per > free ? '<div class="rowl"><span><b>Пока не сходится</b> к $1: нужно ' + rubT(per) + ' в день, свободно ≈ ' + rubT(Math.max(0, free)) + '.</span></div>' : '$&');
+  return r; };
+/* 8. приход: обязательные из «аренда, кредит, ипотека…», порядок любой, «500 рублей» не умножается на 1000, дни зарплаты 1–31 */
+const HMAND = /обязат|аренд|кредит|ипотек|коммун|квартплат|садик|школ|связь|интернет|налог|алимент|страхов|рассрочк/i;
+const hAmt = seg => { const n = parseMoney(seg).filter(x => x.v > 0)[0]; if (!n) return 0; return !n.unit && n.v < 1000 && !/руб|₽|р\.(?!\w)/i.test(seg) ? n.v * 1000 : n.v; };
+parseIncome = function(s){ s = String(s || ''); const pm = s.match(/(\d{1,2})\s*(?:и|,)\s*(\d{1,2})\s*числ[а-яё]*/i) || s.match(/(\d{1,2})\s*числ[а-яё]*/i);
+  const pay = pm ? pm.slice(1).filter(Boolean).map(Number) : [10, 25], s2 = pm ? s.replace(pm[0], ' ') : s;
+  let m = null, mand = 0;
+  s2.split(/[,;\n]+|\sи\s(?=[а-яё]+\s+\d)/i).forEach(seg => { const v = hAmt(seg); if (!v) return; if (HMAND.test(seg)) mand += v; else if (m == null) m = v; });
+  return {m, mand, pay, src:'manual'}; };
+const hValIncome1 = hValIncome;
+HVAL.incomeGo = function(){ const inp = $('#income'); if (inp) { const pm = (inp.value || '').match(/(\d{1,2})\s*(?:и|,)\s*(\d{1,2})\s*числ/i) || (inp.value || '').match(/(\d{1,2})\s*числ/i);
+    if (pm && pm.slice(1).filter(Boolean).some(x => +x < 1 || +x > 31)) { hErr(inp, 'Дни зарплаты — от 1 до 31, например «10 и 25 числа».'); return false; } }
+  return hValIncome1(); };
+const hIncome1 = ACT.incomeGo;
+ACT.incomeGo = function(){ if (!HVAL.incomeGo()) return; return hIncome1.apply(this, arguments); };
+/* 9. название цели без висящего предлога («Ноутбук за») */
+const hParse1 = parsePhrase;
+parsePhrase = function(t){ const r = hParse1(t); if (r && r.name) r.name = r.name.replace(/\s+(за|на|до|к|в|около|примерно|где-то)$/i, '').trim(); return r; };
+/* 10. крупные суммы: «Я отложил(а)» больше остатка — вопрос; трата больше дохода месяца — подтверждение вторым нажатием */
+let hBig = null;
+document.addEventListener('submit', e => { const id = e.target.id, w = S.who;
+  if (id === 'savef') { const p = P(), inp = $('#saveamt'), n = +inp.value; if (p && n > leftOf(p, w) && leftOf(p, w) > 0) { e.preventDefault(); e.stopImmediatePropagation(); hErr(inp, 'Осталось отложить ' + rubT(leftOf(p, w)) + ' — впишите столько или меньше.'); } }
+  else if (id === 'spendf') { const inp = $('#spend'), n = hMoney(inp.value), i = me().income, lim = i ? i.m : 100000;
+    if (n > lim && hBig !== n) { hBig = n; e.preventDefault(); e.stopImmediatePropagation(); hErr(inp, 'Записать ' + rubT(n) + '? Нажмите «Записать» ещё раз.'); } else hBig = null; }
+}, true);"""
