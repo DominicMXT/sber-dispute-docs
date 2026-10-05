@@ -71,6 +71,7 @@ const hCur = t => /долл|\$|usd|евро|€|eur|юан|¥|cny/i.test(String(
 const hToday = () => Math.floor(now() / DAY) * DAY;
 function hErr(inp, msg){ if (!inp) return; const id = (inp.id || 'f') + '-err'; let p = document.getElementById(id);
   if (!p) { p = document.createElement('p'); p.className = 'v3h-err'; p.id = id; p.setAttribute('role', 'alert'); const host = inp.closest('form') || inp; host.after(p); }
+  $$('[aria-busy="true"]').forEach(b => { b.disabled = false; b.removeAttribute('aria-busy'); if (b.dataset.hLabel) b.textContent = b.dataset.hLabel; });
   p.textContent = msg; inp.setAttribute('aria-invalid', 'true'); inp.setAttribute('aria-describedby', id); inp.focus();
   inp.addEventListener('input', () => { inp.removeAttribute('aria-invalid'); inp.removeAttribute('aria-describedby'); p.remove(); }, {once:true}); }
 const hDate = v => { const m = String(v).trim().match(/^(?:к\s+)?(\d{1,2})[.\/](\d{1,2})(?:[.\/](\d{2,4}))?$/i); if (!m || +m[2] < 1 || +m[2] > 12) return null;
@@ -90,7 +91,7 @@ document.addEventListener('submit', e => { const id = e.target.id, stop = (inp, 
   if (id === 'phrasef') { const inp = $('#phrase'); if (!(inp.value || '').trim()) return stop(inp, 'Напишите цель и срок — например, «ноутбук к 1 марта».'); }
   else if (id === 'clarf') { const inp = $('#clar'), f = inp.dataset.f, v = inp.value.trim();
     if (f === 'dl') { const r = hDay(v); if (r.err) return stop(inp, r.err); inp.value = r.str; }
-    else if (!/сам|полов/i.test(v)) { const r = hSum(v, '95 000'); if (r.err) return stop(inp, r.err); inp.value = String(r.n); } }
+    else if (!/сам|полов/i.test(v)) { const pr0 = S.draft && S.draft.price, r = hSum(v, f === 'share' && pr0 ? fmt(Math.max(1000, Math.round(pr0 / 2000) * 1000)) : '95 000'); if (r.err) return stop(inp, r.err); inp.value = String(r.n); } }
   else if (id === 'savef') { const inp = $('#saveamt'), r = hSum(inp.value, '5 000'); if (r.err) return stop(inp, r.err); inp.value = String(r.n); }
   else if (id === 'inputf') { const inp = $('#inputv'), k = e.target.dataset.k, p = P(), w = S.who;
     if (k === 'dl') { const r = hDay(inp.value); if (r.err) return stop(inp, r.err); inp.value = r.str; }
@@ -106,24 +107,30 @@ document.addEventListener('submit', e => { const id = e.target.id, stop = (inp, 
     else inp.value = String(r.n); }
 }, true);
 /* главная кнопка «Посчитать» зовёт ACT.phraseGo мимо отправки формы — та же проверка */
+const hValPhrase = () => { const inp = $('#phrase'); if (inp && !(inp.value || '').trim()) { hErr(inp, 'Напишите цель и срок — например, «ноутбук к 1 марта».'); return false; } return true; };
 const hPhrase0 = ACT.phraseGo;
-ACT.phraseGo = function(){ const inp = $('#phrase'); if (inp && !(inp.value || '').trim()) return hErr(inp, 'Напишите цель и срок — например, «ноутбук к 1 марта».'); return hPhrase0.apply(this, arguments); };
+ACT.phraseGo = function(){ if (!hValPhrase()) return; return hPhrase0.apply(this, arguments); };
 /* «Поправить» (форма полей): та же проверка; значения приводятся к цифрам и дате до ядра */
+const hValFields = () => { const fp = $('#f-price'), fd = $('#f-dl'), fs = $('#f-share'); let price = null;
+  if (fp && fp.value.trim()) { const r = hSum(fp.value, '90 000'); if (r.err) { hErr(fp, r.err); return false; } fp.value = String(r.n); price = r.n; }
+  if (fd && fd.value.trim()) { const r = hDay(fd.value); if (r.err) { hErr(fd, r.err); return false; } fd.value = r.str.replace(/^к\s+/i, ''); }
+  if (fs && fs.value.trim()) { const r = hSum(fs.value, '40 000'); if (r.err) { hErr(fs, r.err); return false; }
+    if (price && r.n > price) { hErr(fs, 'Больше цены на ' + rubT(r.n - price) + ' — впишите не больше ' + rubT(price) + '.'); return false; } fs.value = String(r.n); }
+  return true; };
 const hFields0 = ACT.fieldsGo;
-ACT.fieldsGo = function(){ const fp = $('#f-price'), fd = $('#f-dl'), fs = $('#f-share');
-  let price = null;
-  if (fp && fp.value.trim()) { const r = hSum(fp.value, '90 000'); if (r.err) return hErr(fp, r.err); fp.value = String(r.n); price = r.n; }
-  if (fd && fd.value.trim()) { const r = hDay(fd.value); if (r.err) return hErr(fd, r.err); fd.value = r.str.replace(/^к\s+/i, ''); }
-  if (fs && fs.value.trim()) { const r = hSum(fs.value, '40 000'); if (r.err) return hErr(fs, r.err);
-    if (price && r.n > price) return hErr(fs, 'Больше цены на ' + rubT(r.n - price) + ' — впишите не больше ' + rubT(price) + '.'); fs.value = String(r.n); }
-  return hFields0.apply(this, arguments); };
+ACT.fieldsGo = function(){ if (!hValFields()) return; return hFields0.apply(this, arguments); };
 /* приход: пусто, валюта, обязательные больше прихода */
+const hValIncome = () => { const inp = $('#income'), v = inp ? inp.value : ''; if (!inp) return true;
+  if (hCur(v)) { hErr(inp, 'Считаю только в рублях — сколько это в рублях?'); return false; }
+  const i = parseIncome(v); if (!i.m) { hErr(inp, 'Напишите приход и дни — например, «80 тысяч 10 и 25 числа».'); return false; }
+  if (i.mand >= i.m) { hErr(inp, 'Обязательные не меньше прихода — проверьте суммы.'); return false; } return true; };
 const hIncome0 = ACT.incomeGo;
-ACT.incomeGo = function(){ const inp = $('#income'), v = inp ? inp.value : '';
-  if (inp) { if (hCur(v)) return hErr(inp, 'Считаю только в рублях — сколько это в рублях?');
-    const i = parseIncome(v); if (!i.m) return hErr(inp, 'Напишите приход и дни — например, «80 тысяч 10 и 25 числа».');
-    if (i.mand >= i.m) return hErr(inp, 'Обязательные не меньше прихода — проверьте суммы.'); }
-  return hIncome0.apply(this, arguments); };
+ACT.incomeGo = function(){ if (!hValIncome()) return; return hIncome0.apply(this, arguments); };
+/* главная кнопка: проверка до «Считаю» — при ошибке кнопка не блокируется (раньше оставалась «Считаю» навсегда) */
+const HVAL = {phraseGo:hValPhrase, fieldsGo:hValFields, incomeGo:hValIncome};
+document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-main]'); if (!b) return;
+  if (!b.dataset.hLabel) b.dataset.hLabel = b.textContent;
+  const v = HVAL[b.dataset.main]; if (v && !v()) { e.preventDefault(); e.stopImmediatePropagation(); } }, true);
 /* 3. «Проверьте поля»: правдивый подзаголовок, одно название поля */
 const hScrF0 = SCR.fields;
 scrFields = SCR.fields = function(){ const r = hScrF0.apply(this, arguments), d = S.draft || {}, miss = !d.name || !d.price || !d.dl || d.share == null;
@@ -142,7 +149,8 @@ scrToday = SCR.today = function(){ const r = hScrT0.apply(this, arguments), w = 
   return r; };
 function hAfter(){
   const HF = {'f-name':'Напишите, что покупаете.', 'f-price':'Сколько стоит — цифрами, например 90 000.', 'f-dl':'К какой дате — например, «15 ноября».', 'f-share':'Сколько отложите сами — например, 40 000.'};
-  $$('#view .inp.miss').forEach(inp => { if (HF[inp.id] && !document.getElementById(inp.id + '-err')) { const p = document.createElement('p'); p.className = 'v3h-err'; p.id = inp.id + '-err'; p.textContent = HF[inp.id]; inp.after(p); inp.setAttribute('aria-invalid', 'true'); inp.setAttribute('aria-describedby', p.id); } });
+  $$('#view .inp.miss').forEach(inp => { if (HF[inp.id] && !document.getElementById(inp.id + '-err')) { const p = document.createElement('p'); p.className = 'v3h-err'; p.id = inp.id + '-err'; p.textContent = HF[inp.id]; inp.after(p); inp.setAttribute('aria-invalid', 'true'); inp.setAttribute('aria-describedby', p.id);
+    inp.addEventListener('input', () => { inp.classList.remove('miss'); inp.removeAttribute('aria-invalid'); inp.removeAttribute('aria-describedby'); p.remove(); }, {once:true}); } });
   /* цифровая клавиатура у полей сумм (Baymard, GOV.UK: text + inputmode, не type=number) */
   ['#price', '#saveamt', '#f-price', '#f-share'].forEach(q => { const el = $(q); if (el) el.setAttribute('inputmode', 'decimal'); });
   const iv = $('#inputv'), ivf = iv && iv.closest('form'); if (iv && ivf && ivf.dataset.k !== 'dl') iv.setAttribute('inputmode', 'decimal');
