@@ -10,13 +10,15 @@
 - случай 22 «Сумма в валюте» → только рубли, вопрос «сколько в рублях?». Было: «1000 долларов» молча становились 1 000 ₽.
 Вопросы задаются тем же экраном уточнения (форма `clarf`, ответ обрабатывает ядро v2).
 Экран ответа: срок другого года — с годом (`fxDl` из fixes), как в шапке цели и в списке.
+Год в фразе убирается до разбора суммы: ядро v2 считало «2026» ценой (находка critique N3, 05.10).
 """
 R = []
 CSS = ""
 JS = r"""const edgeMI = s => ['январ','феврал','март','апрел','ма','июн','июл','август','сентябр','октябр','ноябр','декабр'].findIndex(x => s.toLowerCase().startsWith(x));
 const edgeMON = '(январ|феврал|март|апрел|ма[йя]|июн|июл|август|сентябр|октябр|ноябр|декабр)[а-я]*';
 const edgeParse0 = parsePhrase;
-parsePhrase = function(txt){ const r = edgeParse0(txt), s = r.text || '';
+parsePhrase = function(txt){ const yRe = new RegExp('(к\\s+\\d{1,2}\\s+' + edgeMON + ')\\s+(20\\d\\d)', 'i'), yM = String(txt).match(yRe);
+  const r = edgeParse0(yM ? String(txt).replace(yRe, '$1') : txt), s = String(txt);   /* год в фразе — только срок, не сумма (иначе «к 1 сентября 2026» давало цену 2 026 ₽) */
   if (!r.link) {
     const cur = s.match(/\d[\d\s]*(?:[.,]\d+)?\s*(?:тыс\S*\s*)?(?:долл\S*|\$|usd|евро|€|eur|юан\S*|¥|cny)/i) || s.match(/[$€¥]\s*\d[\d\s]*/);
     if (cur) { r.cur = /евро|€|eur/i.test(cur[0]) ? 'евро' : /юан|¥|cny/i.test(cur[0]) ? 'юанях' : 'долларах'; r.curRaw = cur[0].trim(); r.price = null; }

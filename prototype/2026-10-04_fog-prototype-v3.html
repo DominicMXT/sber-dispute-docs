@@ -1734,7 +1734,8 @@ if (/[?&#]clean\b/.test(location.search + location.hash) || new URLSearchParams(
 const edgeMI = s => ['январ','феврал','март','апрел','ма','июн','июл','август','сентябр','октябр','ноябр','декабр'].findIndex(x => s.toLowerCase().startsWith(x));
 const edgeMON = '(январ|феврал|март|апрел|ма[йя]|июн|июл|август|сентябр|октябр|ноябр|декабр)[а-я]*';
 const edgeParse0 = parsePhrase;
-parsePhrase = function(txt){ const r = edgeParse0(txt), s = r.text || '';
+parsePhrase = function(txt){ const yRe = new RegExp('(к\\s+\\d{1,2}\\s+' + edgeMON + ')\\s+(20\\d\\d)', 'i'), yM = String(txt).match(yRe);
+  const r = edgeParse0(yM ? String(txt).replace(yRe, '$1') : txt), s = String(txt);   /* год в фразе — только срок, не сумма (иначе «к 1 сентября 2026» давало цену 2 026 ₽) */
   if (!r.link) {
     const cur = s.match(/\d[\d\s]*(?:[.,]\d+)?\s*(?:тыс\S*\s*)?(?:долл\S*|\$|usd|евро|€|eur|юан\S*|¥|cny)/i) || s.match(/[$€¥]\s*\d[\d\s]*/);
     if (cur) { r.cur = /евро|€|eur/i.test(cur[0]) ? 'евро' : /юан|¥|cny/i.test(cur[0]) ? 'юанях' : 'долларах'; r.curRaw = cur[0].trim(); r.price = null; }
