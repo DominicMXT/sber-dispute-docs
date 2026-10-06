@@ -38,7 +38,7 @@ p = await pg('?clean&s=dayprice'); r = await p.evaluate(() => document.querySele
 ok('«влезет ли»: «Куплено», не «Купил»', /Куплено/.test(r) && !/\bКупил\b/.test(r), r.slice(0, 300));
 await p.close();
 p = await pg('?clean&s=login'); r = await p.evaluate(() => $('#sheet').innerText);
-ok('лист входа: VK ID и Яндекс ID, без Сбер ID и Max', /VK ID/.test(r) && /Яндекс ID/.test(r) && !/Сбер ID/.test(r) && !/Max/.test(r), r);
+ok('лист входа: все законные способы (решение 06.10, mentor1006.py)', ['VK ID','Яндекс ID','Сбер ID','Max','Код на почту','Сохранить без входа'].every(x => r.includes(x)) && !/Google|Telegram/.test(r), r);
 await p.close();
 console.log(res.join('\n')); console.log('PASS', res.filter(x => x.startsWith('PASS')).length, '/', res.length, '· errors', errs.length, errs.slice(0, 3));
 await b.close();

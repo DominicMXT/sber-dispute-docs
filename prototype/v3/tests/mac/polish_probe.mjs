@@ -63,9 +63,9 @@ r = await p4.evaluate(() => { const s = $('#spend'), pr = $('#price'); return { 
 ok('200 %: поля трат и «влезет ли» не сжаты (≥ 250 px), вкладки растут', r.spend >= 250 && r.price >= 250 && !r.hs && parseFloat(r.tab) >= 20, JSON.stringify(r));
 await p4.close();
 const p5 = await pg({ width: 375, height: 812 }, '?clean&s=purchase');
-r = await p5.evaluate(() => { openSheet('email'); return { close: !!document.querySelector('#sheet [data-close]') }; });
+r = await p5.evaluate(() => { openSheet('email'); return { close: !!document.querySelector('#sheet [data-close], #sheet [data-act="mSkip"]') }; });
 await p5.keyboard.press('Escape'); const esc = await p5.evaluate(() => !$('#sheetwrap').classList.contains('open'));
-ok('лист почты → лист входа: «Не сейчас» есть, Escape закрывает', r.close && esc, JSON.stringify({ r, esc }));
+ok('лист почты → лист входа: выход «Сохранить без входа» есть, Escape закрывает', r.close && esc, JSON.stringify({ r, esc }));
 r = await p5.evaluate(() => { const ls = [...document.querySelectorAll('#view button.link')].map(x => Math.round(x.getBoundingClientRect().height)); return ls; });
 ok('кнопки-ссылки ≥ 44 px', r.every(h => h >= 44 || h === 0), JSON.stringify(r));
 await p5.close();
