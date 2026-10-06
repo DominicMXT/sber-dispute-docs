@@ -19,7 +19,7 @@ workshop-1-plan-results.pdf
 # PDF БТ и ТЗ собираются из Markdown: python tools/build_docs.py --pdf
 pdf/*
 # в репозитории — только текущие версии для разработки; при новой версии поменять имена ниже
-!pdf/TZ_finance-assistant_v1.4.4.pdf
+!pdf/TZ_finance-assistant_v1.4.5.pdf
 !pdf/BT_finance-assistant_v1.5.pdf
 __pycache__/
 
@@ -79,3 +79,6 @@ dossier-public.html
 
 # Расшифровки встреч с ментором — реальные высказывания
 Встреча с ментором *.txt
+
+# Юридические оценки — рабочие материалы владельца, вне репозитория разработки
+Юр/

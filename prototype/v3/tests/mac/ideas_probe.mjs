@@ -1,0 +1,26 @@
+// Проба эталона Р2 по ТЗ 1.4.5 (ideas1006.py): node ideas_probe.mjs <путь к html>
+import { createRequire } from 'module';
+import { pathToFileURL } from 'url';
+const require = createRequire(process.cwd() + '/package.json');
+const { chromium } = require('playwright');
+const f = pathToFileURL(process.argv[2]).href;
+const b = await chromium.launch({ executablePath: 'C:/Program Files/Google/Chrome/Application/chrome.exe' });
+const errs = [], res = [];
+const ok = (n, c, d) => res.push((c ? 'PASS ' : 'FAIL ') + n + (c ? '' : ' :: ' + d));
+const p = await b.newPage({ viewport: { width: 375, height: 812 } }); p.on('pageerror', e => errs.push(e.message));
+await p.goto(f + '?clean&s=today'); await p.waitForTimeout(300);
+let r = await p.evaluate(() => { const w = S.who; S.aff = untilPay(w) + 30000; go('today'); render(true);
+  return { t: document.querySelector('#view').innerText.replace(/\s+/g, ' '), btns: [...document.querySelectorAll('#view .kb button')].map(x => x.textContent) }; });
+ok('«не влезет» → «Из своих — примерно через N дней» и две кнопки', /Из своих — примерно через \d/.test(r.t) && r.btns.includes('Сделать целью') && r.btns.includes('Не буду'), JSON.stringify(r).slice(0, 400));
+r = await p.evaluate(() => { const v = S.aff; ACT.iGoal(); return { scr: S.scr, price: S.draft && S.draft.price, v, dl: S.draft && S.draft.dl > now() }; });
+ok('«Сделать целью» → поля цели с ценой и датой', r.scr === 'fields' && r.price === r.v && r.dl, JSON.stringify(r));
+r = await p.evaluate(() => { go('today'); render(true); const n0 = me().spent.length; $('#spend').value = 'кофе 300 и такси 450'; $('#spendf').requestSubmit(); const s = me().spent.slice(n0); return { n: s.length, s }; });
+ok('«кофе 300 и такси 450» → две траты', r.n === 2 && r.s[0].v === 300 && r.s[1].v === 450 && r.s[0].t === 'кофе' && r.s[1].t === 'такси', JSON.stringify(r));
+r = await p.evaluate(() => { const n0 = me().spent.length; $('#spend').value = 'кофе 300'; $('#spendf').requestSubmit(); return me().spent.length - n0; });
+ok('одна трата по-прежнему записывается одна', r === 1, String(r));
+r = await p.evaluate(() => { const h = document.getElementById('i-hint'); const before = h && getComputedStyle(h).display; $('#spend').focus(); const after = h && getComputedStyle(h).display; return { before, after, ph: $('#spend').placeholder }; });
+ok('подсказка про голос — только при фокусе; плейсхолдер «кофе 300 и такси 450»', r.before === 'none' && r.after === 'block' && /и такси 450/.test(r.ph), JSON.stringify(r));
+r = await p.evaluate(() => { openSheet('remind'); return $('#sheet').innerText; });
+ok('лист напоминаний: только уведомления, Max и Telegram — «скоро»', /Уведомления на телефоне/.test(r) && /скоро/.test(r) && !/В Max\b[\s\S]*траты/.test(r), r);
+console.log(res.join('\n')); console.log('PASS', res.filter(x => x.startsWith('PASS')).length, '/', res.length, '· errors', errs.length, errs.slice(0, 3));
+await b.close();
