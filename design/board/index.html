@@ -73,7 +73,7 @@ footer{color:var(--ink2);font-size:.8125rem;border-top:1px solid var(--line);pad
     <div>
       <p class="eyebrow">Finance Assistant · v3 после ревью · 05.10.2026</p>
       <h1>Доска «Туман» v3</h1>
-      <p class="lead">Все 62 состояния прототипа на одной странице. Каждый экран живой: его можно листать и нажимать. Ссылка под экраном открывает его во весь размер.</p>
+      <p class="lead">Все 64 состояния прототипа на одной странице. Каждый экран живой: его можно листать и нажимать. Ссылка под экраном открывает его во весь размер.</p>
       <div class="facts">
         <div class="fact"><span>Основа</span><b>shadcn/ui + Tailwind v4</b></div>
         <div class="fact"><span>Шрифт</span><b>Onest</b></div>
@@ -123,7 +123,7 @@ footer{color:var(--ink2);font-size:.8125rem;border-top:1px solid var(--line);pad
     </div>
   </section>
 
-  <nav class="toc" aria-label="Сценарии"><a href="#g-1">Первый вход · 6</a><a href="#g-2">Покупка и фото цели · 12</a><a href="#g-3">Глазами партнёра · 4</a><a href="#g-4">Сегодня на себя · 5</a><a href="#g-5">Выписка · 4</a><a href="#g-6">Бот и мои данные · 8</a><a href="#g-7">Р2 · вход и своя цель · 4</a><a href="#g-8">Р2 · общая цель · 7</a><a href="#g-9">Р2 · мотивация · 6</a><a href="#g-10">Р2 · тема · 1</a><a href="#g-11">Ссылки и сбои · 5</a></nav>
+  <nav class="toc" aria-label="Сценарии"><a href="#g-1">Первый вход · 6</a><a href="#g-2">Покупка и фото цели · 12</a><a href="#g-3">Глазами партнёра · 4</a><a href="#g-4">Сегодня на себя · 5</a><a href="#g-5">Выписка · 4</a><a href="#g-6">Бот и мои данные · 8</a><a href="#g-7">Р2 · вход и своя цель · 4</a><a href="#g-8">Р2 · общая цель · 7</a><a href="#g-9">Р2 · мотивация · 6</a><a href="#g-10">Р2 · ввод трат · 2</a><a href="#g-11">Р2 · тема · 1</a><a href="#g-12">Ссылки и сбои · 5</a></nav>
   <div class="zoom" role="group" aria-label="Размер экранов">Размер экранов:
     <button type="button" data-s=".42" aria-pressed="false">мельче</button>
     <button type="button" data-s=".5" aria-pressed="true">обычный</button>
@@ -373,12 +373,22 @@ footer{color:var(--ink2);font-size:.8125rem;border-top:1px solid var(--line);pad
   <figcaption><span>Собрано — следующая цель</span><a href="proto.html#nextgoal" target="_blank" rel="noopener">nextgoal ↗</a></figcaption>
 </figure></div>
 </section><section class="group" id="g-10">
+  <header><h2>Р2 · ввод трат</h2><p>Ввод проще (ТЗ 1.4.6): частые траты и «как вчера» по своим записям, выписка за пропущенные дни.</p><span class="count">2</span></header>
+  <div class="tiles"><figure class="tile">
+  <div class="phone"><iframe title="Плашки частых трат и «Как вчера»" loading="lazy" src="proto.html?clean#chips" tabindex="-1"></iframe></div>
+  <figcaption><span>Плашки частых трат и «Как вчера»</span><a href="proto.html#chips" target="_blank" rel="noopener">chips ↗</a></figcaption>
+</figure>
+<figure class="tile">
+  <div class="phone"><iframe title="Пропустили дни — выписка" loading="lazy" src="proto.html?clean#gap" tabindex="-1"></iframe></div>
+  <figcaption><span>Пропустили дни — выписка</span><a href="proto.html#gap" target="_blank" rel="noopener">gap ↗</a></figcaption>
+</figure></div>
+</section><section class="group" id="g-11">
   <header><h2>Р2 · тема</h2><p>«Как в системе», светлая и тёмная — в «Моих данных».</p><span class="count">1</span></header>
   <div class="tiles"><figure class="tile">
   <div class="phone"><iframe title="Выбор темы" loading="lazy" src="proto.html?clean#themeSet" tabindex="-1"></iframe></div>
   <figcaption><span>Выбор темы</span><a href="proto.html#themeSet" target="_blank" rel="noopener">themeSet ↗</a></figcaption>
 </figure></div>
-</section><section class="group" id="g-11">
+</section><section class="group" id="g-12">
   <header><h2>Ссылки и сбои</h2><p>Что видит человек, когда что-то пошло не так.</p><span class="count">5</span></header>
   <div class="tiles"><figure class="tile">
   <div class="phone"><iframe title="Две цены по ссылке" loading="lazy" src="proto.html?clean#linkTwo" tabindex="-1"></iframe></div>
