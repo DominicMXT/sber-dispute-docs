@@ -34,8 +34,10 @@ window.addEventListener('submit', e => { const f = e.target; if (!f || f.id !== 
   const parts = v.split(/\s+и\s+|[,;]\s*/i).map(x => x.trim()).filter(Boolean); if (parts.length < 2) return;
   const items = parts.map(x => ({x, n:hMoney(x)})); if (items.some(it => !(it.n > 0))) return;
   e.preventDefault(); e.stopImmediatePropagation();
-  items.forEach(it => { const t = it.x.replace(/(\d{1,3}(?:[  ]\d{3})+|\d+)(?:[.,]\d+)?(?:\s*(?:тыс[а-яё]*\.?|тыщ[а-яё]*|т\.?\s?р\.?|млн|миллион[а-яё]*)|(?:к|k)(?![а-яёa-z]))?/i, ' ').replace(/[₽]|руб\S*/gi, ' ').replace(/\s+/g, ' ').trim(); me().spent.push({v:it.n, t}); });
-  inp.value = ''; render(true); toast('Записал ' + items.length + ' ' + plural(items.length, 'трату', 'траты', 'трат') + '.'); }, true);
+  iRecord(items); }, true);
+/* запись нескольких трат — функция, чтобы input1007 (ФТ-216) поставил перед ней карточку */
+function iRecord(items){ items.forEach(it => { const t = it.x.replace(/(\d{1,3}(?:[  ]\d{3})+|\d+)(?:[.,]\d+)?(?:\s*(?:тыс[а-яё]*\.?|тыщ[а-яё]*|т\.?\s?р\.?|млн|миллион[а-яё]*)|(?:к|k)(?![а-яёa-z]))?/i, ' ').replace(/[₽]|руб\S*/gi, ' ').replace(/\s+/g, ' ').trim(); me().spent.push({v:it.n, t}); });
+  const inp = $('#spend'); if (inp) inp.value = ''; render(true); toast('Записал ' + items.length + ' ' + plural(items.length, 'трату', 'траты', 'трат') + '.'); }
 /* 3. ФТ-82, ФТ-210: напоминания — только уведомления */
 SH.remind = () => `<h3 class="disp">Где напоминать?</h3><button class="main press" data-act="linkPush">Уведомления на телефоне</button>
   <p class="xs mut">Утром — «Посмотрите, сколько сегодня можно на себя», без сумм. В Max и Telegram — скоро.</p>`;
